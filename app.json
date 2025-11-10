@@ -35,7 +35,8 @@
         {
           "locationAlwaysAndWhenInUsePermission": "Allow GalliGo to access your location to show your position on maps."
         }
-      ]
+      ],
+      "expo-asset"
     ]
   }
 }

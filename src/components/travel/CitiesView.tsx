@@ -2,10 +2,11 @@
  * CitiesView Component - GalliGo React Native
  *
  * Grid of city hero cards with images
+ * Changed from FlatList to simple View to avoid ScrollView nesting issues
  */
 
 import React, { useMemo } from 'react';
-import { View, FlatList, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Body } from '@/components/ui';
 import { CityHeroCard } from './CityHeroCard';
 import { FriendInCity } from './CityCard';
@@ -50,46 +51,37 @@ export function CitiesView({
     );
   }, [cities]);
 
-  const renderCityCard = ({ item }: { item: CityData }) => (
-    <CityHeroCard
-      city={item.name}
-      country={item.country}
-      countryCode={item.countryCode}
-      placeCount={item.placeCount}
-      onPress={() => onCityClick(item.name)}
-    />
-  );
-
-  const renderEmpty = () => (
-    <View style={styles.emptyContainer}>
-      <Body color={colors.neutral[600]}>No cities yet</Body>
-    </View>
-  );
+  if (citiesArray.length === 0) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Body color={colors.neutral[600]}>No cities yet</Body>
+      </View>
+    );
+  }
 
   return (
-    <FlatList
-      data={citiesArray}
-      renderItem={renderCityCard}
-      keyExtractor={(item) => item.name}
-      ListEmptyComponent={renderEmpty}
-      contentContainerStyle={styles.contentContainer}
-      showsVerticalScrollIndicator={false}
-      // Performance optimizations
-      removeClippedSubviews={true}
-      maxToRenderPerBatch={10}
-      windowSize={5}
-      initialNumToRender={8}
-    />
+    <View style={styles.container}>
+      {citiesArray.map((city) => (
+        <CityHeroCard
+          key={city.name}
+          city={city.name}
+          country={city.country}
+          countryCode={city.countryCode}
+          placeCount={city.placeCount}
+          onPress={() => onCityClick(city.name)}
+        />
+      ))}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  contentContainer: {
+  container: {
     paddingHorizontal: spacing.pagePaddingMobile,
-    paddingBottom: spacing[6],
   },
   emptyContainer: {
     paddingVertical: spacing[12],
+    paddingHorizontal: spacing.pagePaddingMobile,
     alignItems: 'center',
   },
 });
