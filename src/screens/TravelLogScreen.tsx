@@ -12,11 +12,10 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { View, ScrollView, RefreshControl, Pressable, StyleSheet } from 'react-native';
+import { View, ScrollView, RefreshControl, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Ionicons } from '@expo/vector-icons';
 import { FullPageSpinner, Body } from '@/components/ui';
 import { CitiesView } from '@/components/travel/CitiesView';
 import { MapHeader } from '@/components/map/MapHeader';
@@ -165,21 +164,6 @@ export function TravelLogScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Top Header */}
-      <View style={styles.topHeader}>
-        <View style={{ width: 40 }} />
-        <Body weight="semibold" style={styles.headerTitle}>
-          Travel Log
-        </Body>
-        <Pressable
-          onPress={() => navigation.navigate('UserProfile')}
-          hitSlop={8}
-          style={styles.profileButton}
-        >
-          <Ionicons name="person-circle-outline" size={32} color={colors.neutral[700]} />
-        </Pressable>
-      </View>
-
       {/* Map Header - Always visible */}
       <MapHeader
         visitedCountries={visitedCountryCodes}
@@ -275,22 +259,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.neutral[50],
-  },
-  topHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.pagePaddingMobile,
-    paddingVertical: spacing[2],
-    backgroundColor: colors.primary.white,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.neutral[200],
-  },
-  headerTitle: {
-    fontSize: 16,
-  },
-  profileButton: {
-    padding: spacing[1],
   },
   content: {
     flex: 1,
