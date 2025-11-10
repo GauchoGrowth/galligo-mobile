@@ -48,6 +48,7 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(
     const [currentZoom, setCurrentZoom] = useState(1);
     const [detailLevel, setDetailLevel] = useState<MapDetailLevel>('low');
     const [dataVersion, setDataVersion] = useState(0);
+    const [isZooming, setIsZooming] = useState(false);
 
     // Ref for MapControls imperative methods
     const mapControlsRef = useRef<MapControlsHandle>(null);
@@ -204,19 +205,22 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(
     );
 
     // Handle zoom changes for progressive detail loading
-  const handleZoomChange = useCallback((zoom: number) => {
-    console.log('[WorldMap] Zoom changed:', zoom);
-    setCurrentZoom(zoom);
+    const handleZoomChange = useCallback((zoom: number) => {
+      console.log('[WorldMap] Zoom changed:', zoom, 'isZooming:', isZooming);
+      setCurrentZoom(zoom);
 
-    // Switch to high detail at zoom > 3
-    if (zoom > 3 && detailLevel === 'low') {
-      console.log('[WorldMap] Switching to high detail');
-      setDetailLevel('high');
-    } else if (zoom <= 3 && detailLevel === 'high') {
-      console.log('[WorldMap] Switching to low detail');
-      setDetailLevel('low');
-    }
-  }, [detailLevel]);
+      // DISABLED: Progressive detail switching causes harsh bouncing during zoom animations
+      // Keep detail level locked to 'low' for smooth, consistent animations
+
+      // // Switch to high detail at zoom > 3
+      // if (zoom > 3 && detailLevel === 'low' && !isZooming) {
+      //   console.log('[WorldMap] Switching to high detail');
+      //   setDetailLevel('high');
+      // } else if (zoom <= 3 && detailLevel === 'high' && !isZooming) {
+      //   console.log('[WorldMap] Switching to low detail');
+      //   setDetailLevel('low');
+      // }
+    }, [detailLevel, isZooming]);
 
   // Handle tap to select country (point-in-polygon detection)
   const handleTap = useCallback(
@@ -302,17 +306,19 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(
             />
 
             {/* Render all countries */}
-            {countryPaths.map(({ country, pathData }) => {
+            {countryPaths.map(({ country, pathData }, index) => {
               const countryId = String(
                 country.id || country.properties.iso_a2 || country.properties.name
               );
+              // Use combined key with name and index to ensure uniqueness
+              const uniqueKey = `${detailLevel}-${countryId}-${country.properties.name}-${index}`;
               const countryCode = country.properties.iso_a2?.toUpperCase();
               const isVisited = countryCode ? visitedSet.has(countryCode) : false;
               const isSelected = countryId === selectedCountryId;
 
               return (
                 <CountryPath
-                  key={countryId}
+                  key={uniqueKey}
                   country={country}
                   pathData={pathData}
                   isVisited={isVisited}

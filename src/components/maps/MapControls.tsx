@@ -117,32 +117,38 @@ export const MapControls = forwardRef<MapControlsHandle, MapControlsProps>(
           const boundsWidth = bounds.maxX - bounds.minX;
           const boundsHeight = bounds.maxY - bounds.minY;
 
-          const zoomX = width / boundsWidth;
-          const zoomY = height / boundsHeight;
-          const newZoom = clamp(Math.min(zoomX, zoomY) * 0.8, minZoom, maxZoom);
+          // Add padding factor to avoid edges
+          const paddingFactor = 0.7; // 70% of available space
+          const zoomX = (width / boundsWidth) * paddingFactor;
+          const zoomY = (height / boundsHeight) * paddingFactor;
+          const newZoom = clamp(Math.min(zoomX, zoomY), minZoom, maxZoom);
 
-          console.log('[MapControls] Calculated zoom:', newZoom);
+          console.log('[MapControls] Calculated zoom:', newZoom, 'from bounds:', { width: boundsWidth, height: boundsHeight });
 
-          // Calculate center point
+          // Calculate center point (FIX: was using minY twice!)
           const boundsCenterX = (bounds.minX + bounds.maxX) / 2;
-          const boundsCenterY = (bounds.minY + bounds.minY) / 2;
+          const boundsCenterY = (bounds.minY + bounds.maxY) / 2;
 
-          // Animate zoom
-          scale.value = withSpring(newZoom, { damping: 15 });
+          console.log('[MapControls] Country center:', { x: boundsCenterX, y: boundsCenterY });
+
+          // Animate zoom with smooth timing
+          scale.value = withSpring(newZoom, { damping: 20, stiffness: 90 });
 
           // Center on bounds center
           const newTranslateX = width / 2 - boundsCenterX * newZoom;
           const newTranslateY = height / 2 - boundsCenterY * newZoom;
 
+          console.log('[MapControls] Target translation:', { x: newTranslateX, y: newTranslateY });
+
           const constraints = calculatePanConstraints(newZoom);
 
           translateX.value = withSpring(
             clamp(newTranslateX, constraints.minX, constraints.maxX),
-            { damping: 15 }
+            { damping: 20, stiffness: 90 }
           );
           translateY.value = withSpring(
             clamp(newTranslateY, constraints.minY, constraints.maxY),
-            { damping: 15 }
+            { damping: 20, stiffness: 90 }
           );
 
           savedScale.value = newZoom;

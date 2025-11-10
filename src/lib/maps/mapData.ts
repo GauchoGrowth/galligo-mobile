@@ -142,8 +142,12 @@ export function findCountryByCode(
   isoCode: string,
   detailLevel: MapDetailLevel = 'low'
 ): Country | undefined {
+  console.log('[MapData] findCountryByCode called with:', isoCode, 'detail:', detailLevel);
+
   const mapData = loadMapData(detailLevel);
   const upperCode = isoCode.toUpperCase();
+
+  console.log('[MapData] Searching for ISO code:', upperCode);
 
   // First try direct ISO code match
   let country = mapData.features.find(
@@ -152,13 +156,24 @@ export function findCountryByCode(
       c.properties.iso_a3 === upperCode
   );
 
+  if (country) {
+    console.log('[MapData] Found country by ISO code:', country.properties.name);
+    return country;
+  }
+
   // If not found, try finding by name using ISO mapping
-  if (!country) {
-    const countryName = require('./isoCodeMapping').ISO_TO_COUNTRY_NAME[isoCode.toLowerCase()];
-    if (countryName) {
-      country = mapData.features.find(
-        (c) => c.properties.name === countryName
-      );
+  const { ISO_TO_COUNTRY_NAME } = require('./isoCodeMapping');
+  const countryName = ISO_TO_COUNTRY_NAME[isoCode.toLowerCase()];
+  console.log('[MapData] Trying name lookup:', countryName);
+
+  if (countryName) {
+    country = mapData.features.find(
+      (c) => c.properties.name === countryName
+    );
+    if (country) {
+      console.log('[MapData] Found country by name:', country.properties.name);
+    } else {
+      console.log('[MapData] Country not found by name:', countryName);
     }
   }
 
