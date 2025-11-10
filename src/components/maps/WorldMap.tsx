@@ -11,39 +11,45 @@
  * - Smooth animations
  */
 
-import React, { useMemo, useState, useCallback, useEffect } from 'react';
+import React, { useMemo, useState, useCallback, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import { Canvas, Group, Rect } from '@shopify/react-native-skia';
 import { geoContains } from 'd3-geo';
 import type { WorldMapProps, Country, MapDetailLevel } from '@/types/map.types';
 import { DEFAULT_MAP_COLORS } from '@/types/map.types';
-import { loadMapData } from '@/lib/maps/mapData';
-import { createFittedProjection, createPathGenerator, generateCountryPath, unprojectCoordinates } from '@/lib/maps/projections';
+import { loadMapData, findCountryByCode } from '@/lib/maps/mapData';
+import { createFittedProjection, createPathGenerator, generateCountryPath, unprojectCoordinates, getCountryBounds } from '@/lib/maps/projections';
 import { CountryPath } from './CountryPath';
-import { MapControls } from './MapControls';
+import { MapControls, MapControlsHandle } from './MapControls';
 import { CityMarker } from './CityMarker';
 import { TravelPath } from './TravelPath';
 import { projectCoordinates } from '@/lib/maps/projections';
 
 /**
+ * Imperative handle for programmatic map control
+ */
+export interface WorldMapHandle {
+  /** Zoom to country by ISO code */
+  zoomToCountry: (countryCode: string) => void;
+  /** Reset to full world view */
+  resetView: () => void;
+}
+
+/**
  * Interactive world map component using Skia for high-performance rendering.
  * Displays countries user has visited with smooth animations and gestures.
  */
-export function WorldMap({
-  width,
-  height,
-  visitedCountries = [],
-  onCountrySelect,
-  cities = [],
-  onCitySelect,
-  showPaths = false,
-}: WorldMapProps) {
-  console.log('[WorldMap] Rendering with dimensions:', { width, height });
-  console.log('[WorldMap] Visited countries:', visitedCountries);
+export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(
+  ({ width, height, visitedCountries = [], onCountrySelect, cities = [], onCitySelect, showPaths = false }, ref) => {
+    console.log('[WorldMap] Rendering with dimensions:', { width, height });
+    console.log('[WorldMap] Visited countries:', visitedCountries);
 
-  const [selectedCountryId, setSelectedCountryId] = useState<string | null>(null);
-  const [currentZoom, setCurrentZoom] = useState(1);
-  const [detailLevel, setDetailLevel] = useState<MapDetailLevel>('low');
+    const [selectedCountryId, setSelectedCountryId] = useState<string | null>(null);
+    const [currentZoom, setCurrentZoom] = useState(1);
+    const [detailLevel, setDetailLevel] = useState<MapDetailLevel>('low');
+
+    // Ref for MapControls imperative methods
+    const mapControlsRef = useRef<MapControlsHandle>(null);
 
   // Load map data based on detail level (memoized to prevent re-loading)
   const mapData = useMemo(() => {
@@ -124,25 +130,66 @@ export function WorldMap({
       .filter((item): item is { city: typeof cities[0]; x: number; y: number } => item !== null);
   }, [cities, projection]);
 
-  // Generate travel paths between cities (chronologically)
-  const travelPaths = useMemo(() => {
-    if (!showPaths || projectedCities.length < 2) return [];
+    // Generate travel paths between cities (chronologically)
+    const travelPaths = useMemo(() => {
+      if (!showPaths || projectedCities.length < 2) return [];
 
-    const paths: Array<{ from: [number, number]; to: [number, number]; key: string }> = [];
+      const paths: Array<{ from: [number, number]; to: [number, number]; key: string }> = [];
 
-    // Connect cities in order
-    for (let i = 0; i < projectedCities.length - 1; i++) {
-      paths.push({
-        from: [projectedCities[i].x, projectedCities[i].y],
-        to: [projectedCities[i + 1].x, projectedCities[i + 1].y],
-        key: `path-${i}`,
-      });
-    }
+      // Connect cities in order
+      for (let i = 0; i < projectedCities.length - 1; i++) {
+        paths.push({
+          from: [projectedCities[i].x, projectedCities[i].y],
+          to: [projectedCities[i + 1].x, projectedCities[i + 1].y],
+          key: `path-${i}`,
+        });
+      }
 
-    return paths;
-  }, [showPaths, projectedCities]);
+      return paths;
+    }, [showPaths, projectedCities]);
 
-  // Handle zoom changes for progressive detail loading
+    // Expose imperative methods via ref
+    useImperativeHandle(
+      ref,
+      () => ({
+        zoomToCountry: (countryCode: string) => {
+          console.log('[WorldMap] zoomToCountry called:', countryCode);
+
+          if (!pathGenerator) {
+            console.log('[WorldMap] Path generator not ready');
+            return;
+          }
+
+          // Find country by code (case-insensitive)
+          const country = findCountryByCode(countryCode, detailLevel);
+          if (!country) {
+            console.log('[WorldMap] Country not found:', countryCode);
+            return;
+          }
+
+          console.log('[WorldMap] Found country:', country.properties.name);
+
+          // Calculate country bounds
+          const bounds = getCountryBounds(country, pathGenerator);
+          if (!bounds) {
+            console.log('[WorldMap] Could not calculate bounds for country');
+            return;
+          }
+
+          console.log('[WorldMap] Country bounds:', bounds);
+
+          // Trigger zoom via MapControls
+          mapControlsRef.current?.zoomToBounds(bounds);
+        },
+        resetView: () => {
+          console.log('[WorldMap] resetView called');
+          mapControlsRef.current?.resetZoom();
+        },
+      }),
+      [pathGenerator, detailLevel]
+    );
+
+    // Handle zoom changes for progressive detail loading
   const handleZoomChange = useCallback((zoom: number) => {
     console.log('[WorldMap] Zoom changed:', zoom);
     setCurrentZoom(zoom);
@@ -218,16 +265,17 @@ export function WorldMap({
     );
   }
 
-  return (
-    <View style={[styles.container, { width, height }]}>
-      <MapControls
-        width={width}
-        height={height}
-        onZoomChange={handleZoomChange}
-        onTap={handleTap}
-        minZoom={1}
-        maxZoom={5}
-      >
+    return (
+      <View style={[styles.container, { width, height }]}>
+        <MapControls
+          ref={mapControlsRef}
+          width={width}
+          height={height}
+          onZoomChange={handleZoomChange}
+          onTap={handleTap}
+          minZoom={1}
+          maxZoom={5}
+        >
         <Canvas style={{ width, height }}>
           <Group>
             {/* Ocean/Background */}
@@ -284,15 +332,18 @@ export function WorldMap({
         </Canvas>
       </MapControls>
 
-      {/* Debug info */}
-      <View style={styles.debugInfo}>
-        <Text style={styles.debugText}>
-          Countries: {countryPaths.length} | Visited: {visitedCountries.length} | Zoom: {currentZoom.toFixed(1)}x | Detail: {detailLevel}
-        </Text>
+        {/* Debug info */}
+        <View style={styles.debugInfo}>
+          <Text style={styles.debugText}>
+            Countries: {countryPaths.length} | Visited: {visitedCountries.length} | Zoom: {currentZoom.toFixed(1)}x | Detail: {detailLevel}
+          </Text>
+        </View>
       </View>
-    </View>
-  );
-}
+    );
+  }
+);
+
+WorldMap.displayName = 'WorldMap';
 
 const styles = StyleSheet.create({
   container: {

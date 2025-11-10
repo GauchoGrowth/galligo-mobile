@@ -248,3 +248,88 @@ export function calculatePanConstraints(
 export function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
+
+// ============================================================================
+// Country-Specific Bounds and Zoom
+// ============================================================================
+
+/**
+ * Gets the bounding box of a specific country
+ *
+ * @param country - Country GeoJSON feature
+ * @param pathGenerator - D3 path generator
+ * @returns Bounding box { minX, maxX, minY, maxY } or null if invalid
+ */
+export function getCountryBounds(
+  country: Country,
+  pathGenerator: GeoPath
+): { minX: number; maxX: number; minY: number; maxY: number } | null {
+  try {
+    const bounds = pathGenerator.bounds(country);
+
+    if (
+      !bounds ||
+      !isFinite(bounds[0][0]) ||
+      !isFinite(bounds[0][1]) ||
+      !isFinite(bounds[1][0]) ||
+      !isFinite(bounds[1][1])
+    ) {
+      return null;
+    }
+
+    return {
+      minX: bounds[0][0],
+      minY: bounds[0][1],
+      maxX: bounds[1][0],
+      maxY: bounds[1][1],
+    };
+  } catch (error) {
+    console.error('[Projections] Failed to calculate country bounds:', error);
+    return null;
+  }
+}
+
+/**
+ * Calculates zoom and pan values to fit a country in the viewport
+ *
+ * @param bounds - Country bounding box
+ * @param canvasWidth - Canvas width in pixels
+ * @param canvasHeight - Canvas height in pixels
+ * @param padding - Padding around country in pixels (default: 20)
+ * @returns { zoom, translateX, translateY } values for centering country
+ */
+export function calculateZoomToFitBounds(
+  bounds: { minX: number; maxX: number; minY: number; maxY: number },
+  canvasWidth: number,
+  canvasHeight: number,
+  padding: number = 20
+): { zoom: number; translateX: number; translateY: number } {
+  // Calculate country dimensions
+  const boundsWidth = bounds.maxX - bounds.minX;
+  const boundsHeight = bounds.maxY - bounds.minY;
+
+  // Calculate zoom to fit country with padding
+  const availableWidth = canvasWidth - padding * 2;
+  const availableHeight = canvasHeight - padding * 2;
+
+  const zoomX = availableWidth / boundsWidth;
+  const zoomY = availableHeight / boundsHeight;
+
+  // Use smaller zoom to fit both dimensions, cap at max zoom (5)
+  const zoom = Math.min(zoomX, zoomY, 5);
+
+  // Calculate country center
+  const boundsCenterX = (bounds.minX + bounds.maxX) / 2;
+  const boundsCenterY = (bounds.minY + bounds.maxY) / 2;
+
+  // Calculate canvas center
+  const canvasCenterX = canvasWidth / 2;
+  const canvasCenterY = canvasHeight / 2;
+
+  // Calculate translation to center the country
+  // Translation is the difference between canvas center and scaled country center
+  const translateX = canvasCenterX - boundsCenterX * zoom;
+  const translateY = canvasCenterY - boundsCenterY * zoom;
+
+  return { zoom, translateX, translateY };
+}

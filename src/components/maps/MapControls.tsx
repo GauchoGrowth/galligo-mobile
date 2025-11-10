@@ -3,9 +3,10 @@
  *
  * Handles pan, pinch, and tap gestures for the interactive world map.
  * Provides smooth animations and enforces zoom/pan constraints.
+ * Exposes imperative methods for programmatic zoom control.
  */
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useImperativeHandle, forwardRef } from 'react';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
@@ -16,6 +17,25 @@ import Animated, {
 } from 'react-native-reanimated';
 import { DEFAULT_ZOOM_CONSTRAINTS } from '@/types/map.types';
 import { clamp } from '@/lib/maps/projections';
+
+/**
+ * Imperative handle for programmatic map control
+ */
+export interface MapControlsHandle {
+  /** Zoom to specific point with animation */
+  zoomToPoint: (x: number, y: number, targetZoom: number) => void;
+  /** Zoom to fit bounding box */
+  zoomToBounds: (bounds: {
+    minX: number;
+    maxX: number;
+    minY: number;
+    maxY: number;
+  }) => void;
+  /** Reset zoom to initial view */
+  resetZoom: () => void;
+  /** Get current zoom level */
+  getCurrentZoom: () => number;
+}
 
 interface MapControlsProps {
   /** Width of the map canvas */
@@ -42,30 +62,123 @@ interface MapControlsProps {
  * - Pinch: Pinch to zoom in/out
  * - Double-tap: Zoom in at tap point
  * - Constraints: Keeps map within bounds
+ * - Imperative methods: Programmatic zoom control
  */
-export function MapControls({
-  width,
-  height,
-  children,
-  onZoomChange,
-  onTap,
-  minZoom = DEFAULT_ZOOM_CONSTRAINTS.min,
-  maxZoom = DEFAULT_ZOOM_CONSTRAINTS.max,
-}: MapControlsProps) {
-  // Shared values for pan and zoom state
-  const scale = useSharedValue(1);
-  const translateX = useSharedValue(0);
-  const translateY = useSharedValue(0);
-  const savedScale = useSharedValue(1);
-  const savedTranslateX = useSharedValue(0);
-  const savedTranslateY = useSharedValue(0);
-  const focalX = useSharedValue(0);
-  const focalY = useSharedValue(0);
+export const MapControls = forwardRef<MapControlsHandle, MapControlsProps>(
+  ({ width, height, children, onZoomChange, onTap, minZoom = DEFAULT_ZOOM_CONSTRAINTS.min, maxZoom = DEFAULT_ZOOM_CONSTRAINTS.max }, ref) => {
+    // Shared values for pan and zoom state
+    const scale = useSharedValue(1);
+    const translateX = useSharedValue(0);
+    const translateY = useSharedValue(0);
+    const savedScale = useSharedValue(1);
+    const savedTranslateX = useSharedValue(0);
+    const savedTranslateY = useSharedValue(0);
+    const focalX = useSharedValue(0);
+    const focalY = useSharedValue(0);
 
-  /**
-   * Calculates pan constraints based on current zoom level
-   */
-  const calculatePanConstraints = (zoom: number) => {
+    // Expose imperative methods via ref
+    useImperativeHandle(
+      ref,
+      () => ({
+        zoomToPoint: (x: number, y: number, targetZoom: number) => {
+          const newZoom = clamp(targetZoom, minZoom, maxZoom);
+          const constraints = calculatePanConstraints(newZoom);
+
+          // Animate zoom
+          scale.value = withSpring(newZoom, { damping: 15 });
+
+          // Calculate translation to center on point
+          const scaledX = x * newZoom;
+          const scaledY = y * newZoom;
+          const newTranslateX = width / 2 - scaledX;
+          const newTranslateY = height / 2 - scaledY;
+
+          translateX.value = withSpring(
+            clamp(newTranslateX, constraints.minX, constraints.maxX),
+            { damping: 15 }
+          );
+          translateY.value = withSpring(
+            clamp(newTranslateY, constraints.minY, constraints.maxY),
+            { damping: 15 }
+          );
+
+          savedScale.value = newZoom;
+          savedTranslateX.value = translateX.value;
+          savedTranslateY.value = translateY.value;
+
+          if (onZoomChange) {
+            runOnJS(onZoomChange)(newZoom);
+          }
+        },
+        zoomToBounds: (bounds) => {
+          console.log('[MapControls] Zooming to bounds:', bounds);
+
+          // Calculate zoom to fit
+          const boundsWidth = bounds.maxX - bounds.minX;
+          const boundsHeight = bounds.maxY - bounds.minY;
+
+          const zoomX = width / boundsWidth;
+          const zoomY = height / boundsHeight;
+          const newZoom = clamp(Math.min(zoomX, zoomY) * 0.8, minZoom, maxZoom);
+
+          console.log('[MapControls] Calculated zoom:', newZoom);
+
+          // Calculate center point
+          const boundsCenterX = (bounds.minX + bounds.maxX) / 2;
+          const boundsCenterY = (bounds.minY + bounds.minY) / 2;
+
+          // Animate zoom
+          scale.value = withSpring(newZoom, { damping: 15 });
+
+          // Center on bounds center
+          const newTranslateX = width / 2 - boundsCenterX * newZoom;
+          const newTranslateY = height / 2 - boundsCenterY * newZoom;
+
+          const constraints = calculatePanConstraints(newZoom);
+
+          translateX.value = withSpring(
+            clamp(newTranslateX, constraints.minX, constraints.maxX),
+            { damping: 15 }
+          );
+          translateY.value = withSpring(
+            clamp(newTranslateY, constraints.minY, constraints.maxY),
+            { damping: 15 }
+          );
+
+          savedScale.value = newZoom;
+          savedTranslateX.value = translateX.value;
+          savedTranslateY.value = translateY.value;
+
+          if (onZoomChange) {
+            runOnJS(onZoomChange)(newZoom);
+          }
+        },
+        resetZoom: () => {
+          console.log('[MapControls] Resetting zoom');
+
+          scale.value = withSpring(1, { damping: 15 });
+          translateX.value = withSpring(0, { damping: 15 });
+          translateY.value = withSpring(0, { damping: 15 });
+
+          savedScale.value = 1;
+          savedTranslateX.value = 0;
+          savedTranslateY.value = 0;
+
+          if (onZoomChange) {
+            runOnJS(onZoomChange)(1);
+          }
+        },
+        getCurrentZoom: () => {
+          return scale.value;
+        },
+      }),
+      [width, height, minZoom, maxZoom, onZoomChange]
+    );
+
+    /**
+     * Calculates pan constraints based on current zoom level
+     */
+    const calculatePanConstraints = (zoom: number) => {
     'worklet';
     const scaledWidth = width * zoom;
     const scaledHeight = height * zoom;
@@ -236,11 +349,14 @@ export function MapControls({
     ],
   }));
 
-  return (
-    <GestureDetector gesture={composedGestures}>
-      <Animated.View style={[{ width, height }, animatedStyle]}>
-        {children}
-      </Animated.View>
-    </GestureDetector>
-  );
-}
+    return (
+      <GestureDetector gesture={composedGestures}>
+        <Animated.View style={[{ width, height }, animatedStyle]}>
+          {children}
+        </Animated.View>
+      </GestureDetector>
+    );
+  }
+);
+
+MapControls.displayName = 'MapControls';

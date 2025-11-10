@@ -5,9 +5,9 @@
  * Now powered by react-native-skia for high-performance rendering
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef, useEffect } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
-import { WorldMap } from '@/components/maps/WorldMap';
+import { WorldMap, WorldMapHandle } from '@/components/maps/WorldMap';
 import type { Country } from '@/types/map.types';
 import { theme } from '@/theme';
 
@@ -42,6 +42,7 @@ export function MapHeader({
   height = 200,
 }: MapHeaderProps) {
   const screenWidth = Dimensions.get('window').width;
+  const mapRef = useRef<WorldMapHandle>(null);
 
   // Handle country selection
   const handleCountrySelect = useCallback(
@@ -54,9 +55,21 @@ export function MapHeader({
     [onCountryPress]
   );
 
+  // Zoom to country when flag is clicked (selectedCountry changes)
+  useEffect(() => {
+    if (selectedCountry) {
+      console.log('[MapHeader] Selected country changed, zooming to:', selectedCountry);
+      mapRef.current?.zoomToCountry(selectedCountry);
+    } else {
+      console.log('[MapHeader] Country deselected, resetting view');
+      mapRef.current?.resetView();
+    }
+  }, [selectedCountry]);
+
   return (
     <View style={styles.container}>
       <WorldMap
+        ref={mapRef}
         width={screenWidth}
         height={height}
         visitedCountries={visitedCountries}
