@@ -8,9 +8,9 @@ You are tasked with rebuilding the GalliGo iOS app and ensuring it runs correctl
 
 Execute these steps IN ORDER. Do not skip any step. Do not ask for confirmation between steps.
 
-### Step 1: Clean Up Existing Processes
+### Step 1: Clean Up Existing Processes & Fix Simulator Network
 
-Kill any existing Metro bundler processes that might be blocking port 8081:
+Kill any existing Metro bundler processes and fix simulator network issues:
 
 ```bash
 # Find and kill any processes on port 8081
@@ -19,6 +19,15 @@ lsof -ti:8081 | xargs kill -9 2>/dev/null || true
 # Kill any background expo/metro processes
 pkill -f "expo start" || true
 pkill -f "metro" || true
+
+# Fix simulator network (prevents "Network request failed" errors)
+killall Simulator 2>/dev/null || true
+xcrun simctl shutdown all 2>/dev/null || true
+
+# Boot the simulator fresh
+xcrun simctl boot "iPhone 16 Pro" 2>/dev/null || true
+open -a Simulator
+sleep 3
 ```
 
 ### Step 2: Clear Metro Cache (Recommended)

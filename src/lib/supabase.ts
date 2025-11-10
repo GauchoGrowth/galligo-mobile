@@ -34,37 +34,3 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 });
 
 console.log('[Supabase] Client created successfully');
-
-// Test 1: Can we reach the internet?
-console.log('[Network Test] Testing internet connectivity...');
-fetch('https://www.google.com')
-  .then(() => console.log('[Network Test] ✅ Internet connectivity works'))
-  .catch(err => console.error('[Network Test] ❌ No internet:', err.message, err));
-
-// Test 2: Can we reach Supabase?
-console.log('[Network Test] Testing Supabase reachability...');
-fetch(supabaseUrl)
-  .then(res => console.log('[Network Test] ✅ Supabase reachable, status:', res.status))
-  .catch(err => console.error('[Network Test] ❌ Cannot reach Supabase:', err.message, err));
-
-// Test 3: Can we query Supabase?
-console.log('[Supabase] Running test query...');
-supabase
-  .from('places')
-  .select('id')
-  .limit(1)
-  .then(({ data, error }) => {
-    console.log('[Supabase] Test query result:', {
-      hasData: !!data,
-      dataLength: data?.length,
-      errorMessage: error?.message,
-      errorCode: error?.code
-    });
-    if (error) {
-      console.error('[Supabase] Test query error details:', JSON.stringify(error, null, 2));
-    }
-  })
-  .catch(err => {
-    console.error('[Supabase] Test query FAILED with exception:', err);
-    console.error('[Supabase] Exception details:', JSON.stringify(err, Object.getOwnPropertyNames(err)));
-  });
