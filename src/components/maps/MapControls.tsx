@@ -81,30 +81,34 @@ export const MapControls = forwardRef<MapControlsHandle, MapControlsProps>(
       ref,
       () => ({
         zoomToPoint: (x: number, y: number, targetZoom: number) => {
+          console.log('[MapControls] zoomToPoint called:', { x, y, targetZoom });
+
           const newZoom = clamp(targetZoom, minZoom, maxZoom);
+
+          console.log('[MapControls] Clamped zoom:', newZoom);
+
+          // Calculate where this point should be on screen after zoom
+          // Point (x,y) in map space should end up at center of screen
+          const newTranslateX = (width / 2) - (x * newZoom);
+          const newTranslateY = (height / 2) - (y * newZoom);
+
+          console.log('[MapControls] Calculated translation:', { x: newTranslateX, y: newTranslateY });
+
+          // Apply constraints
           const constraints = calculatePanConstraints(newZoom);
+          const constrainedX = clamp(newTranslateX, constraints.minX, constraints.maxX);
+          const constrainedY = clamp(newTranslateY, constraints.minY, constraints.maxY);
 
-          // Animate zoom
-          scale.value = withSpring(newZoom, { damping: 15 });
+          console.log('[MapControls] Constrained translation:', { x: constrainedX, y: constrainedY });
 
-          // Calculate translation to center on point
-          const scaledX = x * newZoom;
-          const scaledY = y * newZoom;
-          const newTranslateX = width / 2 - scaledX;
-          const newTranslateY = height / 2 - scaledY;
-
-          translateX.value = withSpring(
-            clamp(newTranslateX, constraints.minX, constraints.maxX),
-            { damping: 15 }
-          );
-          translateY.value = withSpring(
-            clamp(newTranslateY, constraints.minY, constraints.maxY),
-            { damping: 15 }
-          );
+          // Animate with smooth spring
+          scale.value = withSpring(newZoom, { damping: 20, stiffness: 90 });
+          translateX.value = withSpring(constrainedX, { damping: 20, stiffness: 90 });
+          translateY.value = withSpring(constrainedY, { damping: 20, stiffness: 90 });
 
           savedScale.value = newZoom;
-          savedTranslateX.value = translateX.value;
-          savedTranslateY.value = translateY.value;
+          savedTranslateX.value = constrainedX;
+          savedTranslateY.value = constrainedY;
 
           if (onZoomChange) {
             runOnJS(onZoomChange)(newZoom);

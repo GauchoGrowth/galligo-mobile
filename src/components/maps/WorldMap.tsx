@@ -170,13 +170,13 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(
         zoomToCountry: (countryCode: string) => {
           console.log('[WorldMap] zoomToCountry called:', countryCode);
 
-          if (!pathGenerator) {
-            console.log('[WorldMap] Path generator not ready');
+          if (!pathGenerator || !projection) {
+            console.log('[WorldMap] Path generator or projection not ready');
             return;
           }
 
-          // Find country by code (case-insensitive)
-          const country = findCountryByCode(countryCode, detailLevel);
+          // ALWAYS use low detail for country lookup to avoid projection mismatches
+          const country = findCountryByCode(countryCode, 'low');
           if (!country) {
             console.log('[WorldMap] Country not found:', countryCode);
             return;
@@ -184,43 +184,38 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(
 
           console.log('[WorldMap] Found country:', country.properties.name);
 
-          // Calculate country bounds
-          const bounds = getCountryBounds(country, pathGenerator);
-          if (!bounds) {
-            console.log('[WorldMap] Could not calculate bounds for country');
+          // Calculate centroid instead of bounds for more reliable centering
+          const centroid = pathGenerator.centroid(country);
+          if (!centroid || !isFinite(centroid[0]) || !isFinite(centroid[1])) {
+            console.log('[WorldMap] Could not calculate centroid');
             return;
           }
 
-          console.log('[WorldMap] Country bounds:', bounds);
+          console.log('[WorldMap] Country centroid:', { x: centroid[0], y: centroid[1] });
 
-          // Trigger zoom via MapControls
-          mapControlsRef.current?.zoomToBounds(bounds);
+          // Use a fixed zoom level for consistency (2.5x for most countries)
+          const targetZoom = 2.5;
+
+          // Trigger zoom to centroid
+          mapControlsRef.current?.zoomToPoint(centroid[0], centroid[1], targetZoom);
         },
         resetView: () => {
           console.log('[WorldMap] resetView called');
           mapControlsRef.current?.resetZoom();
         },
       }),
-      [pathGenerator, detailLevel]
+      [pathGenerator, projection]
     );
 
-    // Handle zoom changes for progressive detail loading
+    // Handle zoom changes
     const handleZoomChange = useCallback((zoom: number) => {
-      console.log('[WorldMap] Zoom changed:', zoom, 'isZooming:', isZooming);
+      console.log('[WorldMap] Zoom changed:', zoom);
       setCurrentZoom(zoom);
 
-      // DISABLED: Progressive detail switching causes harsh bouncing during zoom animations
-      // Keep detail level locked to 'low' for smooth, consistent animations
-
-      // // Switch to high detail at zoom > 3
-      // if (zoom > 3 && detailLevel === 'low' && !isZooming) {
-      //   console.log('[WorldMap] Switching to high detail');
-      //   setDetailLevel('high');
-      // } else if (zoom <= 3 && detailLevel === 'high' && !isZooming) {
-      //   console.log('[WorldMap] Switching to low detail');
-      //   setDetailLevel('low');
-      // }
-    }, [detailLevel, isZooming]);
+      // Progressive detail switching is DISABLED to prevent harsh bouncing
+      // during zoom animations. Detail level stays locked at 'low' for
+      // smooth, consistent geometry throughout all zoom levels.
+    }, []);
 
   // Handle tap to select country (point-in-polygon detection)
   const handleTap = useCallback(
