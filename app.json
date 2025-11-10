@@ -14,7 +14,13 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.galligomobile"
+      "bundleIdentifier": "com.anonymous.galligomobile",
+      "infoPlist": {
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true,
+          "NSAllowsLocalNetworking": true
+        }
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -35,7 +41,8 @@
         {
           "locationAlwaysAndWhenInUsePermission": "Allow GalliGo to access your location to show your position on maps."
         }
-      ]
+      ],
+      "expo-asset"
     ]
   }
 }
