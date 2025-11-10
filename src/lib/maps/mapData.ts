@@ -8,6 +8,7 @@
 import { feature } from 'topojson-client';
 import type { Topology, GeometryCollection } from 'topojson-specification';
 import type { CountriesFeatureCollection, MapDetailLevel, Country } from '@/types/map.types';
+import { getISOFromCountryName } from './isoCodeMapping';
 
 // Load TopoJSON files from assets
 const countries110m = require('../../../assets/maps/countries-110m.json') as Topology;
@@ -59,21 +60,36 @@ export function loadMapData(detailLevel: MapDetailLevel = 'low'): CountriesFeatu
     // Convert TopoJSON to GeoJSON
     const geoJsonData = feature(topology, countriesObject) as CountriesFeatureCollection;
 
-    // Enhance country properties with standardized data
+    // Enhance country properties with standardized data and inject ISO codes
+    let enhancedCount = 0;
     const enhancedData: CountriesFeatureCollection = {
       ...geoJsonData,
-      features: geoJsonData.features.map((country) => ({
-        ...country,
-        properties: {
-          ...country.properties,
-          // Ensure we have a name
-          name: country.properties.name || 'Unknown',
-          // Standardize ISO codes
-          iso_a2: country.properties.iso_a2 || country.properties.ISO_A2,
-          iso_a3: country.properties.iso_a3 || country.properties.ISO_A3,
-        },
-      })),
+      features: geoJsonData.features.map((country) => {
+        const countryName = country.properties.name || 'Unknown';
+
+        // Try to find ISO code from country name
+        const isoCode = getISOFromCountryName(countryName);
+
+        if (isoCode) {
+          enhancedCount++;
+        }
+
+        return {
+          ...country,
+          properties: {
+            ...country.properties,
+            // Ensure we have a name
+            name: countryName,
+            // Inject ISO alpha-2 code based on country name mapping
+            iso_a2: isoCode?.toUpperCase() || country.properties.iso_a2 || country.properties.ISO_A2,
+            // Keep other codes if they exist
+            iso_a3: country.properties.iso_a3 || country.properties.ISO_A3,
+          },
+        };
+      }),
     };
+
+    console.log(`[MapData] Enhanced ${enhancedCount} countries with ISO codes out of ${geoJsonData.features.length}`);
 
     // Cache the result
     if (detailLevel === 'low') {
@@ -118,7 +134,7 @@ export function loadHighResMap(): CountriesFeatureCollection {
 /**
  * Finds a country by ISO code
  *
- * @param isoCode - ISO 3166-1 alpha-2 code (e.g., "US", "FR")
+ * @param isoCode - ISO 3166-1 alpha-2 code (e.g., "US", "FR", "us", "fr")
  * @param detailLevel - Map detail level to search in
  * @returns Country feature or undefined if not found
  */
@@ -129,11 +145,24 @@ export function findCountryByCode(
   const mapData = loadMapData(detailLevel);
   const upperCode = isoCode.toUpperCase();
 
-  return mapData.features.find(
-    (country) =>
-      country.properties.iso_a2 === upperCode ||
-      country.properties.iso_a3 === upperCode
+  // First try direct ISO code match
+  let country = mapData.features.find(
+    (c) =>
+      c.properties.iso_a2 === upperCode ||
+      c.properties.iso_a3 === upperCode
   );
+
+  // If not found, try finding by name using ISO mapping
+  if (!country) {
+    const countryName = require('./isoCodeMapping').ISO_TO_COUNTRY_NAME[isoCode.toLowerCase()];
+    if (countryName) {
+      country = mapData.features.find(
+        (c) => c.properties.name === countryName
+      );
+    }
+  }
+
+  return country;
 }
 
 /**
