@@ -13,7 +13,8 @@
 
 import React, { useMemo, useState, useCallback, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
-import { Canvas, Group, Rect } from '@shopify/react-native-skia';
+import { Canvas, Group, Rect, processTransform2d } from '@shopify/react-native-skia';
+import { useDerivedValue } from 'react-native-reanimated';
 import { geoContains } from 'd3-geo';
 import type { WorldMapProps, Country, MapDetailLevel } from '@/types/map.types';
 import { DEFAULT_MAP_COLORS } from '@/types/map.types';
@@ -50,6 +51,20 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(
 
     // Ref for MapControls imperative methods
     const mapControlsRef = useRef<MapControlsHandle>(null);
+
+    // Create matrix transform for Skia Group (applied via ref after MapControls mounts)
+    const matrix = useDerivedValue(() => {
+      const ref = mapControlsRef.current as any;
+      if (!ref?.sharedValues) {
+        return processTransform2d([]);
+      }
+
+      return processTransform2d([
+        { translateX: ref.sharedValues.translateX.value },
+        { translateY: ref.sharedValues.translateY.value },
+        { scale: ref.sharedValues.scale.value },
+      ]);
+    }, []);
 
   // Load map data based on detail level (memoized to prevent re-loading)
   const mapData = useMemo(() => {
@@ -274,8 +289,8 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(
           minZoom={1}
           maxZoom={5}
         >
-        <Canvas style={{ width, height }}>
-          <Group>
+          <Canvas style={{ width, height }}>
+            <Group matrix={matrix}>
             {/* Ocean/Background */}
             <Rect
               x={0}
@@ -328,9 +343,9 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(
                 zoom={currentZoom}
               />
             ))}
-          </Group>
-        </Canvas>
-      </MapControls>
+            </Group>
+          </Canvas>
+        </MapControls>
 
         {/* Debug info */}
         <View style={styles.debugInfo}>

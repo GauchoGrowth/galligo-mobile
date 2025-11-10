@@ -385,7 +385,7 @@ export const MapControls = forwardRef<MapControlsHandle, MapControlsProps>(
 
     return (
       <GestureDetector gesture={composedGestures}>
-        <Animated.View style={[{ width, height }, animatedStyle]}>
+        <Animated.View style={{ width, height }}>
           {children}
         </Animated.View>
       </GestureDetector>
