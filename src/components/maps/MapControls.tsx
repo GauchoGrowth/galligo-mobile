@@ -199,15 +199,11 @@ export const MapControls = forwardRef<MapControlsHandle, MapControlsProps>(
             translateY: translateY.value,
           };
         },
+        // Expose shared values for Skia transforms
+        sharedValues: { scale, translateX, translateY },
       }),
-      [width, height, minZoom, maxZoom, onZoomChange]
+      [width, height, minZoom, maxZoom, onZoomChange, scale, translateX, translateY]
     );
-
-    // Expose shared values for direct Skia transform application
-    (ref as any).current = {
-      ...(ref as any).current,
-      sharedValues: { scale, translateX, translateY },
-    };
 
     /**
      * Calculates pan constraints based on current zoom level

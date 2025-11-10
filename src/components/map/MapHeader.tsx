@@ -7,7 +7,7 @@
 
 import React, { useCallback, useRef, useEffect } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
-import { WorldMap, WorldMapHandle } from '@/components/maps/WorldMap';
+import { WorldMapSimple as WorldMap, WorldMapHandle } from '@/components/maps/WorldMapSimple';
 import type { Country } from '@/types/map.types';
 import { theme } from '@/theme';
 
