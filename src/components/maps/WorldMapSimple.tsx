@@ -102,9 +102,9 @@ export const WorldMapSimple = forwardRef<WorldMapHandle, WorldMapProps>(
       },
       resetView: () => {
         console.log('[WorldMapSimple] Resetting view');
-        scale.value = withSpring(1, { damping: 20 });
-        translateX.value = withSpring(0, { damping: 20 });
-        translateY.value = withSpring(0, { damping: 20 });
+        scale.value = withSpring(1, { damping: 20, stiffness: 90 });
+        translateX.value = withSpring(0, { damping: 20, stiffness: 90 });
+        translateY.value = withSpring(0, { damping: 20, stiffness: 90 });
       },
     }), [pathGenerator, width, height]);
 
