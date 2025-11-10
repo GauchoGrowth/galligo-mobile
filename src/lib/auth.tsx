@@ -24,24 +24,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial session and validate it
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session) {
-        // Validate the session by checking if the token is still valid
-        const { data: { user }, error } = await supabase.auth.getUser();
-        if (error || !user) {
-          // Session is invalid, clear it
-          await supabase.auth.signOut();
-          setSession(null);
-          setUser(null);
-        } else {
-          setSession(session);
-          setUser(user);
-        }
-      } else {
-        setSession(null);
-        setUser(null);
-      }
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('[Auth] Initial session check:', session?.user?.email || 'No session');
+      setSession(session);
+      setUser(session?.user ?? null);
       setLoading(false);
     });
 
@@ -49,6 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log('[Auth] State changed:', _event, session?.user?.email);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);

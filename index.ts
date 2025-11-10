@@ -1,3 +1,9 @@
+// Import polyfills FIRST before anything else
+// MUST be first for Supabase crypto operations
+import 'react-native-get-random-values';
+import 'react-native-url-polyfill/auto';
+// Note: React Native has built-in fetch support, no need for whatwg-fetch
+
 import { registerRootComponent } from 'expo';
 
 import App from './App';

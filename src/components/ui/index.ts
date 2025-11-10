@@ -8,7 +8,7 @@ export type { ButtonProps, ButtonVariant, ButtonSize } from './Button';
 export { Card } from './Card';
 export type { CardProps, CardVariant } from './Card';
 
-export { Text, Display, H1, H2, H3, Body, Caption, Label } from './Text';
+export { Text, Display, H1, H2, H3, Body, BodyLarge, BodySmall, Caption, Label } from './Text';
 export type { TextProps, TextVariant } from './Text';
 
 export { Input } from './Input';

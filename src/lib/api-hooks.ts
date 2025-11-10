@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { Place, CuratedList, Trip, Home, TimelineItem } from '@/types/shared';
+import { supabase } from './supabase';
+import { useAuth } from './auth';
 
 // Use environment variable or fallback to localhost
 // In production, this would be your deployed backend URL
@@ -17,28 +19,146 @@ export interface UserProfile {
 
 // Places hooks
 export function usePlaces() {
+  const { user } = useAuth();
+
   return useQuery<Place[]>({
-    queryKey: [API_BASE, 'places'],
+    queryKey: ['places', user?.id],
+    queryFn: async () => {
+      try {
+        if (!user) return [];
+
+        console.log('[usePlaces] Fetching places for user:', user.id);
+        console.log('[usePlaces] Supabase URL:', process.env.EXPO_PUBLIC_SUPABASE_URL);
+
+        // Query places through the reviews table
+        const { data, error } = await supabase
+          .from('reviews')
+          .select('place_id, places(*)')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Error fetching places:', error);
+          console.error('Error details:', JSON.stringify(error, null, 2));
+          console.error('Error message:', error.message);
+          console.error('Error code:', error.code);
+          throw error;
+        }
+
+        console.log('[usePlaces] Fetched places successfully, count:', data?.length || 0);
+
+        // Extract and map places from the join result
+        const places = data
+          ?.filter(review => review.places)
+          .map((review: any) => {
+            const place = review.places;
+            const validCategories = ['restaurant', 'coffee', 'activity', 'hotel', 'sightseeing', 'shopping', 'nightlife'];
+            const category = validCategories.includes(place.category) ? place.category : 'restaurant';
+
+            return {
+              id: place.id,
+              name: place.display_name || place.name || '',
+              city: place.city || '',
+              country: place.country || '',
+              category,
+              note: place.notes || undefined,
+              organized: place.organized || false,
+              context: place.context as 'trip' | 'home' | undefined,
+              tripName: place.trip_name || undefined,
+              homeYears: place.home_years || undefined,
+              lists: [], // TODO: Fetch list_places associations
+            } as Place;
+          }) || [];
+
+        return places;
+      } catch (err) {
+        console.error('[usePlaces] Exception caught:', err);
+        console.error('[usePlaces] Exception type:', typeof err);
+        console.error('[usePlaces] Exception stringified:', JSON.stringify(err, Object.getOwnPropertyNames(err)));
+        throw err;
+      }
+    },
+    enabled: !!user,
   });
 }
 
 export function useLists() {
+  const { user } = useAuth();
+
   return useQuery<CuratedList[]>({
-    queryKey: [API_BASE, 'lists'],
+    queryKey: ['lists', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+
+      const { data, error } = await supabase
+        .from('lists')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching lists:', error);
+        return [];
+      }
+
+      return data?.map(list => {
+        const validColors = ['amber', 'purple', 'emerald', 'blue', 'pink', 'teal'];
+        const color = validColors.includes(list.color) ? list.color : 'blue';
+
+        return {
+          id: list.id,
+          name: list.name,
+          emoji: list.emoji || '📍',
+          description: list.description || '',
+          color: color as any,
+          userId: list.user_id,
+        } as CuratedList;
+      }) || [];
+    },
+    enabled: !!user,
   });
 }
 
 export function useTrips() {
+  const { user } = useAuth();
+
   return useQuery<Trip[]>({
-    queryKey: [API_BASE, 'trips'],
-    select: (data: any[]) => {
-      // Convert date strings to Date objects
-      return data.map(trip => ({
-        ...trip,
-        startDate: new Date(trip.startDate),
-        endDate: new Date(trip.endDate),
-      }));
+    queryKey: ['trips', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+
+      const { data, error } = await supabase
+        .from('trips')
+        .select('*')
+        .eq('created_by', user.id)
+        .order('start_date', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching trips:', error);
+        return [];
+      }
+
+      return data?.map(trip => {
+        const now = new Date();
+        const endDate = new Date(trip.end_date);
+        const isPast = endDate < now;
+
+        return {
+          id: trip.id,
+          name: trip.name,
+          city: trip.city || '',
+          country: trip.country || '',
+          flag: '', // TODO: Get country flag helper
+          imageUrl: trip.image || '',
+          startDate: new Date(trip.start_date),
+          endDate: endDate,
+          collaborators: [],
+          isPast,
+          tips: trip.tips,
+        } as Trip;
+      }) || [];
     },
+    enabled: !!user,
   });
 }
 
@@ -97,9 +217,33 @@ export function useDeleteTrip() {
 }
 
 export function useUserProfile() {
+  const { user } = useAuth();
+
   return useQuery<UserProfile>({
-    queryKey: [API_BASE, 'auth', 'me'],
-    select: (data: any) => data.user, // Extract user from { user: {...} } response
+    queryKey: ['user', 'profile', user?.id],
+    queryFn: async () => {
+      if (!user) return {} as UserProfile;
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (error || !data) {
+        console.error('Error fetching user profile:', error);
+        return {} as UserProfile;
+      }
+
+      return {
+        id: data.id,
+        email: user.email || '',
+        display_name: data.full_name,
+        avatar_url: data.avatar_url,
+        bio: data.bio,
+      };
+    },
+    enabled: !!user,
   });
 }
 
@@ -135,15 +279,200 @@ export interface FriendsNetwork {
 }
 
 export function useFriendsNetwork() {
+  const { user } = useAuth();
+
   return useQuery<FriendsNetwork>({
-    queryKey: [API_BASE, 'friends', 'network'],
+    queryKey: ['friends', 'network', user?.id],
+    queryFn: async () => {
+      try {
+        console.log('[useFriendsNetwork] Starting query for user:', user?.id);
+
+        if (!user) {
+          console.log('[useFriendsNetwork] No user, returning empty');
+          return {
+            friends: [],
+            cities: [],
+            totalPlaces: 0,
+            totalCities: 0,
+          };
+        }
+
+        console.log('[useFriendsNetwork] Fetching friend connections...');
+        // Get all accepted friend connections
+        const { data: connections, error: connectionsError } = await supabase
+          .from('friend_connections')
+          .select('id, user_id, friend_id, status, created_at')
+          .or(`user_id.eq.${user.id},friend_id.eq.${user.id}`)
+          .eq('status', 'accepted');
+
+        if (connectionsError) {
+          console.error('[useFriendsNetwork] Error fetching connections:', connectionsError);
+          console.error('[useFriendsNetwork] Error details:', JSON.stringify(connectionsError, null, 2));
+          throw connectionsError;
+        }
+
+        if (!connections || connections.length === 0) {
+          console.log('[useFriendsNetwork] No friends found, returning empty');
+          return {
+            friends: [],
+            cities: [],
+            totalPlaces: 0,
+            totalCities: 0,
+          };
+        }
+
+        console.log('[useFriendsNetwork] Found', connections.length, 'friend connections');
+
+        // Get friend IDs
+        const friendIds = connections.map(conn =>
+          conn.user_id === user.id ? conn.friend_id : conn.user_id
+        );
+
+      // Fetch friend profiles
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, full_name, avatar_url')
+        .in('id', friendIds);
+
+      // Get friends' endorsed places
+      const { data: reviewsData } = await supabase
+        .from('reviews')
+        .select('user_id, place_id, places(id, display_name, city, country, category)')
+        .in('user_id', friendIds)
+        .eq('status', 'endorsed');
+
+      // Build friends list with place counts
+      const friendPlacesCount: Record<string, number> = {};
+      reviewsData?.forEach(review => {
+        friendPlacesCount[review.user_id] = (friendPlacesCount[review.user_id] || 0) + 1;
+      });
+
+      const friends = connections.map(connection => {
+        const friendId = connection.user_id === user.id ? connection.friend_id : connection.user_id;
+        const friendProfile = profiles?.find(p => p.id === friendId);
+
+        return {
+          id: connection.id,
+          userId: friendProfile?.id || friendId,
+          name: friendProfile?.full_name || 'Unknown',
+          avatarUrl: friendProfile?.avatar_url || `https://api.dicebear.com/7.x/avataaars/png?seed=${friendId}`,
+          friendsSince: connection.created_at,
+          placeCount: friendPlacesCount[friendId] || 0,
+        };
+      });
+
+      // Organize places by city
+      const citiesMap: Record<string, any> = {};
+      reviewsData?.forEach(review => {
+        const place = (review as any).places;
+        if (!place || !place.city) return;
+
+        const friendId = review.user_id;
+        const friend = friends.find(f => f.userId === friendId);
+        if (!friend) return;
+
+        if (!citiesMap[place.city]) {
+          citiesMap[place.city] = {
+            city: place.city,
+            country: place.country,
+            friends: [],
+            places: [],
+            totalPlaces: 0,
+          };
+        }
+
+        citiesMap[place.city].totalPlaces++;
+        citiesMap[place.city].places.push({
+          id: place.id,
+          name: place.display_name,
+          category: place.category,
+          friendId: friendId,
+          friendName: friend.name,
+        });
+
+        if (!citiesMap[place.city].friends.find((f: any) => f.userId === friendId)) {
+          citiesMap[place.city].friends.push({
+            userId: friendId,
+            name: friend.name,
+            avatarUrl: friend.avatarUrl,
+            placeCount: 0,
+          });
+        }
+      });
+
+      // Calculate place count per friend per city
+      Object.values(citiesMap).forEach((cityData: any) => {
+        cityData.friends.forEach((friend: any) => {
+          friend.placeCount = cityData.places.filter((p: any) => p.friendId === friend.userId).length;
+        });
+      });
+
+        const cities = Object.values(citiesMap).sort((a: any, b: any) => b.totalPlaces - a.totalPlaces);
+
+        console.log('[useFriendsNetwork] Successfully built network data:', {
+          friendsCount: friends.length,
+          citiesCount: cities.length,
+          totalPlaces: reviewsData?.length || 0
+        });
+
+        return {
+          friends,
+          cities,
+          totalPlaces: reviewsData?.length || 0,
+          totalCities: cities.length,
+        };
+      } catch (err) {
+        console.error('[useFriendsNetwork] Exception:', err);
+        console.error('[useFriendsNetwork] Exception details:', JSON.stringify(err, Object.getOwnPropertyNames(err)));
+        throw err;
+      }
+    },
+    enabled: !!user,
+    retry: 1, // Reduce retries for faster debugging
+    retryDelay: 1000,
   });
 }
 
 // Homes hooks
 export function useHomes() {
+  const { user } = useAuth();
+
   return useQuery<Home[]>({
-    queryKey: [API_BASE, 'homes'],
+    queryKey: ['homes', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+
+      const { data, error } = await supabase
+        .from('homes')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('start_date', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching homes:', error);
+        return [];
+      }
+
+      return data?.map(home => ({
+        id: home.id,
+        city: home.city,
+        country: home.country,
+        adminDivision: home.admin_division || undefined,
+        adminDivisionCode: home.admin_division_code || undefined,
+        countryCode: home.country_code || undefined,
+        latitude: home.latitude || undefined,
+        longitude: home.longitude || undefined,
+        startDate: home.start_date,
+        endDate: home.end_date || undefined,
+        status: home.status as 'current' | 'past',
+        userId: home.user_id,
+        createdAt: home.created_at,
+        updatedAt: home.updated_at,
+        tips: home.tips || undefined,
+        favorites: home.favorites || undefined,
+      })) || [];
+    },
+    enabled: !!user,
   });
 }
 
@@ -203,8 +532,90 @@ export function useDeleteHome() {
 
 // Timeline hook
 export function useTimeline() {
+  const { user } = useAuth();
+
   return useQuery<TimelineItem[]>({
-    queryKey: [API_BASE, 'timeline'],
+    queryKey: ['timeline', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+
+      // Get all trips and homes
+      const [tripsData, homesData] = await Promise.all([
+        supabase
+          .from('trips')
+          .select('*')
+          .eq('created_by', user.id)
+          .order('start_date', { ascending: true }),
+        supabase
+          .from('homes')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('start_date', { ascending: false }),
+      ]);
+
+      const trips = tripsData.data || [];
+      const homes = homesData.data || [];
+
+      const timelineItems: TimelineItem[] = [];
+
+      // Process trips
+      for (const trip of trips) {
+        const now = new Date();
+        const endDate = new Date(trip.end_date);
+        const isPast = endDate < now;
+
+        timelineItems.push({
+          type: 'trip',
+          id: trip.id,
+          name: trip.name,
+          location: `${trip.city}, ${trip.country}`,
+          city: trip.city || '',
+          country: trip.country || '',
+          startDate: trip.start_date,
+          endDate: trip.end_date,
+          isCurrent: false,
+          isPast,
+          placeCounts: {
+            visited: 0,
+            endorsed: 0,
+            toVisit: 0,
+          },
+          completionPercentage: 0,
+        });
+      }
+
+      // Process homes
+      for (const home of homes) {
+        const isCurrent = home.status === 'current';
+
+        timelineItems.push({
+          type: 'home',
+          id: home.id,
+          name: `${home.city}, ${home.country}`,
+          location: `${home.city}, ${home.country}`,
+          city: home.city,
+          country: home.country,
+          startDate: home.start_date,
+          endDate: home.end_date || undefined,
+          isCurrent,
+          isPast: home.status === 'past',
+          placeCounts: {
+            localFavorites: 0,
+          },
+          completionPercentage: 0,
+        });
+      }
+
+      // Sort by start date (most recent first)
+      timelineItems.sort((a, b) => {
+        const dateA = new Date(a.startDate);
+        const dateB = new Date(b.startDate);
+        return dateB.getTime() - dateA.getTime();
+      });
+
+      return timelineItems;
+    },
+    enabled: !!user,
   });
 }
 
@@ -349,9 +760,60 @@ export function useDeleteItineraryItem() {
 
 // City context hook
 export function useCityContext(cityName: string) {
+  const { user } = useAuth();
+
   return useQuery<{ trips: Trip[]; homes: Home[] }>({
-    queryKey: [API_BASE, 'cities', cityName, 'context'],
-    enabled: !!cityName,
+    queryKey: ['cities', cityName, 'context', user?.id],
+    queryFn: async () => {
+      if (!user || !cityName) return { trips: [], homes: [] };
+
+      // Get trips for this city
+      const { data: tripsData } = await supabase
+        .from('trips')
+        .select('*')
+        .eq('created_by', user.id)
+        .eq('city', cityName);
+
+      // Get homes for this city
+      const { data: homesData } = await supabase
+        .from('homes')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('city', cityName);
+
+      const trips = tripsData?.map(trip => {
+        const now = new Date();
+        const endDate = new Date(trip.end_date);
+        const isPast = endDate < now;
+
+        return {
+          id: trip.id,
+          name: trip.name,
+          city: trip.city || '',
+          country: trip.country || '',
+          flag: '',
+          imageUrl: trip.image || '',
+          startDate: new Date(trip.start_date),
+          endDate: endDate,
+          collaborators: [],
+          isPast,
+          tips: trip.tips,
+        } as Trip;
+      }) || [];
+
+      const homes = homesData?.map(home => ({
+        id: home.id,
+        city: home.city,
+        country: home.country,
+        startDate: home.start_date,
+        endDate: home.end_date || undefined,
+        status: home.status as 'current' | 'past',
+        userId: home.user_id,
+      })) || [];
+
+      return { trips, homes };
+    },
+    enabled: !!cityName && !!user,
   });
 }
 
@@ -374,7 +836,22 @@ export interface PlaceReview {
 
 export function usePlaceReviews(placeId: string) {
   return useQuery<PlaceReview[]>({
-    queryKey: [API_BASE, 'places', placeId, 'reviews'],
+    queryKey: ['places', placeId, 'reviews'],
+    queryFn: async () => {
+      if (!placeId) return [];
+
+      const { data, error } = await supabase
+        .from('reviews')
+        .select('*')
+        .eq('place_id', placeId);
+
+      if (error) {
+        console.error('Error fetching place reviews:', error);
+        return [];
+      }
+
+      return data || [];
+    },
     enabled: !!placeId,
   });
 }
@@ -452,8 +929,59 @@ export interface PlaceDetails {
 }
 
 export function usePlaceDetails(placeId: string) {
+  const { user } = useAuth();
+
   return useQuery<PlaceDetails>({
-    queryKey: [API_BASE, 'places', placeId, 'details'],
+    queryKey: ['places', placeId, 'details', user?.id],
+    queryFn: async () => {
+      if (!placeId) return {} as PlaceDetails;
+
+      // Get place
+      const { data: place, error: placeError } = await supabase
+        .from('places')
+        .select('*')
+        .eq('id', placeId)
+        .single();
+
+      if (placeError || !place) {
+        console.error('Error fetching place:', placeError);
+        return {} as PlaceDetails;
+      }
+
+      // Get friend activity if user is logged in
+      let friendActivity: any[] = [];
+      let userReview: any = undefined;
+
+      if (user) {
+        const { data: reviews } = await supabase
+          .from('reviews')
+          .select('*, profiles(id, full_name, avatar_url)')
+          .eq('place_id', placeId);
+
+        if (reviews) {
+          // Separate user's review from friend reviews
+          friendActivity = reviews
+            .filter(r => r.user_id !== user.id)
+            .map((r: any) => ({
+              friend_id: r.user_id,
+              friend_name: r.profiles?.full_name || 'Unknown',
+              friend_avatar_url: r.profiles?.avatar_url,
+              status: r.status,
+              review: r.review,
+              created_at: r.created_at,
+            }));
+
+          userReview = reviews.find(r => r.user_id === user.id);
+        }
+      }
+
+      return {
+        place,
+        friendActivity,
+        userReview,
+        recommendationCount: friendActivity.filter(f => f.status === 'endorsed').length,
+      };
+    },
     enabled: !!placeId,
   });
 }

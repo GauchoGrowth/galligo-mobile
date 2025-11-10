@@ -23,12 +23,21 @@ const { colors, spacing } = theme;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export function ExploreScreen() {
+  console.log('[ExploreScreen] Component mounting...');
+
   const navigation = useNavigation<NavigationProp>();
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
 
   // Fetch friends network data
   const { data: networkData, isLoading, error, refetch } = useFriendsNetwork();
+
+  console.log('[ExploreScreen] Hook state:', {
+    hasData: !!networkData,
+    isLoading,
+    hasError: !!error,
+    errorMessage: error?.message
+  });
 
   // Transform data for display
   const citiesData = useMemo(() => {
@@ -69,6 +78,7 @@ export function ExploreScreen() {
 
   // Loading state
   if (isLoading) {
+    console.log('[ExploreScreen] Rendering loading state');
     return <FullPageSpinner label="Loading your network..." />;
   }
 
