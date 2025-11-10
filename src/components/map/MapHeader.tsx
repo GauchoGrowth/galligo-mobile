@@ -1,13 +1,14 @@
 /**
  * MapHeader Component - GalliGo React Native
  *
- * Interactive SVG world map showing visited countries
- * Matches web app's stylized map design
+ * Interactive world map showing visited countries
+ * Now powered by react-native-skia for high-performance rendering
  */
 
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { InteractiveWorldMap } from './InteractiveWorldMap';
+import React, { useCallback } from 'react';
+import { View, StyleSheet, Dimensions } from 'react-native';
+import { WorldMap } from '@/components/maps/WorldMap';
+import type { Country } from '@/types/map.types';
 import { theme } from '@/theme';
 
 const { colors } = theme;
@@ -40,13 +41,26 @@ export function MapHeader({
   onCountryPress,
   height = 200,
 }: MapHeaderProps) {
+  const screenWidth = Dimensions.get('window').width;
+
+  // Handle country selection
+  const handleCountrySelect = useCallback(
+    (country: Country) => {
+      const countryCode = country.properties.iso_a2?.toLowerCase();
+      if (countryCode && onCountryPress) {
+        onCountryPress(countryCode);
+      }
+    },
+    [onCountryPress]
+  );
+
   return (
     <View style={styles.container}>
-      <InteractiveWorldMap
-        visitedCountries={visitedCountries}
-        selectedCountry={selectedCountry}
-        onCountryPress={onCountryPress}
+      <WorldMap
+        width={screenWidth}
         height={height}
+        visitedCountries={visitedCountries}
+        onCountrySelect={handleCountrySelect}
       />
     </View>
   );
