@@ -29,7 +29,13 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow GalliGo to access your location to show your position on maps."
+        }
+      ]
     ]
   }
 }

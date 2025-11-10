@@ -118,6 +118,14 @@ export const Body: React.FC<Omit<TextProps, 'variant'>> = (props) => (
   <Text variant="body" {...props} />
 );
 
+export const BodyLarge: React.FC<Omit<TextProps, 'variant'>> = (props) => (
+  <Text variant="bodyLarge" {...props} />
+);
+
+export const BodySmall: React.FC<Omit<TextProps, 'variant'>> = (props) => (
+  <Text variant="bodySmall" {...props} />
+);
+
 export const Caption: React.FC<Omit<TextProps, 'variant'>> = (props) => (
   <Text variant="caption" {...props} />
 );
