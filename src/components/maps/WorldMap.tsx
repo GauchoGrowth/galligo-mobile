@@ -47,40 +47,25 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(
     const [selectedCountryId, setSelectedCountryId] = useState<string | null>(null);
     const [currentZoom, setCurrentZoom] = useState(1);
     const [detailLevel, setDetailLevel] = useState<MapDetailLevel>('low');
-    const [dataVersion, setDataVersion] = useState(0);
-    const [isZooming, setIsZooming] = useState(false);
 
     // Ref for MapControls imperative methods
     const mapControlsRef = useRef<MapControlsHandle>(null);
 
-    // Clear map data cache on mount to ensure fresh data with ISO codes
-    useEffect(() => {
-      const { clearMapDataCache } = require('@/lib/maps/mapData');
-      clearMapDataCache();
-      console.log('[WorldMap] Cleared map data cache, forcing reload');
-      setDataVersion(v => v + 1); // Force useMemo to re-run
-    }, []);
-
   // Load map data based on detail level (memoized to prevent re-loading)
   const mapData = useMemo(() => {
     try {
-      console.log('[WorldMap] Loading map data at detail level:', detailLevel, 'version:', dataVersion);
+      console.log('[WorldMap] Loading map data at detail level:', detailLevel);
       const data = loadMapData(detailLevel);
       console.log('[WorldMap] Map data loaded:', {
         countriesCount: data.features.length,
         detailLevel,
       });
-      // Log sample country to verify ISO codes
-      const sampleUSA = data.features.find(c => c.properties.name === 'United States of America');
-      if (sampleUSA) {
-        console.log('[WorldMap] Sample USA data:', { name: sampleUSA.properties.name, iso_a2: sampleUSA.properties.iso_a2 });
-      }
       return data;
     } catch (error) {
       console.error('[WorldMap] Failed to load map data:', error);
       return null;
     }
-  }, [detailLevel, dataVersion]);
+  }, [detailLevel]);
 
   // Create D3 projection fitted to canvas size (memoized)
   const projection = useMemo(() => {

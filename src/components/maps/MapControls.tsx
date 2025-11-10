@@ -35,6 +35,17 @@ export interface MapControlsHandle {
   resetZoom: () => void;
   /** Get current zoom level */
   getCurrentZoom: () => number;
+  /** Get current transform values (for Skia Canvas) */
+  getTransform: () => { scale: number; translateX: number; translateY: number };
+}
+
+/**
+ * Props for accessing transform values from parent
+ */
+export interface MapTransformProps {
+  scale: any; // SharedValue<number>
+  translateX: any; // SharedValue<number>
+  translateY: any; // SharedValue<number>
 }
 
 interface MapControlsProps {
@@ -181,9 +192,22 @@ export const MapControls = forwardRef<MapControlsHandle, MapControlsProps>(
         getCurrentZoom: () => {
           return scale.value;
         },
+        getTransform: () => {
+          return {
+            scale: scale.value,
+            translateX: translateX.value,
+            translateY: translateY.value,
+          };
+        },
       }),
       [width, height, minZoom, maxZoom, onZoomChange]
     );
+
+    // Expose shared values for direct Skia transform application
+    (ref as any).current = {
+      ...(ref as any).current,
+      sharedValues: { scale, translateX, translateY },
+    };
 
     /**
      * Calculates pan constraints based on current zoom level
