@@ -91,8 +91,8 @@ export function SentRecCard({ recommendation, onPress }: SentRecCardProps) {
             hasLoved && styles.lovedBadge,
             hasLiked && styles.likedBadge,
           ]}>
-            {hasSaved && <Ionicons name="bookmark" size={14} color={colors.accent.purple} />}
-            {hasLoved && <Ionicons name="heart" size={14} color={colors.success[500]} />}
+            {hasSaved && <Ionicons name="bookmark" size={14} color={colors.secondary.purple} />}
+            {hasLoved && <Ionicons name="heart" size={14} color={colors.success} />}
             {hasLiked && <Ionicons name="checkmark" size={14} color={colors.primary.blue} />}
             {hasBeenThere && <Ionicons name="location" size={14} color={colors.neutral[600]} />}
           </View>
@@ -145,7 +145,7 @@ export function SentRecCard({ recommendation, onPress }: SentRecCardProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.neutral.white,
+    backgroundColor: colors.primary.white,
     borderRadius: borderRadius.lg,
     marginBottom: spacing[3],
     borderWidth: 1,
@@ -176,10 +176,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.neutral[100],
   },
   savedBadge: {
-    backgroundColor: colors.accent.purple + '15',
+    backgroundColor: colors.secondary.purple + '15',
   },
   lovedBadge: {
-    backgroundColor: colors.success[50],
+    backgroundColor: colors.successLight,
   },
   likedBadge: {
     backgroundColor: colors.primary.blue + '15',

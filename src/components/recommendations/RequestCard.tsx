@@ -76,7 +76,7 @@ export function RequestCard({ request, onSendRec, onPress }: RequestCardProps) {
           </View>
           {request.status === 'resolved' && (
             <View style={styles.resolvedBadge}>
-              <Ionicons name="checkmark-circle" size={20} color={colors.success[500]} />
+              <Ionicons name="checkmark-circle" size={20} color={colors.success} />
             </View>
           )}
         </View>
@@ -112,7 +112,7 @@ export function RequestCard({ request, onSendRec, onPress }: RequestCardProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.neutral.white,
+    backgroundColor: colors.primary.white,
     borderRadius: borderRadius.lg,
     marginBottom: spacing[3],
     ...shadows.sm,

@@ -17,7 +17,7 @@ import {
   Platform,
   Alert,
   ActivityIndicator,
-} from 'react';
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Button } from '@/components/ui/Button';
@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: spacing.pagePaddingMobile,
     paddingVertical: spacing[4],
-    backgroundColor: colors.neutral.white,
+    backgroundColor: colors.primary.white,
     borderBottomWidth: 1,
     borderBottomColor: colors.neutral[200],
   },
@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
     gap: spacing[2],
     paddingHorizontal: spacing.pagePaddingMobile,
     paddingVertical: spacing[3],
-    backgroundColor: colors.neutral.white,
+    backgroundColor: colors.primary.white,
     borderBottomWidth: 1,
     borderBottomColor: colors.neutral[200],
   },
@@ -412,7 +412,7 @@ const styles = StyleSheet.create({
     gap: spacing[3],
     paddingHorizontal: spacing.pagePaddingMobile,
     paddingVertical: spacing[3],
-    backgroundColor: colors.neutral.white,
+    backgroundColor: colors.primary.white,
     borderBottomWidth: 1,
     borderBottomColor: colors.neutral[100],
   },
@@ -434,7 +434,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing[3],
-    backgroundColor: colors.neutral.white,
+    backgroundColor: colors.primary.white,
     borderWidth: 1,
     borderColor: colors.neutral[300],
     borderRadius: borderRadius.md,
@@ -447,7 +447,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[2],
-    backgroundColor: colors.neutral.white,
+    backgroundColor: colors.primary.white,
     borderWidth: 1,
     borderColor: colors.neutral[300],
     borderRadius: borderRadius.md,
@@ -457,7 +457,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   textInput: {
-    backgroundColor: colors.neutral.white,
+    backgroundColor: colors.primary.white,
     borderWidth: 1,
     borderColor: colors.neutral[300],
     borderRadius: borderRadius.md,
@@ -471,7 +471,7 @@ const styles = StyleSheet.create({
     gap: spacing[3],
     paddingHorizontal: spacing.pagePaddingMobile,
     paddingVertical: spacing[4],
-    backgroundColor: colors.neutral.white,
+    backgroundColor: colors.primary.white,
     borderTopWidth: 1,
     borderTopColor: colors.neutral[200],
   },

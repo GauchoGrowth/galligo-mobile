@@ -152,7 +152,7 @@ export function WishlistCard({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.neutral.white,
+    backgroundColor: colors.primary.white,
     borderRadius: borderRadius.lg,
     marginBottom: spacing[3],
     borderWidth: 1,
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
   },
   avatarWrapper: {
     borderWidth: 2,
-    borderColor: colors.neutral.white,
+    borderColor: colors.primary.white,
     borderRadius: 16,
   },
   avatar: {
@@ -217,10 +217,10 @@ const styles = StyleSheet.create({
   noteContainer: {
     marginTop: spacing[2],
     padding: spacing[3],
-    backgroundColor: colors.accent.purple + '08',
+    backgroundColor: colors.secondary.purple + '08',
     borderRadius: borderRadius.md,
     borderLeftWidth: 3,
-    borderLeftColor: colors.accent.purple,
+    borderLeftColor: colors.secondary.purple,
   },
   note: {
     fontStyle: 'italic',

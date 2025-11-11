@@ -94,7 +94,7 @@ export function ReceivedRecCard({
           <Ionicons
             name={isInWishlist ? 'bookmark' : 'bookmark-outline'}
             size={24}
-            color={isInWishlist ? colors.accent.purple : colors.neutral[600]}
+            color={isInWishlist ? colors.secondary.purple : colors.neutral[600]}
           />
         </Pressable>
       </View>
@@ -142,7 +142,7 @@ export function ReceivedRecCard({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.neutral.white,
+    backgroundColor: colors.primary.white,
     borderRadius: borderRadius.lg,
     marginBottom: spacing[3],
     borderWidth: 1,

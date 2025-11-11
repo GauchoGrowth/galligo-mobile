@@ -255,7 +255,7 @@ export function RecommendationsScreen() {
             }
           }}
         >
-          <Ionicons name="add" size={28} color={colors.neutral.white} />
+          <Ionicons name="add" size={28} color={colors.primary.white} />
         </Pressable>
       )}
 
@@ -288,12 +288,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.pagePaddingMobile,
     paddingTop: spacing[2],
     paddingBottom: spacing[3],
-    backgroundColor: colors.neutral.white,
+    backgroundColor: colors.primary.white,
   },
   segmentedControlContainer: {
     paddingHorizontal: spacing.pagePaddingMobile,
     paddingVertical: spacing[3],
-    backgroundColor: colors.neutral.white,
+    backgroundColor: colors.primary.white,
     borderBottomWidth: 1,
     borderBottomColor: colors.neutral[200],
   },
