@@ -138,20 +138,51 @@ import { Button } from '../../../components/ui/Button'
 Use these subagents for specific tasks:
 
 - **@mobile-ui-implementer**: Building React Native components, screens, and UI
-- **@mobile-design-reviewer**: Reviewing mobile UI quality, iOS compliance, accessibility
-- **@animation-specialist**: Implementing animations, transitions, and gestures with reanimated
+- **@mobile-design-reviewer**: Reviewing mobile UI quality, iOS HIG compliance, accessibility, safe areas, touch targets
+- **@animation-specialist**: Diagnosing and refining animations with Reanimated v4. Focuses on iOS-native timing, spring physics, and gesture-driven interactions. Automatically references react-native-animations skill for deep technical patterns.
+
+**Workflow**: @mobile-ui-implementer builds → @mobile-design-reviewer validates → @animation-specialist polishes motion
 
 ## Key Skills
 
 Reference these skills for domain-specific guidance:
 
 - **@react-native-patterns**: RN component patterns and best practices
+- **@react-native-animations**: Comprehensive iOS-native animation guide with Reanimated v4. Covers timing standards, spring physics, gesture handlers, and production patterns. 12k+ words of technical reference.
 - **@expo-workflows**: Expo CLI, development builds, native dependencies
 - **@ios-design-guidelines**: iOS Human Interface Guidelines compliance
 - **@react-navigation-patterns**: Navigation setup and patterns
-- **@reanimated-library**: Animation implementation with reanimated v4
 - **@mobile-accessibility**: VoiceOver, Dynamic Type, WCAG compliance
 - **@nativewind-styling**: Tailwind-like styling for React Native
+
+**Note**: Skills load progressively on-demand, saving tokens when not needed. Agents automatically trigger relevant skills.
+
+## Brand & Design Documentation
+
+Core design references for maintaining brand consistency:
+
+### Design System
+- **docs/design-system-mobile.md**: React Native design tokens, iOS-specific standards, component patterns
+  - Color palette with iOS semantic colors
+  - Typography scale (iOS Dynamic Type)
+  - Spacing scale (8pt grid)
+  - Touch targets (44x44pt minimum)
+  - Safe area handling
+  - Component patterns and examples
+
+### Brand Guidelines
+- **docs/brand-guidelines.md**: Comprehensive brand identity guide
+  - Voice & tone (enthusiastic curator + organized planner)
+  - Visual identity (colors, typography, iconography)
+  - Photography style (analog film aesthetic, golden hour)
+  - Motion standards (React Native Reanimated v4, iOS timing)
+  - Accessibility requirements
+  - Do's and don'ts
+
+**When to reference**:
+- Building new components → design-system-mobile.md
+- Writing copy or choosing imagery → brand-guidelines.md
+- Implementing animations → brand-guidelines.md (motion section) + react-native-animations skill
 
 ## iOS-Specific Requirements
 
@@ -202,15 +233,59 @@ Currently focused on manual testing on physical iPhone 16 Pro device. Automated 
 
 - [Mobile Architecture](docs/mobile-architecture.md) - Detailed architecture overview
 - [Design System](docs/design-system-mobile.md) - Mobile design tokens and patterns
+- [Brand Guidelines](docs/brand-guidelines.md) - Complete brand identity guide
+- [Expo MCP Usage](docs/expo-mcp-usage.md) - iOS Simulator interaction guide
+
+## Animation Development Workflow
+
+GalliGo follows iOS-native animation standards with Reanimated v4:
+
+### When to Use Animation Resources
+
+**For Implementation** (building from scratch):
+1. Read `react-native-animations` skill for patterns and standards
+2. Reference brand-guidelines.md (motion section) for timing/style
+3. Use `@animation-specialist` if motion feels off after initial implementation
+
+**For Refinement** (fixing existing animations):
+1. Invoke `@animation-specialist` agent directly
+2. Agent automatically consults `react-native-animations` skill
+3. Agent diagnoses issues (spring physics, timing, gestures)
+4. Agent provides refined code with iOS-native feel
+
+### iOS Animation Standards (Quick Reference)
+- **Navigation**: 350ms with spring (damping: 18, stiffness: 140)
+- **Modals**: 440ms present, 320ms dismiss
+- **Buttons**: 200-300ms spring (damping: 12, stiffness: 200)
+- **Target**: 60 FPS on iPhone 11+
+
+**Critical**: Always test animations on physical iOS device, not simulator. Simulator performance is misleading.
 
 ## Getting Help
 
-When in doubt:
-1. Reference the relevant skill (e.g., @react-native-patterns)
-2. Check iOS Human Interface Guidelines (@ios-design-guidelines)
-3. Consult React Native and Expo documentation
-4. Ask the user for clarification on product requirements
+When in doubt, follow this decision tree:
+
+### UI Implementation
+1. Check design-system-mobile.md for tokens and patterns
+2. Reference relevant skill (@react-native-patterns, @ios-design-guidelines)
+3. Invoke @mobile-ui-implementer if building from scratch
+4. Use @mobile-design-reviewer to validate quality
+
+### Animation Issues
+1. Check brand-guidelines.md (motion section) for timing standards
+2. Invoke @animation-specialist (it auto-loads react-native-animations skill)
+3. Test on physical device (simulator is unreliable)
+
+### Brand Consistency
+1. Check brand-guidelines.md for voice, visual identity, photography style
+2. Reference design-system-mobile.md for technical implementation
+3. Ask user for clarification on product requirements
+
+### Backend/Data
+1. Reference Supabase client setup in src/lib/supabase.ts
+2. Use TanStack Query patterns for data fetching
+3. Check mobile-architecture.md for state management approach
 
 ---
 
-**Last Updated**: 2025-11-10
+**Last Updated**: 2025-01-11
