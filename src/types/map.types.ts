@@ -56,6 +56,18 @@ export interface CountriesFeatureCollection {
 // ============================================================================
 
 /**
+ * Location marker for home/trip display
+ */
+export interface LocationMarker {
+  city: string;
+  countryCode: string;
+  coords?: {
+    lat: number;
+    lng: number;
+  };
+}
+
+/**
  * Props for the main WorldMap component
  */
 export interface WorldMapProps {
@@ -75,6 +87,12 @@ export interface WorldMapProps {
   showPaths?: boolean;
   /** Initial zoom level (1 = full world view) */
   initialZoom?: number;
+  /** Home location markers (🏠) */
+  homeMarkers?: LocationMarker[];
+  /** Trip location markers (🧳) */
+  tripMarkers?: LocationMarker[];
+  /** Only show markers when zoomed to this country code */
+  showMarkersForCountry?: string | null;
 }
 
 /**

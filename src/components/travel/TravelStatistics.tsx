@@ -7,6 +7,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { BodySmall, H2 } from '@/components/ui';
+import { AnimatedStatsCounter } from './AnimatedStatsCounter';
 import { theme } from '@/theme';
 
 const { colors, spacing, borderRadius } = theme;
@@ -35,9 +36,11 @@ interface StatCardProps {
 function StatCard({ value, label }: StatCardProps) {
   return (
     <View style={styles.card}>
-      <H2 weight="bold" align="center">
-        {value}
-      </H2>
+      <AnimatedStatsCounter
+        value={value}
+        duration={300}
+        style={styles.statNumber}
+      />
       <BodySmall color={colors.neutral[600]} align="center" style={styles.label}>
         {label}
       </BodySmall>
@@ -61,6 +64,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: colors.neutral[200],
+  },
+  statNumber: {
+    fontSize: theme.typography.fontSize.h2,
+    fontWeight: theme.typography.fontWeight.bold,
+    lineHeight: 40,
+    color: colors.neutral[900],
+    textAlign: 'center',
   },
   label: {
     marginTop: spacing[1],

@@ -5,16 +5,17 @@
  * Removes complex gesture handling to fix zoom issues.
  */
 
-import React, { useMemo, useState, useCallback, useImperativeHandle, forwardRef } from 'react';
+import React, { useMemo, useState, useCallback, useImperativeHandle, forwardRef, useEffect } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
-import { Canvas, Group, Rect, processTransform2d } from '@shopify/react-native-skia';
-import { useSharedValue, useDerivedValue, withSpring } from 'react-native-reanimated';
+import { Canvas, Group, Rect, Circle, processTransform2d } from '@shopify/react-native-skia';
+import { useSharedValue, useDerivedValue, withSpring, withTiming, withDelay, Easing } from 'react-native-reanimated';
 import { geoContains } from 'd3-geo';
-import type { WorldMapProps, Country, MapDetailLevel } from '@/types/map.types';
+import type { WorldMapProps, Country, MapDetailLevel, LocationMarker } from '@/types/map.types';
 import { DEFAULT_MAP_COLORS } from '@/types/map.types';
 import { loadMapData, findCountryByCode } from '@/lib/maps/mapData';
 import { createFittedProjection, createPathGenerator, generateCountryPath } from '@/lib/maps/projections';
 import { CountryPath } from './CountryPath';
+import { theme } from '@/theme';
 
 export interface WorldMapHandle {
   zoomToCountry: (countryCode: string) => void;
@@ -22,13 +23,30 @@ export interface WorldMapHandle {
 }
 
 export const WorldMapSimple = forwardRef<WorldMapHandle, WorldMapProps>(
-  ({ width, height, visitedCountries = [] }, ref) => {
-    console.log('[WorldMapSimple] Rendering:', { width, height, visited: visitedCountries });
+  ({
+    width,
+    height,
+    visitedCountries = [],
+    homeMarkers = [],
+    tripMarkers = [],
+    showMarkersForCountry = null,
+  }, ref) => {
+    console.log('[WorldMapSimple] Rendering:', {
+      width,
+      height,
+      visited: visitedCountries,
+      homes: homeMarkers.length,
+      trips: tripMarkers.length,
+      showMarkers: showMarkersForCountry,
+    });
 
     // Simple zoom state using shared values for Skia
     const scale = useSharedValue(1);
     const translateX = useSharedValue(0);
     const translateY = useSharedValue(0);
+
+    // Marker animation state
+    const markersVisible = useSharedValue(0);
 
     // Load map data
     const mapData = useMemo(() => {
@@ -63,6 +81,63 @@ export const WorldMapSimple = forwardRef<WorldMapHandle, WorldMapProps>(
     const visitedSet = useMemo(() => {
       return new Set(visitedCountries.map(code => code.toUpperCase()));
     }, [visitedCountries]);
+
+    // Trigger marker animations when country is selected
+    useEffect(() => {
+      if (showMarkersForCountry) {
+        // Show markers with drop animation
+        markersVisible.value = withDelay(
+          300, // Wait for map zoom to complete
+          withSpring(1, { damping: 15, stiffness: 100 })
+        );
+      } else {
+        // Hide markers immediately
+        markersVisible.value = 0;
+      }
+    }, [showMarkersForCountry]);
+
+    // Project markers to screen coordinates
+    const projectedHomeMarkers = useMemo(() => {
+      if (!projection || !showMarkersForCountry) return [];
+
+      return homeMarkers
+        .filter(marker => marker.countryCode.toLowerCase() === showMarkersForCountry.toLowerCase())
+        .map((marker, index) => {
+          if (!marker.coords) return null;
+
+          const projected = projection([marker.coords.lng, marker.coords.lat]);
+          if (!projected) return null;
+
+          return {
+            ...marker,
+            x: projected[0],
+            y: projected[1],
+            index,
+          };
+        })
+        .filter(Boolean) as Array<LocationMarker & { x: number; y: number; index: number }>;
+    }, [projection, homeMarkers, showMarkersForCountry]);
+
+    const projectedTripMarkers = useMemo(() => {
+      if (!projection || !showMarkersForCountry) return [];
+
+      return tripMarkers
+        .filter(marker => marker.countryCode.toLowerCase() === showMarkersForCountry.toLowerCase())
+        .map((marker, index) => {
+          if (!marker.coords) return null;
+
+          const projected = projection([marker.coords.lng, marker.coords.lat]);
+          if (!projected) return null;
+
+          return {
+            ...marker,
+            x: projected[0],
+            y: projected[1],
+            index,
+          };
+        })
+        .filter(Boolean) as Array<LocationMarker & { x: number; y: number; index: number }>;
+    }, [projection, tripMarkers, showMarkersForCountry]);
 
     // Skia matrix transform
     const matrix = useDerivedValue(() => {
@@ -122,6 +197,7 @@ export const WorldMapSimple = forwardRef<WorldMapHandle, WorldMapProps>(
           <Group matrix={matrix}>
             <Rect x={0} y={0} width={width} height={height} color={DEFAULT_MAP_COLORS.ocean} />
 
+            {/* Country paths */}
             {countryPaths.map(({ country, pathData }, index) => {
               const countryCode = country.properties.iso_a2?.toUpperCase();
               const isVisited = countryCode ? visitedSet.has(countryCode) : false;
@@ -136,12 +212,69 @@ export const WorldMapSimple = forwardRef<WorldMapHandle, WorldMapProps>(
                 />
               );
             })}
+
+            {/* Home markers (🏠) */}
+            {projectedHomeMarkers.map((marker) => {
+              // Staggered drop animation based on index
+              const delay = marker.index * 80; // 80ms between each marker
+              const animatedOpacity = useDerivedValue(() => {
+                'worklet';
+                return markersVisible.value;
+              });
+
+              const animatedY = useDerivedValue(() => {
+                'worklet';
+                // Start 20px above, animate down to position
+                const dropDistance = 20;
+                return marker.y - (dropDistance * (1 - markersVisible.value));
+              });
+
+              return (
+                <Circle
+                  key={`home-${marker.city}-${marker.index}`}
+                  cx={marker.x}
+                  cy={animatedY}
+                  r={8}
+                  color={theme.colors.markers.loved}
+                  opacity={animatedOpacity}
+                />
+              );
+            })}
+
+            {/* Trip markers (🧳) */}
+            {projectedTripMarkers.map((marker) => {
+              // Staggered drop animation based on index
+              const delay = marker.index * 80; // 80ms between each marker
+              const animatedOpacity = useDerivedValue(() => {
+                'worklet';
+                return markersVisible.value;
+              });
+
+              const animatedY = useDerivedValue(() => {
+                'worklet';
+                // Start 20px above, animate down to position
+                const dropDistance = 20;
+                return marker.y - (dropDistance * (1 - markersVisible.value));
+              });
+
+              return (
+                <Circle
+                  key={`trip-${marker.city}-${marker.index}`}
+                  cx={marker.x}
+                  cy={animatedY}
+                  r={7}
+                  color={theme.colors.markers.wanttogo}
+                  opacity={animatedOpacity}
+                />
+              );
+            })}
           </Group>
         </Canvas>
 
         <View style={styles.debugInfo}>
           <Text style={styles.debugText}>
             Countries: {countryPaths.length} | Visited: {visitedCountries.length}
+            {showMarkersForCountry && ` | Markers: 🏠${projectedHomeMarkers.length} 🧳${projectedTripMarkers.length}`}
           </Text>
         </View>
       </View>
