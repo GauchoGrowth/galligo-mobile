@@ -14,10 +14,8 @@ import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useSharedValue, withTiming, runOnJS, cancelAnimation } from 'react-native-reanimated';
 import { FullPageSpinner } from '@/components/ui';
 import { WorldView } from '@/components/travel/WorldView';
-import { CountryDetailView } from '@/components/travel/CountryDetailView';
 import type { CityData, FriendInCity } from '@/components/travel/CitiesView';
 import type { TravelLogTab } from '@/components/travel/TravelLogTabs';
 import { usePlaces, useTrips, useHomes, useUserProfile } from '@/lib/api-hooks';
@@ -30,15 +28,11 @@ import {
   getTripLocationsForCountry,
 } from '@/lib/travel-data-utils';
 import { theme } from '@/theme';
-import { ANIMATION_DURATIONS } from '@/lib/animations/constants';
 import type { RootStackParamList } from '@/navigation/RootNavigator';
 
 const { colors } = theme;
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
-
-// View state machine: world → country-transition → country-detail
-type ViewState = 'world' | 'country-transition' | 'country-detail';
 
 export function TravelLogScreen() {
   const navigation = useNavigation<NavigationProp>();
@@ -46,12 +40,6 @@ export function TravelLogScreen() {
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<TravelLogTab>('footprint');
-
-  // View state for world ↔ country transitions
-  const [viewState, setViewState] = useState<ViewState>('world');
-
-  // Shared value for transition progress (0 = world, 1 = country)
-  const transitionProgress = useSharedValue(0);
 
   // Fetch data from API
   const { data: places = [], isLoading: placesLoading, refetch: refetchPlaces } = usePlaces();
@@ -184,66 +172,17 @@ export function TravelLogScreen() {
     setRefreshing(false);
   };
 
-  // Handle country selection with transition
+  // Handle country selection - simplified (no page navigation)
   const handleCountryPress = useCallback((countryCode: string) => {
-    // Toggle selection in world view
-    if (viewState === 'world') {
-      if (selectedCountry === countryCode) {
-        // Deselect country
-        setSelectedCountry(null);
-      } else {
-        // Start transition to country detail
-        console.log('[TravelLogScreen] Starting transition to:', countryCode);
-        setSelectedCountry(countryCode);
-        setViewState('country-transition');
-
-        // Cancel any ongoing animation
-        if (transitionProgress.value !== 0 && transitionProgress.value !== 1) {
-          cancelAnimation(transitionProgress);
-        }
-
-        // Animate transition progress: 0 → 1
-        transitionProgress.value = withTiming(
-          1,
-          {
-            duration: 600, // Total transition time (map zoom + hero entrance)
-          },
-          (finished) => {
-            'worklet';
-            if (finished) {
-              runOnJS(setViewState)('country-detail');
-            }
-          }
-        );
-      }
+    if (selectedCountry === countryCode || !countryCode) {
+      // Deselect country (empty string or same country clicked)
+      setSelectedCountry(null);
+    } else {
+      // Select country (globe will zoom automatically via AnimatedMapHeader)
+      console.log('[TravelLogScreen] Country selected:', countryCode);
+      setSelectedCountry(countryCode);
     }
-  }, [viewState, selectedCountry, transitionProgress]);
-
-  // Handle back to world view
-  const handleBackToWorld = useCallback(() => {
-    console.log('[TravelLogScreen] Returning to world view');
-    setViewState('country-transition');
-
-    // Cancel any ongoing animation
-    if (transitionProgress.value !== 0 && transitionProgress.value !== 1) {
-      cancelAnimation(transitionProgress);
-    }
-
-    // Reverse transition: 1 → 0
-    transitionProgress.value = withTiming(
-      0,
-      {
-        duration: ANIMATION_DURATIONS.RETURN_TO_WORLD,
-      },
-      (finished) => {
-        'worklet';
-        if (finished) {
-          runOnJS(setViewState)('world');
-          runOnJS(setSelectedCountry)(null);
-        }
-      }
-    );
-  }, [transitionProgress]);
+  }, [selectedCountry]);
 
   // Get country name from selected country code
   const selectedCountryName = useMemo(() => {
@@ -261,54 +200,31 @@ export function TravelLogScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* World View (visible when viewState === 'world') */}
-      {viewState === 'world' && (
-        <WorldView
-          visitedCountries={visitedCountryCodes}
-          citiesMap={citiesMap}
-          citiesCount={uniqueCities}
-          placesCount={uniquePlaces}
-          favoritesCount={favoritesCount}
-          weeklySummaries={weeklySummaries}
-          homesCount={totalHomesCount}
-          tripsCount={totalTripsCount}
-          homeMarkers={homeCitiesInCountry}
-          tripMarkers={tripLocationsInCountry}
-          displayName={displayName}
-          avatarUrl={profile?.avatar_url}
-          friendCount={0}
-          selectedCountry={selectedCountry}
-          searchQuery={searchQuery}
-          activeTab={activeTab}
-          onCountryPress={handleCountryPress}
-          onSearchChange={setSearchQuery}
-          onTabChange={setActiveTab}
-          onCityClick={(cityName) => navigation.navigate('CityDetail', { cityName })}
-          onLogoutPress={() => navigation.navigate('UserProfile')}
-          onRefresh={handleRefresh}
-          transitionProgress={transitionProgress}
-          refreshing={refreshing}
-        />
-      )}
-
-      {/* Country Detail View (visible during transition and in country-detail state) */}
-      {(viewState === 'country-transition' || viewState === 'country-detail') && selectedCountry && selectedCountryName && (
-        <CountryDetailView
-          countryCode={selectedCountry}
-          countryName={selectedCountryName}
-          cities={citiesMap}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          onBack={handleBackToWorld}
-          onCityClick={(cityName) => navigation.navigate('CityDetail', { cityName })}
-          transitionProgress={transitionProgress}
-          animateEntrance={viewState === 'country-transition'}
-          homesCount={currentCountryHomes}
-          tripsCount={currentCountryTrips}
-          homeCities={homeCitiesInCountry.map(h => h.city)}
-          tripCities={tripLocationsInCountry.map(t => t.city)}
-        />
-      )}
+      <WorldView
+        visitedCountries={visitedCountryCodes}
+        citiesMap={citiesMap}
+        citiesCount={uniqueCities}
+        placesCount={uniquePlaces}
+        favoritesCount={favoritesCount}
+        weeklySummaries={weeklySummaries}
+        homesCount={totalHomesCount}
+        tripsCount={totalTripsCount}
+        homeMarkers={homeCitiesInCountry}
+        tripMarkers={tripLocationsInCountry}
+        displayName={displayName}
+        avatarUrl={profile?.avatar_url}
+        friendCount={0}
+        selectedCountry={selectedCountry}
+        searchQuery={searchQuery}
+        activeTab={activeTab}
+        onCountryPress={handleCountryPress}
+        onSearchChange={setSearchQuery}
+        onTabChange={setActiveTab}
+        onCityClick={(cityName) => navigation.navigate('CityDetail', { cityName })}
+        onLogoutPress={() => navigation.navigate('UserProfile')}
+        onRefresh={handleRefresh}
+        refreshing={refreshing}
+      />
     </SafeAreaView>
   );
 }

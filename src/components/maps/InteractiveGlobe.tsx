@@ -11,13 +11,14 @@
  */
 
 import React, { useMemo, useCallback, forwardRef, useImperativeHandle, useState } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, useWindowDimensions } from 'react-native';
 import { Canvas, Path, Skia, Circle, vec, RadialGradient } from '@shopify/react-native-skia';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import {
   useSharedValue,
   withTiming,
   withSpring,
+  withDecay,
   Easing,
   runOnJS,
 } from 'react-native-reanimated';
@@ -55,6 +56,9 @@ export const InteractiveGlobe = forwardRef<InteractiveGlobeHandle, WorldMapProps
   ) => {
     console.log('[InteractiveGlobe] Rendering:', { width, height, visitedCount: visitedCountries.length });
 
+    // Get window dimensions for responsive sizing
+    const windowDimensions = useWindowDimensions();
+
     // Load map data
     const mapData = useMemo(() => {
       const data = loadMapData('low');
@@ -75,10 +79,12 @@ export const InteractiveGlobe = forwardRef<InteractiveGlobeHandle, WorldMapProps
     const savedScale = useSharedValue(1);
     const isAnimating = useSharedValue(false);
 
-    // Globe dimensions
+    // Globe dimensions - make it 87% of screen width for prominence
+    // Calculate dynamic size based on available screen space
+    const globeSize = Math.min(windowDimensions.width * 0.87, height * 0.9);
     const centerX = width / 2;
     const centerY = height / 2;
-    const baseRadius = Math.min(width, height) / 2 - 20;
+    const baseRadius = globeSize / 2;
 
     // Generate paths based on current rotation and scale
     const countryPaths = useMemo(() => {
@@ -187,13 +193,17 @@ export const InteractiveGlobe = forwardRef<InteractiveGlobeHandle, WorldMapProps
       }, 1700);
     }, [mapData, rotationX, rotationY, scaleValue, savedScale, isAnimating]);
 
-    // Handle tap
+    // Handle tap - use current shared values for accurate detection
     const handleTap = useCallback((x: number, y: number) => {
       if (isAnimating.value) return;
 
+      // Use current shared values instead of React state for accurate tap detection
+      const currentRotation = [rotationX.value, rotationY.value];
+      const currentScale = scaleValue.value;
+
       const projection = geoOrthographic()
-        .scale(baseRadius * scale)
-        .rotate([rotation[0], -rotation[1], 0])
+        .scale(baseRadius * currentScale)
+        .rotate([currentRotation[0], -currentRotation[1], 0])
         .translate([centerX, centerY]);
 
       const inversedPoint = projection.invert?.([x, y]);
@@ -207,7 +217,7 @@ export const InteractiveGlobe = forwardRef<InteractiveGlobeHandle, WorldMapProps
           onCountrySelect(country);
         }
       }
-    }, [mapData, baseRadius, centerX, centerY, rotation, scale, focusOnCountry, onCountrySelect, isAnimating]);
+    }, [mapData, baseRadius, centerX, centerY, rotationX, rotationY, scaleValue, focusOnCountry, onCountrySelect, isAnimating]);
 
     // Update paths when gesture ends
     const updatePaths = useCallback(() => {
@@ -215,20 +225,44 @@ export const InteractiveGlobe = forwardRef<InteractiveGlobeHandle, WorldMapProps
       setScale(scaleValue.value);
     }, [rotationX, rotationY, scaleValue]);
 
-    // Pan gesture
+    // Pan gesture - use changeX/changeY for smooth continuous rotation
     const panGesture = Gesture.Pan()
       .onUpdate((event) => {
         'worklet';
         if (!isAnimating.value) {
-          rotationX.value += event.translationX * 0.5;
-          rotationY.value += event.translationY * 0.5;
+          // Use changeX/changeY (delta values) for smooth, continuous rotation
+          rotationX.value += event.changeX * 0.5;
+          rotationY.value += event.changeY * 0.5;
+          // Clamp latitude to prevent upside-down globe
           rotationY.value = Math.max(-90, Math.min(90, rotationY.value));
         }
       })
-      .onEnd(() => {
+      .onEnd((event) => {
         'worklet';
-        // Update paths when gesture ends
+        // Update paths when gesture ends (not during dragging)
         runOnJS(updatePaths)();
+
+        // Optionally add subtle momentum
+        if (!isAnimating.value && Math.abs(event.velocityX) > 500) {
+          // Only use decay for very fast swipes
+          const finalX = rotationX.value + (event.velocityX * 0.001);
+          const finalY = Math.max(-90, Math.min(90, rotationY.value + (event.velocityY * 0.001)));
+
+          rotationX.value = withSpring(finalX, {
+            damping: 20,
+            stiffness: 90,
+          }, (finished) => {
+            'worklet';
+            if (finished) {
+              runOnJS(updatePaths)();
+            }
+          });
+
+          rotationY.value = withSpring(finalY, {
+            damping: 20,
+            stiffness: 90,
+          });
+        }
       });
 
     // Pinch gesture

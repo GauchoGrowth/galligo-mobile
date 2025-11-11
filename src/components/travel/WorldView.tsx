@@ -7,9 +7,14 @@
  * - Passes all necessary data down from TravelLogScreen
  */
 
-import React from 'react';
-import { View, ScrollView, StyleSheet, RefreshControl } from 'react-native';
-import { SharedValue } from 'react-native-reanimated';
+import React, { useState, useEffect } from 'react';
+import { View, ScrollView, StyleSheet, RefreshControl, TouchableOpacity, Text } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  Easing,
+} from 'react-native-reanimated';
 import { AnimatedMapHeader } from '@/components/map/AnimatedMapHeader';
 import { AnimatedCountryFlags } from '@/components/travel/AnimatedCountryFlags';
 import { ProfileHeader } from '@/components/travel/ProfileHeader';
@@ -88,6 +93,73 @@ export function WorldView({
   transitionProgress,
   refreshing = false,
 }: WorldViewProps) {
+  // View mode state: global view or country-focused view
+  const [viewMode, setViewMode] = useState<'global' | 'country'>('global');
+
+  // Animated values for UI transitions
+  const flagOpacity = useSharedValue(1);
+  const statsTranslateY = useSharedValue(0);
+  const backButtonOpacity = useSharedValue(0);
+
+  // Handle country selection
+  const handleCountrySelect = (countryCode: string) => {
+    setViewMode('country');
+    onCountryPress(countryCode);
+  };
+
+  // Handle back to global view
+  const handleBackToGlobal = () => {
+    setViewMode('global');
+    onCountryPress(''); // Deselect country
+  };
+
+  // Animate UI elements based on view mode
+  useEffect(() => {
+    if (viewMode === 'country') {
+      // Fade out flags
+      flagOpacity.value = withTiming(0, {
+        duration: 800,
+        easing: Easing.out(Easing.cubic),
+      });
+      // Stats stay visible (no movement)
+      statsTranslateY.value = withTiming(0, {
+        duration: 800,
+        easing: Easing.out(Easing.cubic),
+      });
+      // Show back button
+      backButtonOpacity.value = withTiming(1, {
+        duration: 400,
+        easing: Easing.out(Easing.cubic),
+      });
+    } else {
+      // Reverse animations
+      flagOpacity.value = withTiming(1, {
+        duration: 800,
+        easing: Easing.out(Easing.cubic),
+      });
+      statsTranslateY.value = withTiming(0, {
+        duration: 800,
+      });
+      backButtonOpacity.value = withTiming(0, {
+        duration: 400,
+      });
+    }
+  }, [viewMode, flagOpacity, statsTranslateY, backButtonOpacity]);
+
+  // Animated styles
+  const flagAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: flagOpacity.value,
+    pointerEvents: flagOpacity.value === 0 ? 'none' : 'auto',
+  }));
+
+  const statsAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: statsTranslateY.value }],
+  }));
+
+  const backButtonAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: backButtonOpacity.value,
+    pointerEvents: backButtonOpacity.value === 0 ? 'none' : 'auto',
+  }));
 
   return (
     <View style={styles.container}>
@@ -116,22 +188,18 @@ export function WorldView({
         {/* Travel Footprint Tab */}
         {activeTab === 'footprint' && (
           <View>
-            {/* Country Flags */}
-            {visitedCountries.length > 0 && (
-              <AnimatedCountryFlags
-                countryCodes={visitedCountries}
-                selectedCountryCode={selectedCountry}
-                onFlagPress={onCountryPress}
-                size="md"
-                animateEntrance={true}
-              />
-            )}
+            {/* Back Button - appears when in country view */}
+            <Animated.View style={[styles.backButtonContainer, backButtonAnimatedStyle]}>
+              <TouchableOpacity onPress={handleBackToGlobal} style={styles.backButton}>
+                <Text style={styles.backButtonText}>← Back to World</Text>
+              </TouchableOpacity>
+            </Animated.View>
 
-            {/* Map/Globe */}
+            {/* Map/Globe - always visible, handles zoom internally */}
             <AnimatedMapHeader
               visitedCountries={visitedCountries}
               selectedCountry={selectedCountry}
-              onCountryPress={onCountryPress}
+              onCountryPress={handleCountrySelect}
               height={LAYOUT.MAP_HEADER_HEIGHT}
               transitionProgress={transitionProgress}
               homeMarkers={homeMarkers}
@@ -139,12 +207,27 @@ export function WorldView({
               showMarkersForCountry={selectedCountry}
             />
 
-            {/* Statistics with animated counters */}
-            <TravelStatistics
-              citiesCount={citiesCount}
-              placesCount={placesCount}
-              favoritesCount={favoritesCount}
-            />
+            {/* Country Flags - fade out when country selected - MOVED BELOW MAP */}
+            {visitedCountries.length > 0 && (
+              <Animated.View style={flagAnimatedStyle}>
+                <AnimatedCountryFlags
+                  countryCodes={visitedCountries}
+                  selectedCountryCode={selectedCountry}
+                  onFlagPress={handleCountrySelect}
+                  size="md"
+                  animateEntrance={true}
+                />
+              </Animated.View>
+            )}
+
+            {/* Statistics - stay visible, slide in when country selected */}
+            <Animated.View style={statsAnimatedStyle}>
+              <TravelStatistics
+                citiesCount={citiesCount}
+                placesCount={placesCount}
+                favoritesCount={favoritesCount}
+              />
+            </Animated.View>
           </View>
         )}
 
@@ -168,5 +251,19 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingBottom: spacing[8],
+  },
+  backButtonContainer: {
+    paddingHorizontal: spacing.pagePaddingMobile,
+    paddingVertical: spacing[3],
+  },
+  backButton: {
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[4],
+    alignSelf: 'flex-start',
+  },
+  backButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.primary.blue,
   },
 });

@@ -16,9 +16,10 @@ import { DEFAULT_MAP_COLORS } from '@/types/map.types';
  * Performance optimizations:
  * - Memoized component to prevent unnecessary re-renders
  * - Efficient path rendering using Skia
+ * - Animated opacity for fade effects
  */
 export const CountryPath = React.memo<CountryPathProps>(
-  ({ country, pathData, isVisited, isSelected }) => {
+  ({ country, pathData, isVisited, isSelected, opacity = 1 }) => {
     // Determine fill color based on state
     const fillColor = useMemo(() => {
       if (isSelected) {
@@ -39,6 +40,7 @@ export const CountryPath = React.memo<CountryPathProps>(
         path={pathData}
         color={fillColor}
         style="fill"
+        opacity={opacity}
       />
     );
   },
@@ -48,6 +50,7 @@ export const CountryPath = React.memo<CountryPathProps>(
       prevProps.pathData === nextProps.pathData &&
       prevProps.isVisited === nextProps.isVisited &&
       prevProps.isSelected === nextProps.isSelected &&
+      prevProps.opacity === nextProps.opacity &&
       prevProps.country.id === nextProps.country.id
     );
   }

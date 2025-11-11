@@ -107,6 +107,8 @@ export interface CountryPathProps {
   isVisited: boolean;
   /** Whether this country is currently selected */
   isSelected: boolean;
+  /** Opacity for fade effects (0-1) */
+  opacity?: number;
   /** Callback when country is pressed */
   onPress?: (country: Country) => void;
 }
