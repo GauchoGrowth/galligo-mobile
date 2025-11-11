@@ -1,41 +1,36 @@
 /**
  * Travel Log Screen - GalliGo React Native
  *
- * Complete redesign matching web app with:
+ * Complete redesign with animated transitions:
+ * - World view → Country detail transitions
  * - Three tabs: Travel Footprint, Journal, Milestones
  * - Interactive world map with visited countries
- * - Country flags filter
- * - Statistics cards
- * - Search functionality
- * - Weekly journal timeline
- * - Milestone tracking
+ * - Cinema-quality animations (60 FPS target)
+ * - Smooth state transitions with Reanimated v4
  */
 
-import React, { useState, useMemo } from 'react';
-import { View, ScrollView, RefreshControl, StyleSheet } from 'react-native';
+import React, { useState, useMemo, useCallback } from 'react';
+import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { FullPageSpinner, Body } from '@/components/ui';
-import { CitiesView } from '@/components/travel/CitiesView';
-import { MapHeader } from '@/components/map/MapHeader';
-import { ProfileHeader } from '@/components/travel/ProfileHeader';
-import { TravelLogTabs } from '@/components/travel/TravelLogTabs';
-import { TravelStatistics } from '@/components/travel/TravelStatistics';
-import { CountryFlags } from '@/components/travel/CountryFlags';
-import { SearchBar } from '@/components/travel/SearchBar';
-import { FilterChip } from '@/components/travel/FilterChip';
-import { JournalTimeline } from '@/components/journal/JournalTimeline';
-import { MilestonesView } from '@/components/milestones/MilestonesView';
+import { FullPageSpinner } from '@/components/ui';
+import { WorldView } from '@/components/travel/WorldView';
 import type { CityData, FriendInCity } from '@/components/travel/CitiesView';
 import type { TravelLogTab } from '@/components/travel/TravelLogTabs';
 import { usePlaces, useTrips, useHomes, useUserProfile } from '@/lib/api-hooks';
 import { getCountryCode } from '@/utils/countryUtils';
 import { fetchUserActivities, groupActivitiesByWeek } from '@/services/journalService';
+import {
+  getTripsByCountry,
+  getHomesByCountry,
+  getHomeCitiesForCountry,
+  getTripLocationsForCountry,
+} from '@/lib/travel-data-utils';
 import { theme } from '@/theme';
 import type { RootStackParamList } from '@/navigation/RootNavigator';
 
-const { colors, spacing } = theme;
+const { colors } = theme;
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -121,14 +116,43 @@ export function TravelLogScreen() {
     return Array.from(countries);
   }, [places]);
 
-  // Get country name from code for filter chip
-  const selectedCountryName = useMemo(() => {
-    if (!selectedCountry) return null;
-    const countryName = Object.keys(require('@/utils/countryUtils').COUNTRY_CODES).find(
-      key => require('@/utils/countryUtils').COUNTRY_CODES[key] === selectedCountry
-    );
-    return countryName || null;
-  }, [selectedCountry]);
+  // Global homes and trips stats
+  const totalHomesCount = useMemo(() => homes.length, [homes]);
+  const totalTripsCount = useMemo(() => trips.length, [trips]);
+
+  // Aggregate by country
+  const tripsByCountry = useMemo(
+    () => getTripsByCountry(trips),
+    [trips]
+  );
+
+  const homesByCountry = useMemo(
+    () => getHomesByCountry(homes),
+    [homes]
+  );
+
+  // Current country stats (when country is selected)
+  const currentCountryHomes = useMemo(() => {
+    if (!selectedCountry) return 0;
+    return homesByCountry.get(selectedCountry) || 0;
+  }, [selectedCountry, homesByCountry]);
+
+  const currentCountryTrips = useMemo(() => {
+    if (!selectedCountry) return 0;
+    return tripsByCountry.get(selectedCountry) || 0;
+  }, [selectedCountry, tripsByCountry]);
+
+  // Home cities for current country
+  const homeCitiesInCountry = useMemo(() => {
+    if (!selectedCountry) return [];
+    return getHomeCitiesForCountry(homes, selectedCountry);
+  }, [selectedCountry, homes]);
+
+  // Trip locations for current country
+  const tripLocationsInCountry = useMemo(() => {
+    if (!selectedCountry) return [];
+    return getTripLocationsForCountry(trips, selectedCountry);
+  }, [selectedCountry, trips]);
 
   // Journal data
   const weeklySummaries = useMemo(() => {
@@ -148,14 +172,26 @@ export function TravelLogScreen() {
     setRefreshing(false);
   };
 
-  // Handle country selection
-  const handleCountryPress = (countryCode: string) => {
-    if (selectedCountry === countryCode) {
+  // Handle country selection - simplified (no page navigation)
+  const handleCountryPress = useCallback((countryCode: string) => {
+    if (selectedCountry === countryCode || !countryCode) {
+      // Deselect country (empty string or same country clicked)
       setSelectedCountry(null);
     } else {
+      // Select country (globe will zoom automatically via AnimatedMapHeader)
+      console.log('[TravelLogScreen] Country selected:', countryCode);
       setSelectedCountry(countryCode);
     }
-  };
+  }, [selectedCountry]);
+
+  // Get country name from selected country code
+  const selectedCountryName = useMemo(() => {
+    if (!selectedCountry) return null;
+    const countryName = Object.keys(require('@/utils/countryUtils').COUNTRY_CODES).find(
+      key => require('@/utils/countryUtils').COUNTRY_CODES[key] === selectedCountry
+    );
+    return countryName || null;
+  }, [selectedCountry]);
 
   // Loading state
   if (isLoading) {
@@ -164,93 +200,31 @@ export function TravelLogScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Map Header - Always visible */}
-      <MapHeader
+      <WorldView
         visitedCountries={visitedCountryCodes}
-        selectedCountry={selectedCountry}
-        onCountryPress={handleCountryPress}
-        height={200}
-      />
-
-      {/* Profile Header */}
-      <ProfileHeader
+        citiesMap={citiesMap}
+        citiesCount={uniqueCities}
+        placesCount={uniquePlaces}
+        favoritesCount={favoritesCount}
+        weeklySummaries={weeklySummaries}
+        homesCount={totalHomesCount}
+        tripsCount={totalTripsCount}
+        homeMarkers={homeCitiesInCountry}
+        tripMarkers={tripLocationsInCountry}
         displayName={displayName}
         avatarUrl={profile?.avatar_url}
         friendCount={0}
+        selectedCountry={selectedCountry}
+        searchQuery={searchQuery}
+        activeTab={activeTab}
+        onCountryPress={handleCountryPress}
+        onSearchChange={setSearchQuery}
+        onTabChange={setActiveTab}
+        onCityClick={(cityName) => navigation.navigate('CityDetail', { cityName })}
         onLogoutPress={() => navigation.navigate('UserProfile')}
+        onRefresh={handleRefresh}
+        refreshing={refreshing}
       />
-
-      {/* Tab Navigation */}
-      <TravelLogTabs activeTab={activeTab} onTabChange={setActiveTab} />
-
-      {/* Tab Content */}
-      <ScrollView
-        style={styles.content}
-        contentContainerStyle={styles.contentContainer}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.primary.blue} />
-        }
-      >
-        {/* Travel Footprint Tab */}
-        {activeTab === 'footprint' && (
-          <View>
-            {/* Country Flags */}
-            {visitedCountryCodes.length > 0 && (
-              <CountryFlags
-                countryCodes={visitedCountryCodes}
-                selectedCountryCode={selectedCountry}
-                onFlagPress={handleCountryPress}
-                size="md"
-              />
-            )}
-
-            {/* Filter Chip */}
-            {selectedCountryName && (
-              <FilterChip
-                label={`Showing: ${selectedCountryName}`}
-                onDismiss={() => setSelectedCountry(null)}
-              />
-            )}
-
-            {/* Statistics */}
-            <TravelStatistics
-              citiesCount={uniqueCities}
-              placesCount={uniquePlaces}
-              favoritesCount={favoritesCount}
-            />
-
-            {/* Search Bar */}
-            <SearchBar value={searchQuery} onChangeText={setSearchQuery} placeholder="Search cities..." />
-
-            {/* Cities Grid */}
-            {citiesMap.size > 0 ? (
-              <CitiesView
-                cities={citiesMap}
-                onCityClick={cityName => {
-                  navigation.navigate('CityDetail', { cityName });
-                }}
-              />
-            ) : (
-              <View style={styles.emptyState}>
-                <Body align="center" color={colors.neutral[600]}>
-                  {searchQuery
-                    ? 'No cities match your search'
-                    : selectedCountryName
-                    ? `No cities in ${selectedCountryName}`
-                    : 'No places yet. Start adding places to your travel log!'}
-                </Body>
-              </View>
-            )}
-          </View>
-        )}
-
-        {/* Journal Tab */}
-        {activeTab === 'journal' && <JournalTimeline weeklySummaries={weeklySummaries} />}
-
-        {/* Milestones Tab */}
-        {activeTab === 'milestones' && <MilestonesView milestones={[]} />}
-      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -259,15 +233,5 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.neutral[50],
-  },
-  content: {
-    flex: 1,
-  },
-  contentContainer: {
-    paddingBottom: spacing[8],
-  },
-  emptyState: {
-    paddingVertical: spacing[12],
-    paddingHorizontal: spacing[6],
   },
 });

@@ -11,7 +11,7 @@
 import React, { useCallback, useRef, useEffect } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import Animated, { useAnimatedStyle, interpolate, SharedValue } from 'react-native-reanimated';
-import { InteractiveGlobe, InteractiveGlobeHandle } from '@/components/maps/InteractiveGlobe';
+import { WorldMapSimple, WorldMapHandle } from '@/components/maps/WorldMapSimple';
 import type { Country, LocationMarker } from '@/types/map.types';
 import { theme } from '@/theme';
 import { LAYOUT, OPACITY, SCALE } from '@/lib/animations/constants';
@@ -74,7 +74,7 @@ export function AnimatedMapHeader({
   showMarkersForCountry = null,
 }: AnimatedMapHeaderProps) {
   const screenWidth = Dimensions.get('window').width;
-  const mapRef = useRef<InteractiveGlobeHandle>(null);
+  const mapRef = useRef<WorldMapHandle>(null);
 
   // Handle country selection
   const handleCountrySelect = useCallback(
@@ -91,7 +91,13 @@ export function AnimatedMapHeader({
   useEffect(() => {
     if (selectedCountry) {
       console.log('[AnimatedMapHeader] Selected country changed, zooming to:', selectedCountry);
-      mapRef.current?.zoomToCountry(selectedCountry);
+      console.log('[AnimatedMapHeader] mapRef.current exists:', !!mapRef.current);
+      if (mapRef.current) {
+        console.log('[AnimatedMapHeader] Calling zoomToCountry...');
+        mapRef.current.zoomToCountry(selectedCountry);
+      } else {
+        console.log('[AnimatedMapHeader] ERROR: mapRef.current is null!');
+      }
     } else {
       console.log('[AnimatedMapHeader] Country deselected, resetting view');
       mapRef.current?.resetView();
@@ -127,11 +133,14 @@ export function AnimatedMapHeader({
 
   return (
     <AnimatedView style={[styles.container, animatedStyle]}>
-      <InteractiveGlobe
+      <WorldMapSimple
         ref={mapRef}
         width={screenWidth}
         height={height}
         visitedCountries={visitedCountries}
+        homeMarkers={homeMarkers}
+        tripMarkers={tripMarkers}
+        showMarkersForCountry={showMarkersForCountry}
         onCountrySelect={handleCountrySelect}
       />
     </AnimatedView>
