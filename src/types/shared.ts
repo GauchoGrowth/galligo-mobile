@@ -24,62 +24,100 @@ export interface Trip {
 // Recommendation types for Recs page
 export interface RecommendationRequest {
   id: string;
+  user_id: string; // Request creator
   requester: {
+    id: string;
     name: string;
-    avatarUrl: string;
+    avatarUrl?: string;
   };
-  requestText: string;
-  destination: string;
-  tripDate: Date;
+  message: string;
+  status: 'active' | 'resolved';
+  recipient_ids?: string[]; // Target friends (empty = all friends)
   responseCount: number;
-  urgency: 'urgent' | 'soon' | 'future';
-  resolved: boolean;
-  isYourRequest?: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
-export interface Recommendation {
+export interface ReceivedRecommendation {
   id: string;
-  placeName: string;
-  category: 'restaurant' | 'coffee' | 'activity' | 'hotel';
-  city: string;
-  sender: {
+  place_id: string;
+  place: {
+    id: string;
     name: string;
-    avatarUrl: string;
+    display_name?: string;
+    category?: string;
+    city?: string;
+    country?: string;
   };
-  note?: string;
-  savedToWishlist: boolean;
-  receivedDate: Date;
-  inResponseToRequest?: string; // request ID
-}
-
-export interface WishlistPlace {
-  id: string;
-  placeName: string;
-  category: 'restaurant' | 'coffee' | 'activity' | 'hotel';
-  city: string;
-  country: string;
-  recommenders: Array<{
+  recommended_by: string; // User ID
+  sender: {
+    id: string;
     name: string;
-    avatarUrl: string;
-  }>;
+    avatarUrl?: string;
+  };
+  notes?: string;
+  request_id?: string; // If responding to a request
+  created_at: string;
+  // Marker info (from user_place_markers join)
+  currentUserMarker?: MarkerType | null;
 }
 
 export interface SentRecommendation {
   id: string;
-  placeName: string;
-  category: 'restaurant' | 'coffee' | 'activity' | 'hotel';
-  city: string;
-  recipient: {
+  place_id: string;
+  place: {
+    id: string;
     name: string;
-    avatarUrl: string;
+    display_name?: string;
+    category?: string;
+    city?: string;
+    country?: string;
   };
-  message?: string;
-  sentDate: Date;
-  inResponseToRequest?: string;
-  engagement: {
-    saved: boolean;
-    addedToTrip: boolean;
+  recipient_id: string;
+  recipient: {
+    id: string;
+    name: string;
+    avatarUrl?: string;
   };
+  notes?: string;
+  request_id?: string; // If responding to a request
+  created_at: string;
+  // Engagement tracking (from user_place_markers)
+  recipientMarker?: MarkerType | null;
+}
+
+// Wishlist is just places with "wanttogo" marker
+export interface WishlistPlace {
+  id: string;
+  place_id: string;
+  place: {
+    id: string;
+    name: string;
+    display_name?: string;
+    category?: string;
+    city?: string;
+    country?: string;
+  };
+  recommenders: Array<{
+    id: string;
+    name: string;
+    avatarUrl?: string;
+    notes?: string;
+  }>;
+  marked_at: string;
+}
+
+// Input types for creating/sending
+export interface CreateRequestInput {
+  message: string;
+  recipient_ids?: string[]; // Empty = all friends
+}
+
+export interface SendRecommendationInput {
+  place_id: string;
+  recipient_id: string;
+  notes?: string;
+  request_id?: string; // If responding to a request
 }
 
 // Trip Detail types
