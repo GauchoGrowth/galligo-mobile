@@ -11,7 +11,7 @@
 import React, { useCallback, useRef, useEffect } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import Animated, { useAnimatedStyle, interpolate, SharedValue } from 'react-native-reanimated';
-import { WorldMapSimple, WorldMapHandle } from '@/components/maps/WorldMapSimple';
+import { WebViewGlobe, WebViewGlobeHandle } from '@/components/globe';
 import type { Country, LocationMarker } from '@/types/map.types';
 import { theme } from '@/theme';
 import { LAYOUT, OPACITY, SCALE } from '@/lib/animations/constants';
@@ -74,12 +74,12 @@ export function AnimatedMapHeader({
   showMarkersForCountry = null,
 }: AnimatedMapHeaderProps) {
   const screenWidth = Dimensions.get('window').width;
-  const mapRef = useRef<WorldMapHandle>(null);
+  const mapRef = useRef<WebViewGlobeHandle>(null);
 
-  // Handle country selection
+  // Handle country selection from WebView globe
   const handleCountrySelect = useCallback(
-    (country: Country) => {
-      const countryCode = country.properties.iso_a2?.toLowerCase();
+    (countryCode: string) => {
+      console.log('[AnimatedMapHeader] Country selected from WebView globe:', countryCode);
       if (countryCode && onCountryPress) {
         onCountryPress(countryCode);
       }
@@ -132,15 +132,12 @@ export function AnimatedMapHeader({
   }, [transitionProgress]);
 
   return (
-    <AnimatedView style={[styles.container, animatedStyle]}>
-      <WorldMapSimple
+    <AnimatedView style={[styles.container, animatedStyle, { height }]}>
+      <WebViewGlobe
         ref={mapRef}
         width={screenWidth}
         height={height}
         visitedCountries={visitedCountries}
-        homeMarkers={homeMarkers}
-        tripMarkers={tripMarkers}
-        showMarkersForCountry={showMarkersForCountry}
         onCountrySelect={handleCountrySelect}
       />
     </AnimatedView>
@@ -150,6 +147,6 @@ export function AnimatedMapHeader({
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    backgroundColor: colors.neutral[50],
+    backgroundColor: '#0a0a0a', // Dark background for 3D globe
   },
 });
