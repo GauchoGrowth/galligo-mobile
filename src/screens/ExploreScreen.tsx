@@ -6,10 +6,11 @@
 
 import React, { useState, useMemo } from 'react';
 import { View, ScrollView, RefreshControl, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { FullPageSpinner, SearchBar, EmptyState, H1 } from '@/components/ui';
+import { FullPageSpinner, SearchBar, EmptyState, H1, Body } from '@/components/ui';
 import { CityCard } from '@/components/travel/CityCard';
 import { StatCard } from '@/components/explore/StatCard';
 import type { FriendInCity } from '@/components/travel/CityCard';
@@ -26,6 +27,7 @@ export function ExploreScreen() {
   console.log('[ExploreScreen] Component mounting...');
 
   const navigation = useNavigation<NavigationProp>();
+  const insets = useSafeAreaInsets();
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
 
@@ -105,8 +107,8 @@ export function ExploreScreen() {
         <View style={styles.content}>
           <EmptyState
             icon="people-outline"
-            title="No Friends Yet"
-            description="Start adding friends to see their travel recommendations!"
+            title="Travel is better with friends"
+            description="Connect to see where they've been and share your favorite discoveries."
           />
         </View>
       </SafeAreaView>
@@ -114,7 +116,7 @@ export function ExploreScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -126,30 +128,40 @@ export function ExploreScreen() {
           />
         }
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <H1>Explore</H1>
-        </View>
+        {/* Header with Warm Gradient - Extends into Safe Area */}
+        <LinearGradient
+          colors={['rgba(255, 99, 71, 0.08)', 'rgba(245, 208, 25, 0.05)', 'transparent']}
+          locations={[0, 0.5, 0.85]}
+          style={styles.headerGradient}
+        >
+          <View style={[styles.header, { paddingTop: insets.top + spacing[2] }]}>
+            <H1>Explore</H1>
+            <Body style={styles.subtitle}>Your friends have been busy!</Body>
+          </View>
+        </LinearGradient>
 
-        {/* Network Stats */}
+        {/* Network Stats with Brand Colors */}
         <View style={styles.statsRow}>
           <StatCard
             icon="people"
             value={networkData.friends.length}
             label="Friends"
-            color={colors.primary.blue}
+            color="#00DDFF"
+            index={0}
           />
           <StatCard
             icon="location"
             value={networkData.totalCities}
             label="Cities"
-            color="#10b981"
+            color="#23D8C2"
+            index={1}
           />
           <StatCard
             icon="restaurant"
             value={networkData.totalPlaces}
             label="Places"
-            color="#f59e0b"
+            color="#FF6347"
+            index={2}
           />
         </View>
 
@@ -164,11 +176,12 @@ export function ExploreScreen() {
         {filteredCities.length === 0 ? (
           <EmptyState
             icon="search-outline"
-            description={searchQuery ? 'No cities found' : 'No cities to display'}
+            title="No matches"
+            description={searchQuery ? `No cities or friends match "${searchQuery}". Try a different search.` : 'No cities to explore yet'}
           />
         ) : (
           <View style={styles.citiesList}>
-            {filteredCities.map((city) => (
+            {filteredCities.map((city, index) => (
               <CityCard
                 key={city.city}
                 city={city.city}
@@ -176,6 +189,7 @@ export function ExploreScreen() {
                 countryCode={city.countryCode}
                 friends={city.friends}
                 totalPlaces={city.totalPlaces}
+                index={index}
                 onViewAll={() => {
                   navigation.navigate('CityDetail', { cityName: city.city });
                 }}
@@ -204,10 +218,16 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: spacing[6],
   },
+  headerGradient: {
+    paddingBottom: spacing[3],
+  },
   header: {
     paddingHorizontal: spacing.pagePaddingMobile,
-    paddingTop: spacing[4],
-    paddingBottom: spacing[3],
+    paddingBottom: spacing[2],
+  },
+  subtitle: {
+    color: colors.neutral[600],
+    marginTop: spacing[1],
   },
   statsRow: {
     flexDirection: 'row',
