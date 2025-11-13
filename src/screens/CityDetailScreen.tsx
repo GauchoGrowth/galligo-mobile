@@ -337,10 +337,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary.white,
     borderBottomWidth: 1,
     borderBottomColor: colors.neutral[100],
+    flexGrow: 0,
+    flexShrink: 0,
   },
   categoriesScroll: {
     paddingHorizontal: spacing.pagePaddingMobile,
-    paddingVertical: spacing[2],
+    paddingVertical: spacing[3],
     gap: spacing[2],
   },
   categoryChip: {
