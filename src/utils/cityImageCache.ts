@@ -38,7 +38,7 @@ export async function resolveCityImage(city: string, country?: string): Promise<
   }
 
   // Create new request
-  const request = fetchCityImage(`${city} city skyline`, country);
+  const request = fetchCityImage(city, country);
 
   // Store pending request
   pendingRequests.set(cacheKey, request);
