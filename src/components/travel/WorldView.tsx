@@ -14,8 +14,8 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
   Easing,
+  type SharedValue,
 } from 'react-native-reanimated';
-import { AnimatedMapHeader } from '@/components/map/AnimatedMapHeader';
 import { AnimatedCountryFlags } from '@/components/travel/AnimatedCountryFlags';
 import { ProfileHeader } from '@/components/travel/ProfileHeader';
 import { TravelLogTabs } from '@/components/travel/TravelLogTabs';
@@ -27,6 +27,7 @@ import type { TravelLogTab } from '@/components/travel/TravelLogTabs';
 import type { WeeklySummary } from '@/services/journalService';
 import type { LocationMarker } from '@/types/map.types';
 import { theme } from '@/theme';
+import { TravelLogGlobe } from '@/features/globe/components/TravelLogGlobe';
 import { LAYOUT } from '@/lib/animations/constants';
 
 const { colors, spacing } = theme;
@@ -196,16 +197,9 @@ export function WorldView({
             </Animated.View>
 
             {/* Map/Globe - always visible, handles zoom internally */}
-            <AnimatedMapHeader
-              visitedCountries={visitedCountries}
-              selectedCountry={selectedCountry}
-              onCountryPress={handleCountrySelect}
-              height={LAYOUT.MAP_HEADER_HEIGHT}
-              transitionProgress={transitionProgress}
-              homeMarkers={homeMarkers}
-              tripMarkers={tripMarkers}
-              showMarkersForCountry={selectedCountry}
-            />
+            <View style={{ height: LAYOUT.MAP_HEADER_HEIGHT }}>
+              <TravelLogGlobe onCountryChange={handleCountrySelect} />
+            </View>
 
             {/* Country Flags - fade out when country selected - MOVED BELOW MAP */}
             {visitedCountries.length > 0 && (

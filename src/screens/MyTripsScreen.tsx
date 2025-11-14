@@ -106,10 +106,11 @@ export function MyTripsScreen() {
               color={selectedTab === 'upcoming' ? colors.primary.blue : colors.neutral[600]}
             />
             <Caption
-              style={[
-                styles.tabText,
-                selectedTab === 'upcoming' && styles.tabTextActive,
-              ]}
+              style={
+                selectedTab === 'upcoming'
+                  ? [styles.tabText, styles.tabTextActive]
+                  : styles.tabText
+              }
             >
               Upcoming ({upcomingTrips.length})
             </Caption>
@@ -128,10 +129,11 @@ export function MyTripsScreen() {
               color={selectedTab === 'past' ? colors.primary.blue : colors.neutral[600]}
             />
             <Caption
-              style={[
-                styles.tabText,
-                selectedTab === 'past' && styles.tabTextActive,
-              ]}
+              style={
+                selectedTab === 'past'
+                  ? [styles.tabText, styles.tabTextActive]
+                  : styles.tabText
+              }
             >
               Past ({pastTrips.length})
             </Caption>

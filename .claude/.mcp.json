@@ -31,6 +31,18 @@
         "SUPABASE_URL": "https://rcogtfejfggbmkrzlsds.supabase.co",
         "SUPABASE_SERVICE_ROLE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjb2d0ZmVqZmdnYm1rcnpsc2RzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczMDgzMzA1NSwiZXhwIjoyMDQ2NDA5MDU1fQ.JCxEfaJ-7HTOMvLB8YlpJOGMjT81kIyb_HjyVMGIioo"
       }
+    },
+    "blender": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "/Users/joe/Desktop/blender-mcp",
+        "blender-mcp"
+      ],
+      "env": {
+        "BLENDER_HOST": "127.0.0.1",
+        "BLENDER_PORT": "9876"
+      }
     }
   }
 }

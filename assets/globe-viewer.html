@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>3D Globe</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #0a0a0a;
+      touch-action: none;
+    }
+
+    #root {
+      width: 100%;
+      height: 100%;
+    }
+
+    canvas {
+      display: block;
+      touch-action: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- Load React 18, Three.js, and R3F from CDN -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/three@0.166.0/build/three.min.js"></script>
+  <script src="https://unpkg.com/@react-three/fiber@8.15.0/dist/react-three-fiber.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.166.0/examples/js/loaders/GLTFLoader.js"></script>
+
+  <script type="module">
+    const { createElement: h, useState, useEffect, useRef } = window.React;
+    const { createRoot } = window.ReactDOM;
+    const { Canvas, useFrame, useThree, useLoader } = window.ReactThreeFiber;
+
+    // Globe Model Component
+    function GlobeModel({ modelData, visitedCountries, selectedCountry, onCountryClick }) {
+      const groupRef = useRef();
+      const raycaster = useRef(new THREE.Raycaster());
+      const mouse = useRef(new THREE.Vector2());
+      const { camera, scene, gl, size } = useThree();
+
+      // Parse the GLB data
+      useEffect(() => {
+        if (!modelData) return;
+
+        const loader = new THREE.GLTFLoader();
+
+        // Load from data URL
+        loader.load(modelData, (gltf) => {
+          console.log('GLTF loaded in WebView');
+
+          if (groupRef.current) {
+            groupRef.current.add(gltf.scene);
+
+            // Apply materials
+            gltf.scene.traverse((child) => {
+              if (child.isMesh) {
+                child.material.transparent = true;
+                child.material.opacity = 1.0;
+                child.material.emissive = new THREE.Color(0x000000);
+                child.material.emissiveIntensity = 0;
+
+                // Store country name for raycasting
+                child.userData.clickable = child.userData.name !== 'Globe_Base';
+              }
+            });
+          }
+        });
+      }, [modelData]);
+
+      // Update materials based on visited/selected countries
+      useEffect(() => {
+        if (!groupRef.current) return;
+
+        groupRef.current.traverse((child) => {
+          if (child.isMesh && child.userData.name) {
+            const countryName = child.userData.name.replace(/\.\d+$/, '');
+            const isSelected = countryName === selectedCountry;
+            const isVisited = visitedCountries.includes(countryName.toLowerCase());
+
+            if (selectedCountry) {
+              if (isSelected) {
+                child.material.opacity = 1.0;
+                child.material.emissive = new THREE.Color(0x4a90e2);
+                child.material.emissiveIntensity = 0.4;
+              } else {
+                child.material.opacity = 0.15;
+                child.material.emissive = new THREE.Color(0x000000);
+                child.material.emissiveIntensity = 0;
+              }
+            } else {
+              child.material.opacity = 1.0;
+              if (isVisited) {
+                child.material.emissive = new THREE.Color(0x4a90e2);
+                child.material.emissiveIntensity = 0.25;
+              } else {
+                child.material.emissive = new THREE.Color(0x000000);
+                child.material.emissiveIntensity = 0;
+              }
+            }
+            child.material.needsUpdate = true;
+          }
+        });
+      }, [visitedCountries, selectedCountry]);
+
+      // Handle taps
+      useEffect(() => {
+        const handleClick = (event) => {
+          // Calculate normalized device coordinates
+          const rect = gl.domElement.getBoundingClientRect();
+          mouse.current.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+          mouse.current.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+          raycaster.current.setFromCamera(mouse.current, camera);
+
+          const intersects = raycaster.current.intersectObjects(scene.children, true);
+
+          if (intersects.length > 0) {
+            const object = intersects[0].object;
+            if (object.userData.clickable && object.userData.name) {
+              const countryName = object.userData.name.replace(/\.\d+$/, '');
+              onCountryClick(countryName);
+            }
+          }
+        };
+
+        gl.domElement.addEventListener('click', handleClick);
+        return () => gl.domElement.removeEventListener('click', handleClick);
+      }, [camera, scene, gl, onCountryClick]);
+
+      // Auto-rotation
+      useFrame((state, delta) => {
+        if (groupRef.current && !selectedCountry) {
+          groupRef.current.rotation.y += delta * 0.1;
+        }
+      });
+
+      return h('group', { ref: groupRef });
+    }
+
+    // Main App Component
+    function App() {
+      const [modelData, setModelData] = useState(null);
+      const [visitedCountries, setVisitedCountries] = useState([]);
+      const [selectedCountry, setSelectedCountry] = useState(null);
+
+      useEffect(() => {
+        // Listen for messages from React Native
+        const handleMessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+
+            if (data.type === 'LOAD_MODEL') {
+              console.log('Received model data from RN');
+              setModelData(data.dataUrl);
+            } else if (data.type === 'SET_VISITED') {
+              setVisitedCountries(data.countries || []);
+            } else if (data.type === 'SELECT_COUNTRY') {
+              setSelectedCountry(data.country);
+            } else if (data.type === 'RESET_VIEW') {
+              setSelectedCountry(null);
+            }
+          } catch (e) {
+            console.error('Error parsing message:', e);
+          }
+        };
+
+        window.addEventListener('message', handleMessage);
+        document.addEventListener('message', handleMessage); // iOS compatibility
+
+        // Request initial data
+        window.ReactNativeWebView?.postMessage(JSON.stringify({ type: 'READY' }));
+
+        return () => {
+          window.removeEventListener('message', handleMessage);
+          document.removeEventListener('message', handleMessage);
+        };
+      }, []);
+
+      const handleCountryClick = (countryName) => {
+        console.log('Country clicked:', countryName);
+        setSelectedCountry(countryName);
+
+        // Send to React Native
+        window.ReactNativeWebView?.postMessage(JSON.stringify({
+          type: 'COUNTRY_SELECTED',
+          country: countryName,
+        }));
+      };
+
+      if (!modelData) {
+        return h('div', {
+          style: {
+            color: 'white',
+            padding: '20px',
+            textAlign: 'center',
+            paddingTop: '50%'
+          }
+        }, 'Loading globe...');
+      }
+
+      return h(Canvas, {
+        camera: { position: [0, 0, 5], fov: 50 },
+        gl: { antialias: true, alpha: false }
+      }, [
+        h('ambientLight', { key: 'ambient', intensity: 0.6 }),
+        h('directionalLight', { key: 'dir', position: [5, 5, 5], intensity: 0.8 }),
+        h('pointLight', { key: 'point', position: [-5, -5, -5], intensity: 0.3 }),
+        h(GlobeModel, {
+          key: 'globe',
+          modelData,
+          visitedCountries,
+          selectedCountry,
+          onCountryClick: handleCountryClick
+        })
+      ]);
+    }
+
+    // Mount app
+    const container = document.getElementById('root');
+    const root = createRoot(container);
+    root.render(h(App));
+  </script>
+</body>
+</html>

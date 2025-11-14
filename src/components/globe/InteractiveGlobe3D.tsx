@@ -65,7 +65,7 @@ const RaycasterSelector: React.FC<{
 
 // Auto-rotation component
 const AutoRotation: React.FC<{
-  globeRef: React.RefObject<THREE.Group>;
+  globeRef: React.RefObject<THREE.Group | null>;
   enabled: boolean;
 }> = ({ globeRef, enabled }) => {
   useFrame((state, delta) => {
@@ -101,7 +101,7 @@ const PerformanceMonitor: React.FC = () => {
 
 // Apply rotation from gestures
 const GlobeRotation: React.FC<{
-  globeRef: React.RefObject<THREE.Group>;
+  globeRef: React.RefObject<THREE.Group | null>;
   rotationX: any;
   rotationY: any;
   scale: any;
@@ -133,7 +133,7 @@ export const InteractiveGlobe3D = forwardRef<
 >((props, ref) => {
   const { visitedCountries, onCountrySelect } = props;
 
-  const globeRef = useRef<THREE.Group>(null);
+  const globeRef = useRef<THREE.Group | null>(null);
   const [tapPosition, setTapPosition] = useState<{ x: number; y: number } | null>(null);
   const [isUserInteracting, setIsUserInteracting] = useState(false);
 

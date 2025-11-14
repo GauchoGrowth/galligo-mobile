@@ -6,22 +6,23 @@
 
 import React from 'react';
 import { View, ScrollView, Image, Pressable, StyleSheet, ImageBackground } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { FullPageSpinner, H1, H2, Body, Caption, Avatar } from '@/components/ui';
+import { FullPageSpinner, H1, H2, Body, Caption, Avatar, Button } from '@/components/ui';
 import { useTrips } from '@/lib/api-hooks';
 import { getCountryCode } from '@/utils/countryUtils';
 import { theme } from '@/theme';
 import type { RootStackParamList } from '@/navigation/RootNavigator';
 
-const { colors, spacing, borderRadius } = theme;
+const { colors, spacing, borderRadius, typography } = theme;
 
 type Props = NativeStackScreenProps<RootStackParamList, 'TripDetail'>;
 
 export function TripDetailScreen({ route, navigation }: Props) {
   const { tripId } = route.params;
+  const insets = useSafeAreaInsets();
 
   // Fetch all trips and find this one
   const { data: trips = [], isLoading } = useTrips();
@@ -49,7 +50,7 @@ export function TripDetailScreen({ route, navigation }: Props) {
   const imageUrl = trip.heroImage || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828';
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Hero Section */}
         <View style={styles.heroContainer}>
@@ -66,8 +67,10 @@ export function TripDetailScreen({ route, navigation }: Props) {
             {/* Back Button */}
             <Pressable
               onPress={() => navigation.goBack()}
-              style={styles.backButton}
+              style={[styles.backButton, { top: insets.top + spacing[2] }]}
               hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel="Go back"
             >
               <View style={styles.backButtonInner}>
                 <Ionicons name="arrow-back" size={24} color={colors.neutral[900]} />
@@ -75,7 +78,7 @@ export function TripDetailScreen({ route, navigation }: Props) {
             </Pressable>
 
             {/* Trip Info Overlay */}
-            <View style={styles.heroContent}>
+            <View style={[styles.heroContent, { paddingBottom: spacing[4] + insets.bottom }]}>
               <H1 style={styles.heroTitle}>{trip.name}</H1>
 
               <View style={styles.heroLocation}>
@@ -115,19 +118,19 @@ export function TripDetailScreen({ route, navigation }: Props) {
             <View style={styles.statsRow}>
               <View style={styles.statCard}>
                 <Ionicons name="calendar-outline" size={20} color={colors.primary.blue} />
-                <Caption color={colors.neutral[600]}>Duration</Caption>
+                <Caption color={colors.text.secondary}>Duration</Caption>
                 <Body weight="medium">{durationDays} days</Body>
               </View>
 
               <View style={styles.statCard}>
-                <Ionicons name="location-outline" size={20} color="#10b981" />
-                <Caption color={colors.neutral[600]}>Places</Caption>
+                <Ionicons name="location-outline" size={20} color={colors.secondary.green} />
+                <Caption color={colors.text.secondary}>Places</Caption>
                 <Body weight="medium">{trip.places?.length || 0}</Body>
               </View>
 
               <View style={styles.statCard}>
-                <Ionicons name="people-outline" size={20} color="#f59e0b" />
-                <Caption color={colors.neutral[600]}>Travelers</Caption>
+                <Ionicons name="people-outline" size={20} color={colors.brand.sunset} />
+                <Caption color={colors.text.secondary}>Travelers</Caption>
                 <Body weight="medium">{(trip.collaborators?.length || 0) + 1}</Body>
               </View>
             </View>
@@ -137,7 +140,9 @@ export function TripDetailScreen({ route, navigation }: Props) {
           {trip.description && (
             <View style={styles.section}>
               <H2 style={styles.sectionTitle}>About This Trip</H2>
-              <Body color={colors.neutral[700]}>{trip.description}</Body>
+              <Body color={colors.text.secondary} style={styles.paragraph}>
+                {trip.description}
+              </Body>
             </View>
           )}
 
@@ -171,12 +176,17 @@ export function TripDetailScreen({ route, navigation }: Props) {
                       navigation.navigate('PlaceDetail', { placeId: place.id });
                     }
                   }}
+                  accessibilityRole="button"
+                  accessibilityLabel={`View details for ${place.name}`}
+                  accessibilityHint="Opens place detail"
                 >
                   <View style={styles.placeIconContainer}>
                     <Ionicons name="location" size={16} color={colors.primary.blue} />
                   </View>
-                  <Body flex={1}>{place.name}</Body>
-                  <Ionicons name="chevron-forward" size={20} color={colors.neutral[400]} />
+                  <Body flex={1} numberOfLines={1}>
+                    {place.name}
+                  </Body>
+                  <Ionicons name="chevron-forward" size={20} color={colors.text.secondary} />
                 </Pressable>
               ))}
             </View>
@@ -188,29 +198,28 @@ export function TripDetailScreen({ route, navigation }: Props) {
               <H2 style={styles.sectionTitle}>Places</H2>
               <View style={styles.emptyPlaces}>
                 <Ionicons name="location-outline" size={48} color={colors.neutral[300]} />
-                <Caption color={colors.neutral[600]}>No places added yet</Caption>
-                <Pressable style={styles.addPlaceButton}>
-                  <Body color={colors.primary.blue} weight="medium">
-                    Add Place
-                  </Body>
-                </Pressable>
+                <Caption color={colors.text.secondary}>No places added yet</Caption>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onPress={() => navigation.navigate('EditTrip', { tripId })}
+                  accessibilityLabel="Add a new place to this trip"
+                >
+                  Add Place
+                </Button>
               </View>
             </View>
           )}
 
           {/* Edit Action */}
           <View style={styles.actions}>
-            <Pressable
-              style={styles.actionButton}
-              onPress={() => {
-                navigation.navigate('EditTrip', { tripId });
-              }}
+            <Button
+              fullWidth
+              onPress={() => navigation.navigate('EditTrip', { tripId })}
+              accessibilityLabel="Edit this trip"
             >
-              <Ionicons name="create-outline" size={20} color={colors.primary.blue} />
-              <Body color={colors.primary.blue} weight="medium">
-                Edit Trip
-              </Body>
-            </Pressable>
+              Edit Trip
+            </Button>
           </View>
         </View>
       </ScrollView>
@@ -221,7 +230,7 @@ export function TripDetailScreen({ route, navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.primary.white,
+    backgroundColor: colors.brand.warmBeige,
   },
   heroContainer: {
     width: '100%',
@@ -311,6 +320,10 @@ const styles = StyleSheet.create({
   sectionTitle: {
     marginBottom: spacing[4],
   },
+  paragraph: {
+    marginTop: spacing[1],
+    lineHeight: typography.lineHeight.body,
+  },
   statsRow: {
     flexDirection: 'row',
     gap: spacing[3],
@@ -319,11 +332,11 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     padding: spacing[4],
-    backgroundColor: colors.neutral[50],
+    backgroundColor: colors.brand.offWhite,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
     borderColor: colors.neutral[200],
-    gap: spacing[1],
+    gap: spacing[2],
   },
   collaboratorItem: {
     flexDirection: 'row',
@@ -337,9 +350,11 @@ const styles = StyleSheet.create({
     gap: spacing[2],
     paddingVertical: spacing[3],
     paddingHorizontal: spacing[3],
-    backgroundColor: colors.neutral[50],
+    backgroundColor: colors.brand.offWhite,
     borderRadius: borderRadius.md,
     marginBottom: spacing[2],
+    borderWidth: 1,
+    borderColor: colors.neutral[200],
   },
   placeIconContainer: {
     width: 32,
@@ -352,27 +367,10 @@ const styles = StyleSheet.create({
   emptyPlaces: {
     alignItems: 'center',
     paddingVertical: spacing[8],
-    gap: spacing[2],
-  },
-  addPlaceButton: {
-    marginTop: spacing[2],
-    paddingVertical: spacing[2],
-    paddingHorizontal: spacing[4],
+    gap: spacing[3],
   },
   actions: {
     gap: spacing[3],
     marginTop: spacing[4],
-  },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing[2],
-    paddingVertical: spacing[3],
-    paddingHorizontal: spacing[4],
-    backgroundColor: colors.primary.blue + '10',
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    borderColor: colors.primary.blue,
   },
 });

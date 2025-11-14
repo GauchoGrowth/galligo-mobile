@@ -116,7 +116,6 @@ export const ISO_TO_COUNTRY_NAME: Record<string, string> = {
   so: 'Somalia',
   rw: 'Rwanda',
   bj: 'Benin',
-  tn: 'Tunisia',
   gn: 'Guinea',
 
   // Oceania

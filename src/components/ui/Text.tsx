@@ -5,9 +5,9 @@
  */
 
 import React from 'react';
-import { Text as RNText, TextProps as RNTextProps, StyleSheet, TextStyle } from 'react-native';
+import { Text as RNText, TextProps as RNTextProps, TextStyle } from 'react-native';
 import { textStyles } from '@/theme/textStyles';
-import { combineStyles } from '@/theme';
+import { combineStyles, theme } from '@/theme';
 
 // ============================================================================
 // TYPES
@@ -58,12 +58,48 @@ export interface TextProps extends Omit<RNTextProps, 'style'> {
 // COMPONENT
 // ============================================================================
 
-const FONT_WEIGHTS = {
+const { typography } = theme;
+
+const FONT_WEIGHT_VALUES = {
   normal: '400',
   medium: '500',
   semibold: '600',
   bold: '700',
 } as const;
+
+const VARIANT_FONT_ROLE: Record<TextVariant, 'heading' | 'body'> = {
+  display: 'heading',
+  h1: 'heading',
+  h2: 'heading',
+  h3: 'heading',
+  h4: 'heading',
+  h5: 'heading',
+  h6: 'heading',
+  bodyLarge: 'body',
+  body: 'body',
+  bodySmall: 'body',
+  caption: 'body',
+  label: 'body',
+  overline: 'body',
+};
+
+const FONT_FAMILY_OVERRIDES: Record<
+  'heading' | 'body',
+  Record<NonNullable<TextProps['weight']>, string>
+> = {
+  heading: {
+    normal: typography.fontFamily.heading.regular,
+    medium: typography.fontFamily.heading.medium,
+    semibold: typography.fontFamily.heading.semibold,
+    bold: typography.fontFamily.heading.bold,
+  },
+  body: {
+    normal: typography.fontFamily.body.regular,
+    medium: typography.fontFamily.body.medium,
+    semibold: typography.fontFamily.body.semibold,
+    bold: typography.fontFamily.body.bold,
+  },
+};
 
 export const Text: React.FC<TextProps> = ({
   children,
@@ -76,12 +112,15 @@ export const Text: React.FC<TextProps> = ({
   style,
   ...rest
 }) => {
+  const variantRole = VARIANT_FONT_ROLE[variant] ?? 'body';
+  const fontFamilyOverride = weight ? FONT_FAMILY_OVERRIDES[variantRole][weight] : undefined;
+
   // Combine styles
   const combinedStyle = combineStyles(
     textStyles[variant],
     color ? { color } : undefined,
     align ? { textAlign: align } : undefined,
-    weight ? { fontWeight: FONT_WEIGHTS[weight] } : undefined,
+    weight ? { fontWeight: FONT_WEIGHT_VALUES[weight], fontFamily: fontFamilyOverride } : undefined,
     flex !== undefined ? { flex } : undefined,
     style
   );

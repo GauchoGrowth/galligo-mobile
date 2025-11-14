@@ -10,7 +10,7 @@
 
 import React, { useMemo, useState, useCallback, useImperativeHandle, forwardRef, useEffect } from 'react';
 import { View, StyleSheet, Text, Pressable } from 'react-native';
-import { Canvas, Group, Rect, Circle, processTransform2d, useTouchHandler, SkRect, TouchInfo } from '@shopify/react-native-skia';
+import { Canvas, Group, Rect, Circle, processTransform2d } from '@shopify/react-native-skia';
 import { useSharedValue, useDerivedValue, withSpring, withTiming, withDelay, Easing, runOnJS } from 'react-native-reanimated';
 import { geoContains, geoCentroid } from 'd3-geo';
 import type { WorldMapProps, Country, MapDetailLevel, LocationMarker } from '@/types/map.types';
@@ -241,7 +241,7 @@ export const WorldMapSimple = forwardRef<WorldMapHandle, WorldMapProps>(
     }
 
     // Touch handler to detect country taps
-    const handleCanvasTouch = useCallback((touchInfo: TouchInfo) => {
+    const handleCanvasTouch = useCallback((touchInfo: { x: number; y: number; type: string }) => {
       // Only handle tap (touchstart followed by touchend without move)
       if (touchInfo.type !== 'end') return;
 

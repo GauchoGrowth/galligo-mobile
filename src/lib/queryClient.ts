@@ -69,16 +69,9 @@ export const queryClient = new QueryClient({
       staleTime: Infinity,
       retry: 2,
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-      onError: (error) => {
-        console.error('[QueryClient] Query error:', error);
-        console.error('[QueryClient] Error details:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
-      },
     },
     mutations: {
       retry: false,
-      onError: (error) => {
-        console.error('[QueryClient] Mutation error:', error);
-      },
     },
   },
 });
