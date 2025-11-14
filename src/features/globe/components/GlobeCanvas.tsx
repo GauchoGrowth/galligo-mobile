@@ -5,13 +5,8 @@ import { Asset } from 'expo-asset';
 import * as THREE from 'three';
 import { Renderer } from 'expo-three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import {
-  PanGestureHandler,
-  PinchGestureHandler,
-  TapGestureHandler,
-  GestureHandlerRootView,
-} from 'react-native-gesture-handler';
-import Animated, { runOnJS, useAnimatedGestureHandler, useSharedValue } from 'react-native-reanimated';
+import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
+import Animated, { runOnJS, useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
 import type { CountryGlobeData } from '../types';
 import { colors as themeColors } from '@/theme/tokens';
 
@@ -47,18 +42,21 @@ interface GlobeCanvasProps {
 export function GlobeCanvas({ countriesByIso3, onCountrySelect }: GlobeCanvasProps) {
   const worldGroupRef = useRef<THREE.Group>();
   const countryMeshesRef = useRef<CountryMeshInfo[]>([]);
-  const rotationRef = useRef({ x: -0.2, y: 0.6 });
-  const zoomRef = useRef(3.2);
   const rendererRef = useRef<Renderer>();
   const sceneRef = useRef<THREE.Scene>();
   const cameraRef = useRef<THREE.PerspectiveCamera>();
   const frameRef = useRef<number>();
-  const glViewSize = useRef({ width: 0, height: 0 });
   const raycaster = useMemo(() => new THREE.Raycaster(), []);
 
-  const rotationX = useSharedValue(rotationRef.current.x);
-  const rotationY = useSharedValue(rotationRef.current.y);
-  const zoomShared = useSharedValue(zoomRef.current);
+  // Use ONLY shared values - no refs for rotation/zoom
+  const rotationX = useSharedValue(-0.2);
+  const rotationY = useSharedValue(0.6);
+  const zoom = useSharedValue(3.2);
+  const lastRotationX = useSharedValue(-0.2);
+  const lastRotationY = useSharedValue(0.6);
+  const lastZoom = useSharedValue(3.2);
+  const viewWidth = useSharedValue(0);
+  const viewHeight = useSharedValue(0);
 
   const updateSelectionMaterials = useCallback(() => {
     countryMeshesRef.current.forEach(info => {
@@ -97,7 +95,7 @@ export function GlobeCanvas({ countriesByIso3, onCountrySelect }: GlobeCanvasPro
       sceneRef.current = scene;
 
       const camera = new THREE.PerspectiveCamera(45, gl.drawingBufferWidth / gl.drawingBufferHeight, 0.1, 1000);
-      camera.position.z = zoomRef.current;
+      camera.position.z = zoom.value;
       cameraRef.current = camera;
 
       const renderer = new Renderer({ gl });
@@ -160,9 +158,10 @@ export function GlobeCanvas({ countriesByIso3, onCountrySelect }: GlobeCanvasPro
         const cameraInstance = cameraRef.current;
         const rendererInstance = rendererRef.current;
         if (world && cameraInstance && rendererInstance) {
-          world.rotation.x = rotationRef.current.x;
-          world.rotation.y = rotationRef.current.y;
-          cameraInstance.position.z = zoomRef.current;
+          // Read directly from shared values
+          world.rotation.x = rotationX.value;
+          world.rotation.y = rotationY.value;
+          cameraInstance.position.z = zoom.value;
           rendererInstance.render(scene, cameraInstance);
           gl.endFrameEXP();
         }
@@ -181,76 +180,79 @@ export function GlobeCanvas({ countriesByIso3, onCountrySelect }: GlobeCanvasPro
     [raycaster, updateSelectionMaterials]
   );
 
-  const panHandler = useAnimatedGestureHandler({
-    onActive: event => {
-      rotationX.value -= event.translationY * 0.0008;
-      rotationY.value -= event.translationX * 0.0008;
-      runOnJS(applyRotation)(rotationX.value, rotationY.value);
-    },
-  });
+  // Create gestures with Reanimated v4 Gesture API - NO runOnJS needed!
+  const panGesture = Gesture.Pan()
+    .onStart(() => {
+      'worklet';
+      lastRotationX.value = rotationX.value;
+      lastRotationY.value = rotationY.value;
+    })
+    .onUpdate((event) => {
+      'worklet';
+      const newRotationX = lastRotationX.value - event.translationY * 0.003;
+      const newRotationY = lastRotationY.value - event.translationX * 0.003;
+      // Clamp rotation
+      rotationX.value = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, newRotationX));
+      rotationY.value = newRotationY;
+    });
 
-  const applyRotation = (x: number, y: number) => {
-    const clampedX = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, x));
-    rotationRef.current = { x: clampedX, y };
-  };
+  const pinchGesture = Gesture.Pinch()
+    .onStart(() => {
+      'worklet';
+      lastZoom.value = zoom.value;
+    })
+    .onUpdate((event) => {
+      'worklet';
+      const newZoom = Math.max(2.2, Math.min(5.5, lastZoom.value / event.scale));
+      zoom.value = newZoom;
+    });
 
-  const pinchHandler = useAnimatedGestureHandler({
-    onActive: event => {
-      const newZoom = Math.max(2.2, Math.min(5.5, zoomRef.current / event.scale));
-      zoomShared.value = newZoom;
-      runOnJS(applyZoom)(newZoom);
-    },
-  });
+  const composedGesture = Gesture.Simultaneous(panGesture, pinchGesture);
 
-  const applyZoom = (zoom: number) => {
-    zoomRef.current = zoom;
-  };
-
-  const handleTap = useCallback(
-    ({ nativeEvent }: any) => {
-      if (!glViewSize.current.width) return;
-      const { x, y } = nativeEvent;
-      const ndcX = (x / glViewSize.current.width) * 2 - 1;
-      const ndcY = -(y / glViewSize.current.height) * 2 + 1;
-      const camera = cameraRef.current;
-      const world = worldGroupRef.current;
-      if (!camera || !world) return;
-      raycaster.setFromCamera({ x: ndcX, y: ndcY }, camera);
-      const meshes = countryMeshesRef.current.map(entry => entry.mesh);
-      const intersections = raycaster.intersectObjects(meshes, true);
-      if (intersections.length > 0) {
-        const mesh = intersections[0].object as THREE.Mesh;
-        const entry = countryMeshesRef.current.find(info => info.mesh === mesh);
-        if (entry) {
-          const countryData = countriesByIso3[entry.iso3];
-          if (countryData) {
-            onCountrySelect?.(countryData);
-          }
+  const handleTapJS = useCallback((x: number, y: number, width: number, height: number) => {
+    if (!width) return;
+    const ndcX = (x / width) * 2 - 1;
+    const ndcY = -(y / height) * 2 + 1;
+    const camera = cameraRef.current;
+    const world = worldGroupRef.current;
+    if (!camera || !world) return;
+    raycaster.setFromCamera({ x: ndcX, y: ndcY }, camera);
+    const meshes = countryMeshesRef.current.map(entry => entry.mesh);
+    const intersections = raycaster.intersectObjects(meshes, true);
+    if (intersections.length > 0) {
+      const mesh = intersections[0].object as THREE.Mesh;
+      const entry = countryMeshesRef.current.find(info => info.mesh === mesh);
+      if (entry) {
+        const countryData = countriesByIso3[entry.iso3];
+        if (countryData) {
+          onCountrySelect?.(countryData);
         }
       }
-    },
-    [countriesByIso3, onCountrySelect, raycaster]
-  );
+    }
+  }, [countriesByIso3, onCountrySelect, raycaster]);
+
+  const tapGesture = Gesture.Tap().onEnd((event) => {
+    'worklet';
+    runOnJS(handleTapJS)(event.x, event.y, viewWidth.value, viewHeight.value);
+  });
+
+  const allGestures = Gesture.Race(tapGesture, composedGesture);
 
   return (
     <GestureHandlerRootView style={styles.container}>
-      <PanGestureHandler onGestureEvent={panHandler}>
+      <GestureDetector gesture={allGestures}>
         <Animated.View style={styles.container}>
-          <PinchGestureHandler onGestureEvent={pinchHandler}>
-            <Animated.View style={styles.container}>
-              <TapGestureHandler onHandlerStateChange={handleTap}>
-                <GLView
-                  style={styles.container}
-                  onLayout={event => {
-                    glViewSize.current = event.nativeEvent.layout;
-                  }}
-                  onContextCreate={onContextCreate}
-                />
-              </TapGestureHandler>
-            </Animated.View>
-          </PinchGestureHandler>
+          <GLView
+            style={styles.container}
+            onLayout={event => {
+              const { width, height } = event.nativeEvent.layout;
+              viewWidth.value = width;
+              viewHeight.value = height;
+            }}
+            onContextCreate={onContextCreate}
+          />
         </Animated.View>
-      </PanGestureHandler>
+      </GestureDetector>
     </GestureHandlerRootView>
   );
 }

@@ -42,12 +42,14 @@ export function TravelLogScreen() {
   const [activeTab, setActiveTab] = useState<TravelLogTab>('footprint');
 
   // Fetch data from API
-  const { data: places = [], isLoading: placesLoading, refetch: refetchPlaces } = usePlaces();
-  const { data: trips = [], isLoading: tripsLoading, refetch: refetchTrips } = useTrips();
-  const { data: homes = [], isLoading: homesLoading, refetch: refetchHomes } = useHomes();
-  const { data: profile, isLoading: profileLoading } = useUserProfile();
+  const { data: places = [], isLoading: placesLoading, error: placesError, refetch: refetchPlaces } = usePlaces();
+  const { data: trips = [], isLoading: tripsLoading, error: tripsError, refetch: refetchTrips } = useTrips();
+  const { data: homes = [], isLoading: homesLoading, error: homesError, refetch: refetchHomes } = useHomes();
+  const { data: profile, isLoading: profileLoading, error: profileError } = useUserProfile();
 
-  const isLoading = placesLoading || tripsLoading || homesLoading || profileLoading;
+  // Show loading ONLY if actually loading AND no errors occurred
+  const isLoading = (placesLoading || tripsLoading || homesLoading || profileLoading) &&
+                    !placesError && !tripsError && !homesError && !profileError;
 
   // Filter places by selected country
   const filteredPlaces = useMemo(() => {

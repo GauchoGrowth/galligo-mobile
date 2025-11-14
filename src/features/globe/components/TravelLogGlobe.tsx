@@ -13,7 +13,7 @@ interface TravelLogGlobeProps {
 }
 
 export function TravelLogGlobe({ onCountryChange }: TravelLogGlobeProps) {
-  const { countriesByIso3, isLoading } = useTravelLogGlobeData();
+  const { countriesByIso3, isLoading, error } = useTravelLogGlobeData();
   const [selectedCountry, setSelectedCountry] = useState<CountryGlobeData | null>(null);
 
   const handleSelection = useCallback(
@@ -34,6 +34,10 @@ export function TravelLogGlobe({ onCountryChange }: TravelLogGlobeProps) {
     []
   );
 
+  // Always render globe even if loading or error - show empty globe if no data
+  // This allows testing the 3D globe even when network requests fail
+  const shouldRenderGlobe = !isLoading || error;
+
   return (
     <>
       <Card style={styles.card}>
@@ -41,8 +45,12 @@ export function TravelLogGlobe({ onCountryChange }: TravelLogGlobeProps) {
           Your world at a glance
         </Text>
         <View style={styles.globeContainer}>
-          {!isLoading && (
+          {shouldRenderGlobe ? (
             <GlobeCanvas countriesByIso3={countriesByIso3} onCountrySelect={handleSelection} />
+          ) : (
+            <View style={styles.loadingContainer}>
+              <Text variant="bodySm" style={styles.loadingText}>Loading globe...</Text>
+            </View>
           )}
         </View>
         <View style={styles.legendRow}>
@@ -78,6 +86,14 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     overflow: 'hidden',
     backgroundColor: theme.colors.neutral[100],
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    color: theme.colors.text.secondary,
   },
   legendRow: {
     flexDirection: 'row',
