@@ -41,6 +41,19 @@ declare module '@shopify/react-native-skia' {
   }
 }
 
+declare module '@expo-google-fonts/outfit' {
+  export const Outfit_400Regular: number;
+  export const Outfit_500Medium: number;
+  export const Outfit_600SemiBold: number;
+  export const Outfit_700Bold: number;
+}
+
+declare module '@expo-google-fonts/roboto' {
+  export const Roboto_400Regular: number;
+  export const Roboto_500Medium: number;
+  export const Roboto_700Bold: number;
+}
+
 declare global {
   namespace JSX {
     interface IntrinsicElements extends ThreeElements {}

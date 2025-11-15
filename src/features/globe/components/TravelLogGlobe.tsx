@@ -57,7 +57,7 @@ export function TravelLogGlobe({ onCountryChange }: TravelLogGlobeProps) {
           {legend.map(item => (
             <View key={item.label} style={styles.legendItem}>
               <View style={[styles.legendSwatch, { backgroundColor: item.color }]} />
-              <Text variant="bodySm">{item.label}</Text>
+              <Text variant="bodySmall">{item.label}</Text>
             </View>
           ))}
         </View>

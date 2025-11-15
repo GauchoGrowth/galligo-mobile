@@ -175,16 +175,17 @@ export function TravelLogScreen() {
   };
 
   // Handle country selection - simplified (no page navigation)
-  const handleCountryPress = useCallback((countryCode: string) => {
-    if (selectedCountry === countryCode || !countryCode) {
-      // Deselect country (empty string or same country clicked)
-      setSelectedCountry(null);
-    } else {
-      // Select country (globe will zoom automatically via AnimatedMapHeader)
-      console.log('[TravelLogScreen] Country selected:', countryCode);
-      setSelectedCountry(countryCode);
-    }
-  }, [selectedCountry]);
+  const handleCountryPress = useCallback(
+    (countryCode: string | null) => {
+      if (!countryCode || selectedCountry === countryCode) {
+        setSelectedCountry(null);
+      } else {
+        console.log('[TravelLogScreen] Country selected:', countryCode);
+        setSelectedCountry(countryCode);
+      }
+    },
+    [selectedCountry]
+  );
 
   // Get country name from selected country code
   const selectedCountryName = useMemo(() => {

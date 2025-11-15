@@ -10,8 +10,8 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { StyleSheet } from 'react-native';
+import { useFonts } from 'expo-font';
 import {
-  useFonts,
   Outfit_400Regular,
   Outfit_500Medium,
   Outfit_600SemiBold,

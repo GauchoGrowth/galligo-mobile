@@ -56,7 +56,7 @@ export interface WorldViewProps {
   activeTab: TravelLogTab;
 
   // Callbacks
-  onCountryPress: (countryCode: string) => void;
+  onCountryPress: (countryCode: string | null) => void;
   onSearchChange: (query: string) => void;
   onTabChange: (tab: TravelLogTab) => void;
   onCityClick: (cityName: string) => void;
@@ -103,15 +103,19 @@ export function WorldView({
   const backButtonOpacity = useSharedValue(0);
 
   // Handle country selection
-  const handleCountrySelect = (countryCode: string) => {
-    setViewMode('country');
-    onCountryPress(countryCode);
+  const handleCountrySelect = (countryCode: string | null) => {
+    if (countryCode) {
+      setViewMode('country');
+      onCountryPress(countryCode);
+    } else {
+      setViewMode('global');
+      onCountryPress(null);
+    }
   };
 
   // Handle back to global view
   const handleBackToGlobal = () => {
-    setViewMode('global');
-    onCountryPress(''); // Deselect country
+    handleCountrySelect(null);
   };
 
   // Animate UI elements based on view mode
@@ -204,13 +208,13 @@ export function WorldView({
             {/* Country Flags - fade out when country selected - MOVED BELOW MAP */}
             {visitedCountries.length > 0 && (
               <Animated.View style={flagAnimatedStyle}>
-                <AnimatedCountryFlags
-                  countryCodes={visitedCountries}
-                  selectedCountryCode={selectedCountry}
-                  onFlagPress={handleCountrySelect}
-                  size="md"
-                  animateEntrance={true}
-                />
+              <AnimatedCountryFlags
+                countryCodes={visitedCountries}
+                selectedCountryCode={selectedCountry}
+                onFlagPress={code => handleCountrySelect(code)}
+                size="md"
+                animateEntrance={true}
+              />
               </Animated.View>
             )}
 

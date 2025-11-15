@@ -1,12 +1,20 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { StyleSheet } from 'react-native';
 import { GLView } from 'expo-gl';
+import type { ExpoWebGLRenderingContext } from 'expo-gl';
 import { Asset } from 'expo-asset';
 import * as THREE from 'three';
 import { Renderer } from 'expo-three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
-import Animated, { runOnJS, useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
+import { GLTFLoader, type GLTF } from 'three-stdlib';
+import {
+  GestureDetector,
+  GestureHandlerRootView,
+  Gesture,
+  State,
+  TapGestureHandler,
+  type TapGestureHandlerStateChangeEvent,
+} from 'react-native-gesture-handler';
+import { runOnJS, useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
 import type { CountryGlobeData } from '../types';
 import { colors as themeColors } from '@/theme/tokens';
 
@@ -25,7 +33,7 @@ const mapNameToIso3 = (name?: string): string | undefined => {
     'democratic republic of congo': 'COD',
     'republic of the congo': 'COG',
     'côte d’ivoire': 'CIV',
-    'cote d\'ivoire': 'CIV',
+    "cote d'ivoire": 'CIV',
     'south korea': 'KOR',
     'north korea': 'PRK',
     'ivory coast': 'CIV',
@@ -40,23 +48,48 @@ interface GlobeCanvasProps {
 }
 
 export function GlobeCanvas({ countriesByIso3, onCountrySelect }: GlobeCanvasProps) {
-  const worldGroupRef = useRef<THREE.Group>();
+  const worldGroupRef = useRef<THREE.Group | null>(null);
   const countryMeshesRef = useRef<CountryMeshInfo[]>([]);
-  const rendererRef = useRef<Renderer>();
-  const sceneRef = useRef<THREE.Scene>();
-  const cameraRef = useRef<THREE.PerspectiveCamera>();
-  const frameRef = useRef<number>();
+  const rotationRef = useRef({ x: -0.2, y: 0.6 });
+  const zoomRef = useRef(3.2);
+  const rendererRef = useRef<Renderer | null>(null);
+  const sceneRef = useRef<THREE.Scene | null>(null);
+  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
+  const frameRef = useRef<number | null>(null);
+  const glViewSize = useRef<{ width: number; height: number }>({ width: 0, height: 0 });
   const raycaster = useMemo(() => new THREE.Raycaster(), []);
 
-  // Use ONLY shared values - no refs for rotation/zoom
-  const rotationX = useSharedValue(-0.2);
-  const rotationY = useSharedValue(0.6);
-  const zoom = useSharedValue(3.2);
-  const lastRotationX = useSharedValue(-0.2);
-  const lastRotationY = useSharedValue(0.6);
-  const lastZoom = useSharedValue(3.2);
-  const viewWidth = useSharedValue(0);
-  const viewHeight = useSharedValue(0);
+  const rotationX = useSharedValue(rotationRef.current.x);
+  const rotationY = useSharedValue(rotationRef.current.y);
+  const zoomShared = useSharedValue(zoomRef.current);
+  const panStartX = useSharedValue(rotationRef.current.x);
+  const panStartY = useSharedValue(rotationRef.current.y);
+  const pinchStartZoom = useSharedValue(zoomRef.current);
+
+  const applyRotation = useCallback((x: number, y: number) => {
+    const clampedX = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, x));
+    rotationRef.current = { x: clampedX, y };
+  }, []);
+
+  const applyZoom = useCallback((zoom: number) => {
+    zoomRef.current = zoom;
+  }, []);
+
+  useAnimatedReaction(
+    () => ({ x: rotationX.value, y: rotationY.value }),
+    values => {
+      runOnJS(applyRotation)(values.x, values.y);
+    },
+    [applyRotation]
+  );
+
+  useAnimatedReaction(
+    () => zoomShared.value,
+    value => {
+      runOnJS(applyZoom)(value);
+    },
+    [applyZoom]
+  );
 
   const updateSelectionMaterials = useCallback(() => {
     countryMeshesRef.current.forEach(info => {
@@ -88,14 +121,14 @@ export function GlobeCanvas({ countriesByIso3, onCountrySelect }: GlobeCanvasPro
   }, [updateSelectionMaterials]);
 
   const onContextCreate = useCallback(
-    async (gl: any) => {
+    async (gl: ExpoWebGLRenderingContext) => {
       gl.enable(gl.DEPTH_TEST);
       gl.enable(gl.CULL_FACE);
       const scene = new THREE.Scene();
       sceneRef.current = scene;
 
       const camera = new THREE.PerspectiveCamera(45, gl.drawingBufferWidth / gl.drawingBufferHeight, 0.1, 1000);
-      camera.position.z = zoom.value;
+      camera.position.z = zoomRef.current;
       cameraRef.current = camera;
 
       const renderer = new Renderer({ gl });
@@ -118,8 +151,8 @@ export function GlobeCanvas({ countriesByIso3, onCountrySelect }: GlobeCanvasPro
       const loader = new GLTFLoader();
       loader.load(
         asset.localUri || asset.uri,
-        gltf => {
-          gltf.scene.traverse(child => {
+        (gltf: GLTF) => {
+          gltf.scene.traverse((child: THREE.Object3D) => {
             if ((child as THREE.Mesh).isMesh) {
               const mesh = child as THREE.Mesh;
               mesh.material = new THREE.MeshStandardMaterial({
@@ -135,7 +168,7 @@ export function GlobeCanvas({ countriesByIso3, onCountrySelect }: GlobeCanvasPro
           countryMeshesRef.current = [];
           gltf.scene.children.forEach(child => {
             const group = child as THREE.Group;
-            group.traverse(node => {
+            group.traverse((node: THREE.Object3D) => {
               if ((node as THREE.Mesh).isMesh) {
                 const mesh = node as THREE.Mesh;
                 const iso3 = mapNameToIso3(mesh.name);
@@ -158,10 +191,9 @@ export function GlobeCanvas({ countriesByIso3, onCountrySelect }: GlobeCanvasPro
         const cameraInstance = cameraRef.current;
         const rendererInstance = rendererRef.current;
         if (world && cameraInstance && rendererInstance) {
-          // Read directly from shared values
-          world.rotation.x = rotationX.value;
-          world.rotation.y = rotationY.value;
-          cameraInstance.position.z = zoom.value;
+          world.rotation.x = rotationRef.current.x;
+          world.rotation.y = rotationRef.current.y;
+          cameraInstance.position.z = zoomRef.current;
           rendererInstance.render(scene, cameraInstance);
           gl.endFrameEXP();
         }
@@ -175,83 +207,76 @@ export function GlobeCanvas({ countriesByIso3, onCountrySelect }: GlobeCanvasPro
           cancelAnimationFrame(frameRef.current);
         }
         renderer.dispose();
+        worldGroup.clear();
       };
     },
-    [raycaster, updateSelectionMaterials]
+    [updateSelectionMaterials]
   );
 
-  // Create gestures with Reanimated v4 Gesture API - NO runOnJS needed!
   const panGesture = Gesture.Pan()
-    .onStart(() => {
-      'worklet';
-      lastRotationX.value = rotationX.value;
-      lastRotationY.value = rotationY.value;
+    .onBegin(() => {
+      panStartX.value = rotationX.value;
+      panStartY.value = rotationY.value;
     })
-    .onUpdate((event) => {
-      'worklet';
-      const newRotationX = lastRotationX.value - event.translationY * 0.003;
-      const newRotationY = lastRotationY.value - event.translationX * 0.003;
-      // Clamp rotation
-      rotationX.value = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, newRotationX));
-      rotationY.value = newRotationY;
+    .onChange(event => {
+      rotationX.value = panStartX.value - event.translationY * 0.0008;
+      rotationY.value = panStartY.value - event.translationX * 0.0008;
     });
 
   const pinchGesture = Gesture.Pinch()
-    .onStart(() => {
-      'worklet';
-      lastZoom.value = zoom.value;
+    .onBegin(() => {
+      pinchStartZoom.value = zoomShared.value;
     })
-    .onUpdate((event) => {
-      'worklet';
-      const newZoom = Math.max(2.2, Math.min(5.5, lastZoom.value / event.scale));
-      zoom.value = newZoom;
+    .onChange(event => {
+      const baseZoom = pinchStartZoom.value;
+      const newZoom = Math.max(2.2, Math.min(5.5, baseZoom / event.scale));
+      zoomShared.value = newZoom;
     });
 
   const composedGesture = Gesture.Simultaneous(panGesture, pinchGesture);
 
-  const handleTapJS = useCallback((x: number, y: number, width: number, height: number) => {
-    if (!width) return;
-    const ndcX = (x / width) * 2 - 1;
-    const ndcY = -(y / height) * 2 + 1;
-    const camera = cameraRef.current;
-    const world = worldGroupRef.current;
-    if (!camera || !world) return;
-    raycaster.setFromCamera({ x: ndcX, y: ndcY }, camera);
-    const meshes = countryMeshesRef.current.map(entry => entry.mesh);
-    const intersections = raycaster.intersectObjects(meshes, true);
-    if (intersections.length > 0) {
-      const mesh = intersections[0].object as THREE.Mesh;
-      const entry = countryMeshesRef.current.find(info => info.mesh === mesh);
-      if (entry) {
-        const countryData = countriesByIso3[entry.iso3];
-        if (countryData) {
-          onCountrySelect?.(countryData);
+  const handleTap = useCallback(
+    (event: TapGestureHandlerStateChangeEvent) => {
+      if (event.nativeEvent.state !== State.END || !glViewSize.current.width) {
+        return;
+      }
+      const { x, y } = event.nativeEvent;
+      const ndcX = (x / glViewSize.current.width) * 2 - 1;
+      const ndcY = -(y / glViewSize.current.height) * 2 + 1;
+      const camera = cameraRef.current;
+      if (!camera) return;
+
+      raycaster.setFromCamera(new THREE.Vector2(ndcX, ndcY), camera);
+      const meshes = countryMeshesRef.current.map(entry => entry.mesh);
+      const intersections = raycaster.intersectObjects(meshes, true);
+      if (intersections.length > 0) {
+        const mesh = intersections[0].object as THREE.Mesh;
+        const entry = countryMeshesRef.current.find(info => info.mesh === mesh);
+        if (entry) {
+          const countryData = countriesByIso3[entry.iso3];
+          if (countryData) {
+            onCountrySelect?.(countryData);
+            return;
+          }
         }
       }
-    }
-  }, [countriesByIso3, onCountrySelect, raycaster]);
-
-  const tapGesture = Gesture.Tap().onEnd((event) => {
-    'worklet';
-    runOnJS(handleTapJS)(event.x, event.y, viewWidth.value, viewHeight.value);
-  });
-
-  const allGestures = Gesture.Race(tapGesture, composedGesture);
+      onCountrySelect?.(null);
+    },
+    [countriesByIso3, onCountrySelect, raycaster]
+  );
 
   return (
     <GestureHandlerRootView style={styles.container}>
-      <GestureDetector gesture={allGestures}>
-        <Animated.View style={styles.container}>
+      <GestureDetector gesture={composedGesture}>
+        <TapGestureHandler onHandlerStateChange={handleTap}>
           <GLView
             style={styles.container}
             onLayout={event => {
-              const { width, height } = event.nativeEvent.layout;
-              viewWidth.value = width;
-              viewHeight.value = height;
+              glViewSize.current = event.nativeEvent.layout;
             }}
             onContextCreate={onContextCreate}
           />
-        </Animated.View>
+        </TapGestureHandler>
       </GestureDetector>
     </GestureHandlerRootView>
   );

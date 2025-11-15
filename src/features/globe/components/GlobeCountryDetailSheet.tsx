@@ -26,7 +26,7 @@ export function GlobeCountryDetailSheet({ country, visible, onClose }: GlobeCoun
       <View style={styles.overlay}>
         <View style={styles.sheet}>
           <Text variant="h4">{country?.name}</Text>
-          <Text variant="bodySm" style={styles.iso}>
+          <Text variant="bodySmall" style={styles.iso}>
             ISO3 · {country?.iso3}
           </Text>
           <View style={styles.statRow}>
@@ -40,10 +40,14 @@ export function GlobeCountryDetailSheet({ country, visible, onClose }: GlobeCoun
             ))}
           </View>
           <View style={styles.actions}>
-            <Button label={`View places in ${country?.name ?? ''}`} variant="secondary" onPress={onClose} />
-            <Button label="Start a trip here" onPress={onClose} />
+            <Button variant="secondary" onPress={onClose}>
+              {`View places in ${country?.name ?? ''}`}
+            </Button>
+            <Button onPress={onClose}>Start a trip here</Button>
           </View>
-          <Button label="Close" variant="ghost" onPress={onClose} />
+          <Button variant="ghost" onPress={onClose}>
+            Close
+          </Button>
         </View>
       </View>
     </Modal>
