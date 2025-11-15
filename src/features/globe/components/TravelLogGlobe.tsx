@@ -49,7 +49,7 @@ export function TravelLogGlobe({ onCountryChange }: TravelLogGlobeProps) {
             <GlobeCanvas countriesByIso3={countriesByIso3} onCountrySelect={handleSelection} />
           ) : (
             <View style={styles.loadingContainer}>
-              <Text variant="bodySm" style={styles.loadingText}>Loading globe...</Text>
+              <Text variant="bodySmall" style={styles.loadingText}>Loading globe...</Text>
             </View>
           )}
         </View>

@@ -18,16 +18,17 @@ The React Native migration foundation is **100% complete** and validated. A work
 
 ## 🚀 Quick Start
 
-### Run the App
+### Run the App (Simulator or Custom Dev Client)
 
 ```bash
 cd /Users/joe/Desktop/GalliGo/galligo-mobile
 
 # Start Metro bundler
+# Start Metro in dev-client mode (required for native modules)
 npx expo start --dev-client
 
-# The app will open in iOS Simulator (iPhone 16 Pro)
-# Or press 'i' in terminal to open iOS Simulator
+# Press 'i' in the terminal to install & launch the custom dev client in iOS Simulator
+# or connect a device-specific dev build (see below).
 ```
 
 ### Rebuild Native Code (After Adding Dependencies)
@@ -35,6 +36,16 @@ npx expo start --dev-client
 ```bash
 npx expo run:ios --device "C020E08A-22B7-4772-B18D-3D0B6593F25F"
 ```
+
+### Testing on a Physical iPhone
+
+This project depends on native modules such as Skia, react-native-maps, and the custom bottom sheet that are **not bundled in the standard Expo Go app**. To test on real hardware you must install a custom development build:
+
+1. Install the Expo Dev Client on your device by running `expo run:ios --device` (or `expo run:android --device` on Android) and selecting the connected device.
+2. Once the build installs on your phone, keep Metro running with `npx expo start --dev-client`.
+3. Open the "galligo-mobile" dev client on the phone and scan the QR code or choose the server from the "Development builds" list.
+
+More detail on why Expo Go is insufficient and how to manage dev builds lives in `docs/EXPO_GO_DEVICE_TESTING.md`.
 
 ---
 

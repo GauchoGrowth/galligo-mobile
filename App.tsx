@@ -11,17 +11,6 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { StyleSheet } from 'react-native';
 import { useFonts } from 'expo-font';
-import {
-  Outfit_400Regular,
-  Outfit_500Medium,
-  Outfit_600SemiBold,
-  Outfit_700Bold,
-} from '@expo-google-fonts/outfit';
-import {
-  Roboto_400Regular,
-  Roboto_500Medium,
-  Roboto_700Bold,
-} from '@expo-google-fonts/roboto';
 
 // Providers and Navigation
 import { AuthProvider } from '@/lib/auth';
@@ -30,13 +19,13 @@ import { RootNavigator } from '@/navigation/RootNavigator';
 
 export default function App() {
   const [fontsLoaded, fontError] = useFonts({
-    'Outfit-Regular': Outfit_400Regular,
-    'Outfit-Medium': Outfit_500Medium,
-    'Outfit-SemiBold': Outfit_600SemiBold,
-    'Outfit-Bold': Outfit_700Bold,
-    'Roboto-Regular': Roboto_400Regular,
-    'Roboto-Medium': Roboto_500Medium,
-    'Roboto-Bold': Roboto_700Bold,
+    'Outfit-Regular': require('./assets/fonts/Outfit-Regular.ttf'),
+    'Outfit-Medium': require('./assets/fonts/Outfit-Medium.ttf'),
+    'Outfit-SemiBold': require('./assets/fonts/Outfit-SemiBold.ttf'),
+    'Outfit-Bold': require('./assets/fonts/Outfit-Bold.ttf'),
+    'Roboto-Regular': require('./assets/fonts/Roboto-Regular.ttf'),
+    'Roboto-Medium': require('./assets/fonts/Roboto-Medium.ttf'),
+    'Roboto-Bold': require('./assets/fonts/Roboto-Bold.ttf'),
   });
 
   if (fontError) {
