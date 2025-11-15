@@ -449,9 +449,6 @@ export const WebViewGlobe = forwardRef<WebViewGlobeHandle, WebViewGlobeProps>((p
         onLoadStart={() => console.log('[WebViewGlobe] WebView load started')}
         onLoad={() => console.log('[WebViewGlobe] WebView loaded')}
         onLoadEnd={() => console.log('[WebViewGlobe] WebView load ended')}
-        onConsoleMessage={(event) => {
-          console.log('[WebView Console]', event.nativeEvent.message);
-        }}
         allowFileAccess={true}
         allowFileAccessFromFileURLs={true}
         allowUniversalAccessFromFileURLs={true}

@@ -9,9 +9,8 @@
 
 import React, { useMemo } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
-import Svg, { G, Use } from 'react-native-svg';
 import { theme } from '@/theme';
-import WorldMapSvg from '../../../assets/world-continents-grouped.svg';
+import { WorldMapBase } from './WorldMapBase';
 import { VisitedCountriesOverlay } from './VisitedCountriesOverlay';
 
 const { colors } = theme;
@@ -44,12 +43,7 @@ export function InteractiveWorldMap({
     <View style={[styles.container, { height }]}>
       {/* Base white world map */}
       <View style={StyleSheet.absoluteFill}>
-        <WorldMapSvg
-          width={svgWidth}
-          height={height}
-          viewBox="-120 20 2240 817"
-          preserveAspectRatio="xMidYMid meet"
-        />
+        <WorldMapBase width={svgWidth} height={height} />
       </View>
 
       {/* Colored overlay for visited countries */}

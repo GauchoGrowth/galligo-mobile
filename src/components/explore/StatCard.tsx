@@ -60,7 +60,7 @@ export function StatCard({
         <Ionicons name={icon} size={24} color={color} />
       </View>
       <H2 style={styles.value} accessibilityElementsHidden={true}>{value.toLocaleString()}</H2>
-      <Caption color={colors.neutral[600]} accessibilityElementsHidden={true}>{label}</Caption>
+      <Caption color={colors.text.secondary} accessibilityElementsHidden={true}>{label}</Caption>
     </Animated.View>
   );
 }
@@ -68,11 +68,13 @@ export function StatCard({
 const styles = StyleSheet.create({
   card: {
     flex: 1,
-    backgroundColor: colors.primary.white,
+    backgroundColor: colors.brand.offWhite,
     borderRadius: borderRadius.xl,
     padding: spacing[4],
     alignItems: 'center',
-    ...shadows[2],
+    borderWidth: 1,
+    borderColor: colors.neutral[200],
+    ...shadows[1],
   },
   iconContainer: {
     width: 56,

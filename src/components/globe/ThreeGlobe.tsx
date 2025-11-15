@@ -341,7 +341,7 @@ export const ThreeGlobe = forwardRef<ThreeGlobeHandle, ThreeGlobeProps>((props, 
       // Count meshes
       let meshCount = 0;
       let sampleCountries: string[] = [];
-      gltf.scene.traverse((child) => {
+      gltf.scene.traverse((child: THREE.Object3D) => {
         if (child instanceof THREE.Mesh) {
           meshCount++;
           if (meshCount <= 5 && child.userData.name !== 'Globe_Base') {

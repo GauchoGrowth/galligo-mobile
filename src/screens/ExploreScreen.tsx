@@ -146,21 +146,21 @@ export function ExploreScreen() {
             icon="people"
             value={networkData.friends.length}
             label="Friends"
-            color="#00DDFF"
+            color={colors.primary.blue}
             index={0}
           />
           <StatCard
             icon="location"
             value={networkData.totalCities}
             label="Cities"
-            color="#23D8C2"
+            color={colors.secondary.green}
             index={1}
           />
           <StatCard
             icon="restaurant"
             value={networkData.totalPlaces}
             label="Places"
-            color="#FF6347"
+            color={colors.brand.sunset}
             index={2}
           />
         </View>
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing[2],
   },
   subtitle: {
-    color: colors.neutral[600],
+    color: colors.text.secondary,
     marginTop: spacing[1],
   },
   statsRow: {

@@ -1,0 +1,2342 @@
+[
+  {
+    "iso": "ABW",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.012863109111785783,
+    "final_area": 0.010895982980727803,
+    "area_delta_pct": 15.29277341864112,
+    "island_count": 1
+  },
+  {
+    "iso": "AFG",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 62.557929601669315,
+    "final_area": 62.53135657310485,
+    "area_delta_pct": 0.04247747445234275,
+    "island_count": 1
+  },
+  {
+    "iso": "AGO",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 103.58727080345153,
+    "final_area": 103.58850394248967,
+    "area_delta_pct": -0.0011904349140297405,
+    "island_count": 2
+  },
+  {
+    "iso": "AIA",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.00709155082702636,
+    "final_area": 0.005483977794647393,
+    "area_delta_pct": 22.66885017946148,
+    "island_count": 1
+  },
+  {
+    "iso": "ALA",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.12371876478195104,
+    "final_area": 0.11789705991745045,
+    "area_delta_pct": 4.705595690969834,
+    "island_count": 3
+  },
+  {
+    "iso": "ALB",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 3.0433876466751095,
+    "final_area": 3.0307095718383814,
+    "area_delta_pct": 0.41657771893037904,
+    "island_count": 1
+  },
+  {
+    "iso": "AND",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.04849843740463271,
+    "final_area": 0.04401491403579635,
+    "area_delta_pct": 9.244675929307531,
+    "island_count": 1
+  },
+  {
+    "iso": "ARE",
+    "expected_enclaves": 0,
+    "initial_holes": 1,
+    "final_holes": 0,
+    "initial_area": 6.30611067533492,
+    "final_area": 6.306555571556072,
+    "area_delta_pct": -0.0070550017920302755,
+    "island_count": 5
+  },
+  {
+    "iso": "ARG",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 278.47219979047776,
+    "final_area": 278.4962067413333,
+    "area_delta_pct": -0.008620950627607898,
+    "island_count": 4
+  },
+  {
+    "iso": "ARM",
+    "expected_enclaves": 0,
+    "initial_holes": 1,
+    "final_holes": 0,
+    "initial_area": 3.134112722873692,
+    "final_area": 3.1467172098159835,
+    "area_delta_pct": -0.40217082334978327,
+    "island_count": 2
+  },
+  {
+    "iso": "ASM",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.010049567222594676,
+    "final_area": 0.01040161609649651,
+    "area_delta_pct": -3.5031247227274998,
+    "island_count": 1
+  },
+  {
+    "iso": "ATA",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 6048.932237420096,
+    "final_area": 6048.4358969020905,
+    "area_delta_pct": 0.008205423676837532,
+    "island_count": 108
+  },
+  {
+    "iso": "ATF",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.8638020610809274,
+    "final_area": 0.8600936412811204,
+    "area_delta_pct": 0.42931360862538265,
+    "island_count": 3
+  },
+  {
+    "iso": "ATG",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.036661460399629,
+    "final_area": 0.032788699865342275,
+    "area_delta_pct": 10.563574096807992,
+    "island_count": 2
+  },
+  {
+    "iso": "AUS",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 695.9166188955306,
+    "final_area": 695.89438744545,
+    "area_delta_pct": 0.0031945565714375673,
+    "island_count": 42
+  },
+  {
+    "iso": "AUT",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 10.0622409415245,
+    "final_area": 10.074474418163296,
+    "area_delta_pct": -0.12157805313835679,
+    "island_count": 1
+  },
+  {
+    "iso": "AZE",
+    "expected_enclaves": 0,
+    "initial_holes": 1,
+    "final_holes": 0,
+    "initial_area": 9.161920628547659,
+    "final_area": 9.154458661079405,
+    "area_delta_pct": 0.08144544982198762,
+    "island_count": 3
+  },
+  {
+    "iso": "BDI",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 2.204336504936211,
+    "final_area": 2.217424941062924,
+    "area_delta_pct": -0.593758534479811,
+    "island_count": 1
+  },
+  {
+    "iso": "BEL",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 3.9064038872718854,
+    "final_area": 3.8910553979873725,
+    "area_delta_pct": 0.3929058471020452,
+    "island_count": 1
+  },
+  {
+    "iso": "BEN",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 9.567449300289148,
+    "final_area": 9.590272967815393,
+    "area_delta_pct": -0.23855540604281003,
+    "island_count": 1
+  },
+  {
+    "iso": "BFA",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 22.6572451281548,
+    "final_area": 22.649632704257993,
+    "area_delta_pct": 0.033598188366449316,
+    "island_count": 1
+  },
+  {
+    "iso": "BGD",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 11.99958740472799,
+    "final_area": 11.977617404461016,
+    "area_delta_pct": 0.183089630717779,
+    "island_count": 7
+  },
+  {
+    "iso": "BGR",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 12.386436250209812,
+    "final_area": 12.387509465217594,
+    "area_delta_pct": -0.008664437341805602,
+    "island_count": 1
+  },
+  {
+    "iso": "BHR",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.04874303102493547,
+    "final_area": 0.04620299816131889,
+    "area_delta_pct": 5.211068762459959,
+    "island_count": 1
+  },
+  {
+    "iso": "BHS",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 1.1245588874816979,
+    "final_area": 1.1033144462108762,
+    "area_delta_pct": 1.8891355096926798,
+    "island_count": 15
+  },
+  {
+    "iso": "BIH",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 5.828575501441941,
+    "final_area": 5.823429348468772,
+    "area_delta_pct": 0.08829177852969393,
+    "island_count": 1
+  },
+  {
+    "iso": "BLM",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.0020842766761784187,
+    "final_area": 0.001885952949523843,
+    "area_delta_pct": 9.515230339678702,
+    "island_count": 1
+  },
+  {
+    "iso": "BLR",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 28.130319316387197,
+    "final_area": 28.134239938259118,
+    "area_delta_pct": -0.013937352888974009,
+    "island_count": 1
+  },
+  {
+    "iso": "BLZ",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 1.9288066089153257,
+    "final_area": 1.9348945355415446,
+    "area_delta_pct": -0.3156317796755371,
+    "island_count": 3
+  },
+  {
+    "iso": "BMU",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.006314227581024306,
+    "final_area": 0.006621320247649959,
+    "area_delta_pct": -4.863503297672321,
+    "island_count": 1
+  },
+  {
+    "iso": "BOL",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 92.1885237193109,
+    "final_area": 92.18237563133242,
+    "area_delta_pct": 0.006669038325413634,
+    "island_count": 1
+  },
+  {
+    "iso": "BRA",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 706.65419062972,
+    "final_area": 706.6622823190687,
+    "area_delta_pct": -0.0011450705954905776,
+    "island_count": 17
+  },
+  {
+    "iso": "BRB",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.03233761668205417,
+    "final_area": 0.03369457840919726,
+    "area_delta_pct": -4.1962329521214885,
+    "island_count": 1
+  },
+  {
+    "iso": "BRN",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.46017761230469384,
+    "final_area": 0.4546959996223589,
+    "area_delta_pct": 1.1911949942287583,
+    "island_count": 2
+  },
+  {
+    "iso": "BTN",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 3.6331104278564292,
+    "final_area": 3.635722119808167,
+    "area_delta_pct": -0.07188584007006163,
+    "island_count": 1
+  },
+  {
+    "iso": "BWA",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 50.74819507122038,
+    "final_area": 50.74030821800233,
+    "area_delta_pct": 0.015541150196530202,
+    "island_count": 1
+  },
+  {
+    "iso": "CAF",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 50.57561074018479,
+    "final_area": 50.57205526828768,
+    "area_delta_pct": 0.0070300127770688186,
+    "island_count": 1
+  },
+  {
+    "iso": "CAN",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 1687.2395738077187,
+    "final_area": 1685.9229558861284,
+    "area_delta_pct": 0.07803384546149193,
+    "island_count": 141
+  },
+  {
+    "iso": "CHE",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 4.8684563207626415,
+    "final_area": 4.868552298545834,
+    "area_delta_pct": -0.0019714212651519123,
+    "island_count": 1
+  },
+  {
+    "iso": "CHL",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 76.85573621273033,
+    "final_area": 76.84149999141691,
+    "area_delta_pct": 0.018523303548898612,
+    "island_count": 31
+  },
+  {
+    "iso": "CHN",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 950.9811074018476,
+    "final_area": 950.9516831231126,
+    "area_delta_pct": 0.0030940970862543956,
+    "island_count": 13
+  },
+  {
+    "iso": "CIV",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 26.308230237960824,
+    "final_area": 26.301214826107035,
+    "area_delta_pct": 0.026666224943046796,
+    "island_count": 2
+  },
+  {
+    "iso": "CMR",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 37.90084472417828,
+    "final_area": 37.93368124246602,
+    "area_delta_pct": -0.08663795893392646,
+    "island_count": 1
+  },
+  {
+    "iso": "COD",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 189.6130785775184,
+    "final_area": 189.62613446950928,
+    "area_delta_pct": -0.006885544018816347,
+    "island_count": 1
+  },
+  {
+    "iso": "COG",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 28.08070000410081,
+    "final_area": 28.071694099903088,
+    "area_delta_pct": 0.03207150888833292,
+    "island_count": 1
+  },
+  {
+    "iso": "COK",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.0052623248100287885,
+    "final_area": 0.004179420471192259,
+    "area_delta_pct": 20.57843971874866,
+    "island_count": 1
+  },
+  {
+    "iso": "COL",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 92.52336363792425,
+    "final_area": 92.48947319149973,
+    "area_delta_pct": 0.036629068693553715,
+    "island_count": 2
+  },
+  {
+    "iso": "COM",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.13106655597687317,
+    "final_area": 0.12842926979065522,
+    "area_delta_pct": 2.01217325545908,
+    "island_count": 3
+  },
+  {
+    "iso": "CPV",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.30160041451453595,
+    "final_area": 0.29499238252639265,
+    "area_delta_pct": 2.190989027246454,
+    "island_count": 8
+  },
+  {
+    "iso": "CRI",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 4.230486351251599,
+    "final_area": 4.221796743869782,
+    "area_delta_pct": 0.2054044537750699,
+    "island_count": 1
+  },
+  {
+    "iso": "CUB",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 9.510069767236699,
+    "final_area": 9.500266690254197,
+    "area_delta_pct": 0.10308102067005523,
+    "island_count": 7
+  },
+  {
+    "iso": "CUW",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.035557360649110005,
+    "final_area": 0.03507323265075781,
+    "area_delta_pct": 1.361540872309686,
+    "island_count": 1
+  },
+  {
+    "iso": "CYM",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.025841702222825128,
+    "final_area": 0.024184056520462564,
+    "area_delta_pct": 6.414614981897049,
+    "island_count": 3
+  },
+  {
+    "iso": "CYP",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.5630194878578177,
+    "final_area": 0.5590151882171643,
+    "area_delta_pct": 0.7112186570821923,
+    "island_count": 1
+  },
+  {
+    "iso": "CZE",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 9.820975399017328,
+    "final_area": 9.832491581439971,
+    "area_delta_pct": -0.11726108614216588,
+    "island_count": 1
+  },
+  {
+    "iso": "DEU",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 45.90299672126769,
+    "final_area": 45.88513216018679,
+    "area_delta_pct": 0.03891807149188047,
+    "island_count": 6
+  },
+  {
+    "iso": "DJI",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 1.7929791712760927,
+    "final_area": 1.7871678829193163,
+    "area_delta_pct": 0.32411354520312013,
+    "island_count": 1
+  },
+  {
+    "iso": "DMA",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.058553479909897066,
+    "final_area": 0.06137574315071077,
+    "area_delta_pct": -4.819975251951959,
+    "island_count": 1
+  },
+  {
+    "iso": "DNK",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 6.132401356697087,
+    "final_area": 6.126863086223603,
+    "area_delta_pct": 0.09031161124892535,
+    "island_count": 12
+  },
+  {
+    "iso": "DOM",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 4.153734465837478,
+    "final_area": 4.1474989974498735,
+    "area_delta_pct": 0.15011716417812163,
+    "island_count": 1
+  },
+  {
+    "iso": "DZA",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 213.67000767946246,
+    "final_area": 213.67519863724704,
+    "area_delta_pct": -0.002429427433898399,
+    "island_count": 1
+  },
+  {
+    "iso": "ECU",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 20.690104068517687,
+    "final_area": 20.702424000501626,
+    "area_delta_pct": -0.05954504599464445,
+    "island_count": 9
+  },
+  {
+    "iso": "EGY",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 90.79749696969994,
+    "final_area": 90.79585429668425,
+    "area_delta_pct": 0.0018091611228325617,
+    "island_count": 1
+  },
+  {
+    "iso": "ERI",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 10.375823740959168,
+    "final_area": 10.360258553028114,
+    "area_delta_pct": 0.1500139971500271,
+    "island_count": 3
+  },
+  {
+    "iso": "ESH",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 8.057129224538809,
+    "final_area": 8.065303041934962,
+    "area_delta_pct": -0.10144825989956129,
+    "island_count": 1
+  },
+  {
+    "iso": "ESP",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 53.678461122512765,
+    "final_area": 53.67592382669447,
+    "area_delta_pct": 0.004726841577111865,
+    "island_count": 12
+  },
+  {
+    "iso": "EST",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 7.070536475181581,
+    "final_area": 7.052975556850418,
+    "area_delta_pct": 0.2483675516391661,
+    "island_count": 4
+  },
+  {
+    "iso": "ETH",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 92.68459973573688,
+    "final_area": 92.69994537353514,
+    "area_delta_pct": -0.01655683667191287,
+    "island_count": 1
+  },
+  {
+    "iso": "FIN",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 62.15219338655473,
+    "final_area": 62.16033309459685,
+    "area_delta_pct": -0.013096413173221098,
+    "island_count": 8
+  },
+  {
+    "iso": "FJI",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 1.5604435133933852,
+    "final_area": 1.5414506101607954,
+    "area_delta_pct": 1.217147757645339,
+    "island_count": 21
+  },
+  {
+    "iso": "FLK",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 1.4873311305046215,
+    "final_area": 1.4844723510742288,
+    "area_delta_pct": 0.192208673089682,
+    "island_count": 6
+  },
+  {
+    "iso": "FRO",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.17868818283081014,
+    "final_area": 0.17194509863853072,
+    "area_delta_pct": 3.7736598388624696,
+    "island_count": 5
+  },
+  {
+    "iso": "FSM",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.042757012844085826,
+    "final_area": 0.03995782852172535,
+    "area_delta_pct": 6.546725639061242,
+    "island_count": 5
+  },
+  {
+    "iso": "GAB",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 21.088834445476532,
+    "final_area": 21.074518980979914,
+    "area_delta_pct": 0.06788172449089243,
+    "island_count": 1
+  },
+  {
+    "iso": "GBR",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 33.094950919151316,
+    "final_area": 33.01254103898999,
+    "area_delta_pct": 0.24901043172008488,
+    "island_count": 23
+  },
+  {
+    "iso": "GEO",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 7.563050055503855,
+    "final_area": 7.559071547985085,
+    "area_delta_pct": 0.0526045377139198,
+    "island_count": 1
+  },
+  {
+    "iso": "GGY",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.005980502367019532,
+    "final_area": 0.005143595933914631,
+    "area_delta_pct": 13.9939152556842,
+    "island_count": 1
+  },
+  {
+    "iso": "GHA",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 19.572101757526408,
+    "final_area": 19.59273513197898,
+    "area_delta_pct": -0.1054223747055559,
+    "island_count": 1
+  },
+  {
+    "iso": "GIN",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 20.146533148288732,
+    "final_area": 20.1550063896179,
+    "area_delta_pct": -0.042058061636706716,
+    "island_count": 1
+  },
+  {
+    "iso": "GMB",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.8576670503616374,
+    "final_area": 0.843247343301785,
+    "area_delta_pct": 1.6812709610066403,
+    "island_count": 1
+  },
+  {
+    "iso": "GNB",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 2.6510432684421703,
+    "final_area": 2.646263618469251,
+    "area_delta_pct": 0.1802931709872767,
+    "island_count": 7
+  },
+  {
+    "iso": "GNQ",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 2.155959465503697,
+    "final_area": 2.1460059905052096,
+    "area_delta_pct": 0.46167264077769204,
+    "island_count": 2
+  },
+  {
+    "iso": "GRC",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 13.566485555171962,
+    "final_area": 13.530785977840427,
+    "area_delta_pct": 0.26314536057516347,
+    "island_count": 40
+  },
+  {
+    "iso": "GRD",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.0236602580547324,
+    "final_area": 0.02387607574462839,
+    "area_delta_pct": -0.9121527305270638,
+    "island_count": 1
+  },
+  {
+    "iso": "GRL",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 664.0559760248656,
+    "final_area": 663.6866481137279,
+    "area_delta_pct": 0.055616984783203406,
+    "island_count": 17
+  },
+  {
+    "iso": "GTM",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 9.114937933683395,
+    "final_area": 9.119328565597536,
+    "area_delta_pct": -0.0481696304032547,
+    "island_count": 1
+  },
+  {
+    "iso": "GUM",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.04010145425796297,
+    "final_area": 0.03965586185455103,
+    "area_delta_pct": 1.1111627038400054,
+    "island_count": 1
+  },
+  {
+    "iso": "GUY",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 17.21088721275329,
+    "final_area": 17.18557689905169,
+    "area_delta_pct": 0.14705990103080863,
+    "island_count": 1
+  },
+  {
+    "iso": "HKG",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.09000722885131779,
+    "final_area": 0.08874660253524345,
+    "area_delta_pct": 1.400583411091072,
+    "island_count": 3
+  },
+  {
+    "iso": "HMD",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.05636741638183619,
+    "final_area": 0.05507062911986662,
+    "area_delta_pct": 2.3005973046290764,
+    "island_count": 1
+  },
+  {
+    "iso": "HND",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 9.497599825859075,
+    "final_area": 9.485322568416594,
+    "area_delta_pct": 0.12926694815097942,
+    "island_count": 3
+  },
+  {
+    "iso": "HRV",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 6.233969690799709,
+    "final_area": 6.224328660964962,
+    "area_delta_pct": 0.15465313937884376,
+    "island_count": 13
+  },
+  {
+    "iso": "HTI",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 2.2920640492439226,
+    "final_area": 2.2735337913036315,
+    "area_delta_pct": 0.8084528853547348,
+    "island_count": 3
+  },
+  {
+    "iso": "HUN",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 11.058376555442809,
+    "final_area": 11.062643828392028,
+    "area_delta_pct": -0.038588602294601225,
+    "island_count": 1
+  },
+  {
+    "iso": "IDN",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 151.78049898862847,
+    "final_area": 151.53085826396935,
+    "area_delta_pct": 0.1644748345950684,
+    "island_count": 133
+  },
+  {
+    "iso": "IMN",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.0771084165573112,
+    "final_area": 0.08217861413955785,
+    "area_delta_pct": -6.57541395429668,
+    "island_count": 1
+  },
+  {
+    "iso": "IND",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 278.3473990511887,
+    "final_area": 278.37818763256,
+    "area_delta_pct": -0.011061206778391156,
+    "island_count": 14
+  },
+  {
+    "iso": "IOT",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.010796971321103944,
+    "final_area": 0.009416599273681842,
+    "area_delta_pct": 12.784807946317347,
+    "island_count": 1
+  },
+  {
+    "iso": "IRL",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 9.271292234659207,
+    "final_area": 9.276965910196317,
+    "area_delta_pct": -0.06119616762699384,
+    "island_count": 2
+  },
+  {
+    "iso": "IRN",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 156.03087943553928,
+    "final_area": 156.05281191825878,
+    "area_delta_pct": -0.014056501378989904,
+    "island_count": 2
+  },
+  {
+    "iso": "IRQ",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 42.23147011756896,
+    "final_area": 42.22019049406053,
+    "area_delta_pct": 0.026709047724427722,
+    "island_count": 1
+  },
+  {
+    "iso": "ISL",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 19.35782188177111,
+    "final_area": 19.32118461132052,
+    "area_delta_pct": 0.189263392722356,
+    "island_count": 1
+  },
+  {
+    "iso": "ISR",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 2.0906454848299707,
+    "final_area": 2.1055018159861874,
+    "area_delta_pct": -0.7106097740633868,
+    "island_count": 1
+  },
+  {
+    "iso": "ITA",
+    "expected_enclaves": 2,
+    "initial_holes": 2,
+    "final_holes": 2,
+    "initial_area": 33.134358649253855,
+    "final_area": 33.126506550312044,
+    "area_delta_pct": 0.02369775442141463,
+    "island_count": 8
+  },
+  {
+    "iso": "JAM",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.9305042743682841,
+    "final_area": 0.9390817177295662,
+    "area_delta_pct": -0.9218059064914315,
+    "island_count": 1
+  },
+  {
+    "iso": "JEY",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.015640701055528394,
+    "final_area": 0.015068898200989904,
+    "area_delta_pct": 3.655864609319283,
+    "island_count": 1
+  },
+  {
+    "iso": "JOR",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 8.407425801753998,
+    "final_area": 8.374118149280545,
+    "area_delta_pct": 0.3961694489947789,
+    "island_count": 1
+  },
+  {
+    "iso": "JPN",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 37.86116799116136,
+    "final_area": 37.915774829387644,
+    "area_delta_pct": -0.14422914327162975,
+    "island_count": 34
+  },
+  {
+    "iso": "KAZ",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 329.36819128036456,
+    "final_area": 329.39040738821024,
+    "area_delta_pct": -0.006745067809771742,
+    "island_count": 4
+  },
+  {
+    "iso": "KEN",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 48.14859082221984,
+    "final_area": 48.14583446979516,
+    "area_delta_pct": 0.005724679326240744,
+    "island_count": 2
+  },
+  {
+    "iso": "KGZ",
+    "expected_enclaves": 0,
+    "initial_holes": 3,
+    "final_holes": 0,
+    "initial_area": 21.44215711593627,
+    "final_area": 21.512187485694902,
+    "area_delta_pct": -0.3266013273757119,
+    "island_count": 1
+  },
+  {
+    "iso": "KHM",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 15.039507522583062,
+    "final_area": 15.053016104698207,
+    "area_delta_pct": -0.08982064136648771,
+    "island_count": 3
+  },
+  {
+    "iso": "KIR",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.07592214941978628,
+    "final_area": 0.07035678982734092,
+    "area_delta_pct": 7.330350411542693,
+    "island_count": 19
+  },
+  {
+    "iso": "KNA",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.01972857832908525,
+    "final_area": 0.01826255917549065,
+    "area_delta_pct": 7.4309416985880326,
+    "island_count": 2
+  },
+  {
+    "iso": "KOR",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 9.761832311153446,
+    "final_area": 9.754383904933945,
+    "area_delta_pct": 0.07630131293067388,
+    "island_count": 11
+  },
+  {
+    "iso": "KWT",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 1.607774415016173,
+    "final_area": 1.6044387936592124,
+    "area_delta_pct": 0.20746824466211478,
+    "island_count": 2
+  },
+  {
+    "iso": "LAO",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 19.53877691268918,
+    "final_area": 19.545422134399324,
+    "area_delta_pct": -0.03401042828749742,
+    "island_count": 1
+  },
+  {
+    "iso": "LBN",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.9757961893081564,
+    "final_area": 0.9729747843742373,
+    "area_delta_pct": 0.2891387530340135,
+    "island_count": 1
+  },
+  {
+    "iso": "LBR",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 7.78765788674353,
+    "final_area": 7.808663781881331,
+    "area_delta_pct": -0.26973315267942144,
+    "island_count": 1
+  },
+  {
+    "iso": "LBY",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 147.89325032472607,
+    "final_area": 147.93285634517667,
+    "area_delta_pct": -0.026780140651208616,
+    "island_count": 1
+  },
+  {
+    "iso": "LCA",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.04593294143676691,
+    "final_area": 0.04175654172897145,
+    "area_delta_pct": 9.09238463107106,
+    "island_count": 1
+  },
+  {
+    "iso": "LIE",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.01640232324600091,
+    "final_area": 0.016845841407773877,
+    "area_delta_pct": -2.703995983502533,
+    "island_count": 1
+  },
+  {
+    "iso": "LKA",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 5.389573252201069,
+    "final_area": 5.384700002670284,
+    "area_delta_pct": 0.09041995168717797,
+    "island_count": 3
+  },
+  {
+    "iso": "LSO",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 2.792609486579894,
+    "final_area": 2.7799800348281862,
+    "area_delta_pct": 0.4522455363844974,
+    "island_count": 1
+  },
+  {
+    "iso": "LTU",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 9.172702958583823,
+    "final_area": 9.168123545646663,
+    "area_delta_pct": 0.04992435662461161,
+    "island_count": 2
+  },
+  {
+    "iso": "LUX",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.32705888032913616,
+    "final_area": 0.33269189834595075,
+    "area_delta_pct": -1.7223253535099854,
+    "island_count": 1
+  },
+  {
+    "iso": "LVA",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 9.504811668396,
+    "final_area": 9.503801469802857,
+    "area_delta_pct": 0.010628286265805123,
+    "island_count": 1
+  },
+  {
+    "iso": "MAC",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.0019867253303513864,
+    "final_area": 0.0014444470405567255,
+    "area_delta_pct": 27.295081081930423,
+    "island_count": 1
+  },
+  {
+    "iso": "MAF",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.0041697382926946715,
+    "final_area": 0.0035527491569522307,
+    "area_delta_pct": 14.796831178191635,
+    "island_count": 1
+  },
+  {
+    "iso": "MAR",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 54.41791113495825,
+    "final_area": 54.40028456807132,
+    "area_delta_pct": 0.032391112630577645,
+    "island_count": 1
+  },
+  {
+    "iso": "MCO",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.0013900947570803133,
+    "final_area": 0.0008619332313538548,
+    "area_delta_pct": 37.99464195058063,
+    "island_count": 1
+  },
+  {
+    "iso": "MDA",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 3.9420205545425517,
+    "final_area": 3.94647402763368,
+    "area_delta_pct": -0.11297437518422865,
+    "island_count": 1
+  },
+  {
+    "iso": "MDG",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 51.05586164474487,
+    "final_area": 51.03155948638914,
+    "area_delta_pct": 0.04759915428482871,
+    "island_count": 3
+  },
+  {
+    "iso": "MDV",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.005382831096649042,
+    "final_area": 0.00379697084426767,
+    "area_delta_pct": 29.46145297720029,
+    "island_count": 2
+  },
+  {
+    "iso": "MEX",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 174.2027284121514,
+    "final_area": 174.1851204633712,
+    "area_delta_pct": 0.010107734213295852,
+    "island_count": 16
+  },
+  {
+    "iso": "MHL",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.01935044765472685,
+    "final_area": 0.017332701683042066,
+    "area_delta_pct": 10.427386527111665,
+    "island_count": 5
+  },
+  {
+    "iso": "MKD",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 2.74309600830078,
+    "final_area": 2.7482241940498326,
+    "area_delta_pct": -0.18694882474162022,
+    "island_count": 1
+  },
+  {
+    "iso": "MLI",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 106.80166479349137,
+    "final_area": 106.7811144244671,
+    "area_delta_pct": 0.01924161862457787,
+    "island_count": 1
+  },
+  {
+    "iso": "MLT",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.027341976165770217,
+    "final_area": 0.026729276180266406,
+    "area_delta_pct": 2.2408767449327933,
+    "island_count": 2
+  },
+  {
+    "iso": "MMR",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 57.60019019603733,
+    "final_area": 57.53251686811456,
+    "area_delta_pct": 0.11748802858540681,
+    "island_count": 19
+  },
+  {
+    "iso": "MNE",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 1.5062123608589226,
+    "final_area": 1.5124564075469988,
+    "area_delta_pct": -0.41455287782365047,
+    "island_count": 1
+  },
+  {
+    "iso": "MNG",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 184.5897262048722,
+    "final_area": 184.5710017299653,
+    "area_delta_pct": 0.010143833728919268,
+    "island_count": 1
+  },
+  {
+    "iso": "MNP",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.033091905117030376,
+    "final_area": 0.028548798561093044,
+    "area_delta_pct": 13.728754932272768,
+    "island_count": 6
+  },
+  {
+    "iso": "MOZ",
+    "expected_enclaves": 0,
+    "initial_holes": 2,
+    "final_holes": 0,
+    "initial_area": 67.13135331153873,
+    "final_area": 67.11748503208172,
+    "area_delta_pct": 0.02065842378099458,
+    "island_count": 1
+  },
+  {
+    "iso": "MRT",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 89.63534479141232,
+    "final_area": 89.6058807301521,
+    "area_delta_pct": 0.03287103020442757,
+    "island_count": 2
+  },
+  {
+    "iso": "MSR",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.0067380082607260165,
+    "final_area": 0.0052658760547632,
+    "area_delta_pct": 21.84818048596745,
+    "island_count": 1
+  },
+  {
+    "iso": "MUS",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.16203224658966037,
+    "final_area": 0.15457564353942643,
+    "area_delta_pct": 4.601925361880255,
+    "island_count": 1
+  },
+  {
+    "iso": "MWI",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 9.957889122962925,
+    "final_area": 9.940312471389753,
+    "area_delta_pct": 0.17650981403920762,
+    "island_count": 3
+  },
+  {
+    "iso": "MYS",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 26.565949072837796,
+    "final_area": 26.546148712635024,
+    "area_delta_pct": 0.07453285462711852,
+    "island_count": 9
+  },
+  {
+    "iso": "NAM",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 72.1136894655227,
+    "final_area": 72.06156880855562,
+    "area_delta_pct": 0.07227567657871033,
+    "island_count": 1
+  },
+  {
+    "iso": "NCL",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 1.6205151605606065,
+    "final_area": 1.6239295244216878,
+    "area_delta_pct": -0.21069619983685417,
+    "island_count": 6
+  },
+  {
+    "iso": "NER",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 100.56394375801092,
+    "final_area": 100.54435855865485,
+    "area_delta_pct": 0.01947536922696722,
+    "island_count": 1
+  },
+  {
+    "iso": "NFK",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.003806467056273823,
+    "final_area": 0.003810029029846312,
+    "area_delta_pct": -0.09357689216351647,
+    "island_count": 1
+  },
+  {
+    "iso": "NGA",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 74.83037467956548,
+    "final_area": 74.79788022995,
+    "area_delta_pct": 0.04342414394506262,
+    "island_count": 2
+  },
+  {
+    "iso": "NIC",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 10.722887383699435,
+    "final_area": 10.727812771797188,
+    "area_delta_pct": -0.04593341253625884,
+    "island_count": 1
+  },
+  {
+    "iso": "NIU",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.016854472160338443,
+    "final_area": 0.015415067672729092,
+    "area_delta_pct": 8.540193213505221,
+    "island_count": 1
+  },
+  {
+    "iso": "NLD",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 4.895426284074782,
+    "final_area": 4.884682681560517,
+    "area_delta_pct": 0.2194620425439697,
+    "island_count": 12
+  },
+  {
+    "iso": "NPL",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 13.516079351901901,
+    "final_area": 13.511068396568174,
+    "area_delta_pct": 0.037074030147818605,
+    "island_count": 1
+  },
+  {
+    "iso": "NRU",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.0022480964660639468,
+    "final_area": 0.0015776348114005228,
+    "area_delta_pct": 29.82352691640915,
+    "island_count": 1
+  },
+  {
+    "iso": "NZL",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 28.999580235481204,
+    "final_area": 28.982908875942208,
+    "area_delta_pct": 0.05748827880825297,
+    "island_count": 13
+  },
+  {
+    "iso": "OMN",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 26.982041740417486,
+    "final_area": 27.000747995376564,
+    "area_delta_pct": -0.06932853762158735,
+    "island_count": 4
+  },
+  {
+    "iso": "PAK",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 81.69599398136111,
+    "final_area": 81.72089111328101,
+    "area_delta_pct": -0.03047533998494507,
+    "island_count": 1
+  },
+  {
+    "iso": "PAN",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 6.071981575489045,
+    "final_area": 6.074826773405074,
+    "area_delta_pct": -0.046857815371416894,
+    "island_count": 5
+  },
+  {
+    "iso": "PCN",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.003433866500855241,
+    "final_area": 0.002172493934631512,
+    "area_delta_pct": 36.733302413170996,
+    "island_count": 1
+  },
+  {
+    "iso": "PER",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 106.51165375947946,
+    "final_area": 106.46578610539427,
+    "area_delta_pct": 0.043063507575201145,
+    "island_count": 1
+  },
+  {
+    "iso": "PHL",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 24.035053050518012,
+    "final_area": 23.968436992168414,
+    "area_delta_pct": 0.27716210240760414,
+    "island_count": 48
+  },
+  {
+    "iso": "PLW",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.02777712345123107,
+    "final_area": 0.02326196432113597,
+    "area_delta_pct": 16.254955766108996,
+    "island_count": 2
+  },
+  {
+    "iso": "PNG",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 37.81021663188937,
+    "final_area": 37.753851928710844,
+    "area_delta_pct": 0.14907267981899203,
+    "island_count": 26
+  },
+  {
+    "iso": "POL",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 41.18742177486424,
+    "final_area": 41.179597184658064,
+    "area_delta_pct": 0.018997523683193553,
+    "island_count": 1
+  },
+  {
+    "iso": "PRI",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.761544017791747,
+    "final_area": 0.7612922441959364,
+    "area_delta_pct": 0.03306093803226134,
+    "island_count": 3
+  },
+  {
+    "iso": "PRK",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 12.964835002422348,
+    "final_area": 12.956177158355745,
+    "area_delta_pct": 0.0667794388820615,
+    "island_count": 2
+  },
+  {
+    "iso": "PRT",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 9.529184011220927,
+    "final_area": 9.514114601612095,
+    "area_delta_pct": 0.1581395593902679,
+    "island_count": 9
+  },
+  {
+    "iso": "PRY",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 35.30777596712113,
+    "final_area": 35.32470770835877,
+    "area_delta_pct": -0.0479547090516505,
+    "island_count": 1
+  },
+  {
+    "iso": "PSE",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.6034682011604328,
+    "final_area": 0.6034191012382529,
+    "area_delta_pct": 0.008136289879966039,
+    "island_count": 2
+  },
+  {
+    "iso": "PYF",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.2191675758361779,
+    "final_area": 0.20303581714630015,
+    "area_delta_pct": 7.360467728098537,
+    "island_count": 21
+  },
+  {
+    "iso": "QAT",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.9907442283630397,
+    "final_area": 0.9784248661994872,
+    "area_delta_pct": 1.24344526174098,
+    "island_count": 1
+  },
+  {
+    "iso": "ROU",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 27.382732651233688,
+    "final_area": 27.375109870433832,
+    "area_delta_pct": 0.027837911200995165,
+    "island_count": 1
+  },
+  {
+    "iso": "RUS",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 2927.4615209849267,
+    "final_area": 2926.8602229812473,
+    "area_delta_pct": 0.020539911434159525,
+    "island_count": 101
+  },
+  {
+    "iso": "RWA",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 2.0544202899932857,
+    "final_area": 2.0486022377014073,
+    "area_delta_pct": 0.2831967889052292,
+    "island_count": 1
+  },
+  {
+    "iso": "SAU",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 171.00121690750132,
+    "final_area": 171.09714921951294,
+    "area_delta_pct": -0.05610036802458474,
+    "island_count": 4
+  },
+  {
+    "iso": "SDN",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 157.02223573446278,
+    "final_area": 157.07534359931947,
+    "area_delta_pct": -0.03382187535942005,
+    "island_count": 1
+  },
+  {
+    "iso": "SEN",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 16.477728446722036,
+    "final_area": 16.490554096698762,
+    "area_delta_pct": -0.0778362746915976,
+    "island_count": 1
+  },
+  {
+    "iso": "SGP",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.03923208713531397,
+    "final_area": 0.03800429821014331,
+    "area_delta_pct": 3.1295529114623286,
+    "island_count": 1
+  },
+  {
+    "iso": "SGS",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.5105059862136845,
+    "final_area": 0.5100252532959038,
+    "area_delta_pct": 0.09416792961552106,
+    "island_count": 2
+  },
+  {
+    "iso": "SHN",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.015426583290100378,
+    "final_area": 0.01376572847366356,
+    "area_delta_pct": 10.76618707593295,
+    "island_count": 2
+  },
+  {
+    "iso": "SLB",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 2.1077450180053607,
+    "final_area": 2.0764798974990724,
+    "area_delta_pct": 1.4833445335753064,
+    "island_count": 21
+  },
+  {
+    "iso": "SLE",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 5.879167096614828,
+    "final_area": 5.886465010643027,
+    "area_delta_pct": -0.1241317674471493,
+    "island_count": 2
+  },
+  {
+    "iso": "SLV",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 1.6978504550456923,
+    "final_area": 1.6944799911975748,
+    "area_delta_pct": 0.19851358746591502,
+    "island_count": 1
+  },
+  {
+    "iso": "SMR",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.007667107582092183,
+    "final_area": 0.00684474229812694,
+    "area_delta_pct": 10.725886850551246,
+    "island_count": 1
+  },
+  {
+    "iso": "SOM",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 38.495493037700705,
+    "final_area": 38.46067714929592,
+    "area_delta_pct": 0.09044146640929927,
+    "island_count": 1
+  },
+  {
+    "iso": "SPM",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.024306049346923722,
+    "final_area": 0.021889508962630998,
+    "area_delta_pct": 9.942135596785382,
+    "island_count": 2
+  },
+  {
+    "iso": "SRB",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 8.746303863525391,
+    "final_area": 8.755365169048309,
+    "area_delta_pct": -0.10360154031128874,
+    "island_count": 1
+  },
+  {
+    "iso": "SSD",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 50.90445364713668,
+    "final_area": 50.9240083169937,
+    "area_delta_pct": -0.03841445778511468,
+    "island_count": 1
+  },
+  {
+    "iso": "STP",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.07973967552184859,
+    "final_area": 0.07341488361358654,
+    "area_delta_pct": 7.931800407852248,
+    "island_count": 2
+  },
+  {
+    "iso": "SUR",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 11.806242638826372,
+    "final_area": 11.799240736961357,
+    "area_delta_pct": 0.059306775908439316,
+    "island_count": 1
+  },
+  {
+    "iso": "SVK",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 5.92438991308213,
+    "final_area": 5.909299941062938,
+    "area_delta_pct": 0.254709299026226,
+    "island_count": 1
+  },
+  {
+    "iso": "SVN",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 2.3561484575271643,
+    "final_area": 2.344315395355231,
+    "area_delta_pct": 0.5022205682383966,
+    "island_count": 1
+  },
+  {
+    "iso": "SWE",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 78.47603895425803,
+    "final_area": 78.45576685667044,
+    "area_delta_pct": 0.025832213064945302,
+    "island_count": 6
+  },
+  {
+    "iso": "SWZ",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 1.5364525461196883,
+    "final_area": 1.5309801626205444,
+    "area_delta_pct": 0.35617003030548683,
+    "island_count": 1
+  },
+  {
+    "iso": "SXM",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.003558676242828094,
+    "final_area": 0.002894661426544127,
+    "area_delta_pct": 18.659039793860877,
+    "island_count": 1
+  },
+  {
+    "iso": "SYC",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.014151878356933276,
+    "final_area": 0.014139461517335401,
+    "area_delta_pct": 0.08773986946963701,
+    "island_count": 1
+  },
+  {
+    "iso": "SYR",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 18.37079110241356,
+    "final_area": 18.380408530646488,
+    "area_delta_pct": -0.05235173694651136,
+    "island_count": 1
+  },
+  {
+    "iso": "TCA",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.028770509958268888,
+    "final_area": 0.02804649353027468,
+    "area_delta_pct": 2.5165227486213486,
+    "island_count": 3
+  },
+  {
+    "iso": "TCD",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 106.83017944812778,
+    "final_area": 106.78411470413208,
+    "area_delta_pct": 0.043119598070194325,
+    "island_count": 1
+  },
+  {
+    "iso": "TGO",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 4.674221341609942,
+    "final_area": 4.651838327646253,
+    "area_delta_pct": 0.47886080542304776,
+    "island_count": 1
+  },
+  {
+    "iso": "THA",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 43.27865240573893,
+    "final_area": 43.26772422552119,
+    "area_delta_pct": 0.025250740515871752,
+    "island_count": 10
+  },
+  {
+    "iso": "TJK",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 14.713037555217742,
+    "final_area": 14.711042637825019,
+    "area_delta_pct": 0.013558841165439213,
+    "island_count": 3
+  },
+  {
+    "iso": "TKM",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 49.077611575126674,
+    "final_area": 49.05129535913472,
+    "area_delta_pct": 0.05362163142692958,
+    "island_count": 2
+  },
+  {
+    "iso": "TLS",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 1.2294365882873404,
+    "final_area": 1.2295007324218767,
+    "area_delta_pct": -0.005217360142642726,
+    "island_count": 3
+  },
+  {
+    "iso": "TON",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.037251341342924155,
+    "final_area": 0.03436873435973944,
+    "area_delta_pct": 7.738263588009736,
+    "island_count": 3
+  },
+  {
+    "iso": "TTO",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.4196541333198544,
+    "final_area": 0.4237585842609444,
+    "area_delta_pct": -0.9780556451618855,
+    "island_count": 2
+  },
+  {
+    "iso": "TUN",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 15.31114168405535,
+    "final_area": 15.309103426933298,
+    "area_delta_pct": 0.013312247800403361,
+    "island_count": 3
+  },
+  {
+    "iso": "TUR",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 81.24997503042223,
+    "final_area": 81.21081817626954,
+    "area_delta_pct": 0.04819306607544463,
+    "island_count": 3
+  },
+  {
+    "iso": "TUV",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.0008382797241217141,
+    "final_area": 0.0007111454010018608,
+    "area_delta_pct": 15.166097838410089,
+    "island_count": 1
+  },
+  {
+    "iso": "TWN",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 3.1808448243141347,
+    "final_area": 3.165077214241051,
+    "area_delta_pct": 0.4957051017565368,
+    "island_count": 2
+  },
+  {
+    "iso": "TZA",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 77.03747359752654,
+    "final_area": 77.0459916687012,
+    "area_delta_pct": -0.011057048961865969,
+    "island_count": 4
+  },
+  {
+    "iso": "UGA",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 19.62791368961334,
+    "final_area": 19.63366463422775,
+    "area_delta_pct": -0.029299826284910305,
+    "island_count": 1
+  },
+  {
+    "iso": "UKR",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 70.53629058762365,
+    "final_area": 70.51373858137715,
+    "area_delta_pct": 0.03197220332771006,
+    "island_count": 2
+  },
+  {
+    "iso": "URY",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 17.087979207038863,
+    "final_area": 17.09708545923232,
+    "area_delta_pct": -0.05329039837377106,
+    "island_count": 1
+  },
+  {
+    "iso": "USA",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 1115.1781907153143,
+    "final_area": 1114.9242975795273,
+    "area_delta_pct": 0.02276704636987949,
+    "island_count": 127
+  },
+  {
+    "iso": "UZB",
+    "expected_enclaves": 0,
+    "initial_holes": 1,
+    "final_holes": 0,
+    "initial_area": 48.52686805009847,
+    "final_area": 48.49236556291578,
+    "area_delta_pct": 0.0710997609552554,
+    "island_count": 3
+  },
+  {
+    "iso": "VAT",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 7.67660140990862e-05,
+    "final_area": 5.937337875363484e-05,
+    "area_delta_pct": 22.656686750730223,
+    "island_count": 1
+  },
+  {
+    "iso": "VCT",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.02584565639495772,
+    "final_area": 0.02211033225059416,
+    "area_delta_pct": 14.452425147508704,
+    "island_count": 3
+  },
+  {
+    "iso": "VEN",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 74.59428843975068,
+    "final_area": 74.59925673007959,
+    "area_delta_pct": -0.006660416545050558,
+    "island_count": 5
+  },
+  {
+    "iso": "VGB",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.01154575586318846,
+    "final_area": 0.009243646860121166,
+    "area_delta_pct": 19.939006422326568,
+    "island_count": 3
+  },
+  {
+    "iso": "VIR",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.026850770711896604,
+    "final_area": 0.02550455331802153,
+    "area_delta_pct": 5.013701127314811,
+    "island_count": 3
+  },
+  {
+    "iso": "VNM",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 27.856863138675696,
+    "final_area": 27.86500083208094,
+    "area_delta_pct": -0.029212526064887685,
+    "island_count": 8
+  },
+  {
+    "iso": "VUT",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.9514791440963709,
+    "final_area": 0.92583258152008,
+    "area_delta_pct": 2.6954413804464137,
+    "island_count": 14
+  },
+  {
+    "iso": "WLF",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.010970973968504768,
+    "final_area": 0.01009907960891652,
+    "area_delta_pct": 7.947283095295488,
+    "island_count": 2
+  },
+  {
+    "iso": "WSM",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 0.22496075630187923,
+    "final_area": 0.22536009550094604,
+    "area_delta_pct": -0.17751505001651757,
+    "island_count": 2
+  },
+  {
+    "iso": "YEM",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 38.20431074380873,
+    "final_area": 38.15691003799438,
+    "area_delta_pct": 0.12407161624303296,
+    "island_count": 5
+  },
+  {
+    "iso": "ZAF",
+    "expected_enclaves": 1,
+    "initial_holes": 1,
+    "final_holes": 1,
+    "initial_area": 113.11989522457137,
+    "final_area": 113.13827780246733,
+    "area_delta_pct": -0.01625052592160641,
+    "island_count": 2
+  },
+  {
+    "iso": "ZMB",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 62.88692131519318,
+    "final_area": 62.90573577880858,
+    "area_delta_pct": -0.02991792764206094,
+    "island_count": 1
+  },
+  {
+    "iso": "ZWE",
+    "expected_enclaves": 0,
+    "initial_holes": 0,
+    "final_holes": 0,
+    "initial_area": 33.389352140426645,
+    "final_area": 33.39855132102966,
+    "area_delta_pct": -0.0275512401807708,
+    "island_count": 1
+  }
+]

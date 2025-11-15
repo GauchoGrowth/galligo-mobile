@@ -1,13 +1,47 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import Constants from 'expo-constants';
 import type { Place, CuratedList, Trip, Home, TimelineItem } from '@/types/shared';
 import { supabase } from './supabase';
+import {
+  mockFriendsNetwork,
+  mockHomes,
+  mockLists,
+  mockPlaces,
+  mockTimelineItems,
+  mockTrips,
+  mockUserProfile,
+} from './mockData';
 import { useAuth } from './auth';
 
 // Use environment variable or fallback to localhost
 // In production, this would be your deployed backend URL
-const API_BASE = process.env.EXPO_PUBLIC_API_URL
-  ? `${process.env.EXPO_PUBLIC_API_URL}/api`
-  : 'http://localhost:8080/api';
+const USE_MOCK_DATA = process.env.EXPO_PUBLIC_USE_MOCK_DATA === 'true';
+
+const resolveHostFromExpo = () => {
+  const expoConfigHost = Constants.expoConfig?.hostUri;
+  const manifestHost = (Constants as any)?.manifest?.debuggerHost;
+  const manifest2Host = (Constants as any)?.manifest2?.extra?.expoGo?.debuggerHost;
+  const expoHost = expoConfigHost || manifestHost || manifest2Host;
+
+  if (!expoHost) return null;
+  return expoHost.split(':')[0];
+};
+
+const resolveApiBase = () => {
+  if (process.env.EXPO_PUBLIC_API_URL) {
+    const sanitized = process.env.EXPO_PUBLIC_API_URL.replace(/\/$/, '');
+    return `${sanitized}/api`;
+  }
+
+  const hostFromExpo = resolveHostFromExpo();
+  if (hostFromExpo) {
+    return `http://${hostFromExpo}:8080/api`;
+  }
+
+  return 'http://localhost:8080/api';
+};
+
+const API_BASE = resolveApiBase();
 
 export interface UserProfile {
   id: string;
@@ -75,6 +109,10 @@ export function usePlaces() {
         console.error('[usePlaces] Exception caught:', err);
         console.error('[usePlaces] Exception type:', typeof err);
         console.error('[usePlaces] Exception stringified:', JSON.stringify(err, Object.getOwnPropertyNames(err)));
+        if (USE_MOCK_DATA) {
+          console.warn('[usePlaces] Falling back to mock data');
+          return mockPlaces;
+        }
         throw err;
       }
     },
@@ -90,30 +128,45 @@ export function useLists() {
     queryFn: async () => {
       if (!user) return [];
 
-      const { data, error } = await supabase
-        .from('lists')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+      try {
+        const { data, error } = await supabase
+          .from('lists')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching lists:', error);
-        return [];
+        if (error) {
+          console.error('Error fetching lists:', error);
+          if (USE_MOCK_DATA) {
+            console.warn('[useLists] Falling back to mock data');
+            return mockLists;
+          }
+          return [];
+        }
+
+        return (
+          data?.map(list => {
+            const validColors = ['amber', 'purple', 'emerald', 'blue', 'pink', 'teal'];
+            const color = validColors.includes(list.color) ? list.color : 'blue';
+
+            return {
+              id: list.id,
+              name: list.name,
+              emoji: list.emoji || '📍',
+              description: list.description || '',
+              color: color as any,
+              userId: list.user_id,
+            } as CuratedList;
+          }) || []
+        );
+      } catch (error) {
+        console.error('[useLists] Exception fetching lists:', error);
+        if (USE_MOCK_DATA) {
+          console.warn('[useLists] Falling back to mock data');
+          return mockLists;
+        }
+        throw error;
       }
-
-      return data?.map(list => {
-        const validColors = ['amber', 'purple', 'emerald', 'blue', 'pink', 'teal'];
-        const color = validColors.includes(list.color) ? list.color : 'blue';
-
-        return {
-          id: list.id,
-          name: list.name,
-          emoji: list.emoji || '📍',
-          description: list.description || '',
-          color: color as any,
-          userId: list.user_id,
-        } as CuratedList;
-      }) || [];
     },
     enabled: !!user,
   });
@@ -127,36 +180,51 @@ export function useTrips() {
     queryFn: async () => {
       if (!user) return [];
 
-      const { data, error } = await supabase
-        .from('trips')
-        .select('*')
-        .eq('created_by', user.id)
-        .order('start_date', { ascending: true });
+      try {
+        const { data, error } = await supabase
+          .from('trips')
+          .select('*')
+          .eq('created_by', user.id)
+          .order('start_date', { ascending: true });
 
-      if (error) {
-        console.error('Error fetching trips:', error);
-        return [];
+        if (error) {
+          console.error('Error fetching trips:', error);
+          if (USE_MOCK_DATA) {
+            console.warn('[useTrips] Falling back to mock data');
+            return mockTrips;
+          }
+          return [];
+        }
+
+        return (
+          data?.map(trip => {
+            const now = new Date();
+            const endDate = new Date(trip.end_date);
+            const isPast = endDate < now;
+
+            return {
+              id: trip.id,
+              name: trip.name,
+              city: trip.city || '',
+              country: trip.country || '',
+              flag: '',
+              imageUrl: trip.image || '',
+              startDate: new Date(trip.start_date),
+              endDate: endDate,
+              collaborators: [],
+              isPast,
+              tips: trip.tips,
+            } as Trip;
+          }) || []
+        );
+      } catch (error) {
+        console.error('[useTrips] Exception fetching trips:', error);
+        if (USE_MOCK_DATA) {
+          console.warn('[useTrips] Falling back to mock data');
+          return mockTrips;
+        }
+        throw error;
       }
-
-      return data?.map(trip => {
-        const now = new Date();
-        const endDate = new Date(trip.end_date);
-        const isPast = endDate < now;
-
-        return {
-          id: trip.id,
-          name: trip.name,
-          city: trip.city || '',
-          country: trip.country || '',
-          flag: '', // TODO: Get country flag helper
-          imageUrl: trip.image || '',
-          startDate: new Date(trip.start_date),
-          endDate: endDate,
-          collaborators: [],
-          isPast,
-          tips: trip.tips,
-        } as Trip;
-      }) || [];
     },
     enabled: !!user,
   });
@@ -224,24 +292,43 @@ export function useUserProfile() {
     queryFn: async () => {
       if (!user) return {} as UserProfile;
 
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
 
-      if (error || !data) {
-        console.error('Error fetching user profile:', error);
-        return {} as UserProfile;
+        if (error || !data) {
+          console.error('Error fetching user profile:', error);
+          if (USE_MOCK_DATA) {
+            console.warn('[useUserProfile] Falling back to mock profile');
+            return mockUserProfile;
+          }
+          return {
+            id: user.id,
+            email: user.email || '',
+            display_name: user.email || '',
+            avatar_url: undefined,
+            bio: '',
+          };
+        }
+
+        return {
+          id: data.id,
+          email: user.email || '',
+          display_name: data.full_name,
+          avatar_url: data.avatar_url,
+          bio: data.bio,
+        };
+      } catch (error) {
+        console.error('[useUserProfile] Exception fetching profile:', error);
+        if (USE_MOCK_DATA) {
+          console.warn('[useUserProfile] Falling back to mock profile');
+          return mockUserProfile;
+        }
+        throw error;
       }
-
-      return {
-        id: data.id,
-        email: user.email || '',
-        display_name: data.full_name,
-        avatar_url: data.avatar_url,
-        bio: data.bio,
-      };
     },
     enabled: !!user,
   });
@@ -299,11 +386,13 @@ export function useFriendsNetwork() {
 
         console.log('[useFriendsNetwork] Fetching friend connections...');
         // Get all accepted friend connections
+        console.log('[useFriendsNetwork] Executing Supabase query...');
         const { data: connections, error: connectionsError } = await supabase
           .from('friend_connections')
           .select('id, user_id, friend_id, status, created_at')
           .or(`user_id.eq.${user.id},friend_id.eq.${user.id}`)
           .eq('status', 'accepted');
+        console.log('[useFriendsNetwork] Supabase query resolved');
 
         if (connectionsError) {
           console.error('[useFriendsNetwork] Error fetching connections:', connectionsError);
@@ -423,7 +512,10 @@ export function useFriendsNetwork() {
         };
       } catch (err) {
         console.error('[useFriendsNetwork] Exception:', err);
-        console.error('[useFriendsNetwork] Exception details:', JSON.stringify(err, Object.getOwnPropertyNames(err)));
+        if (USE_MOCK_DATA) {
+          console.warn('[useFriendsNetwork] Falling back to mock data');
+          return mockFriendsNetwork;
+        }
         throw err;
       }
     },
@@ -442,35 +534,50 @@ export function useHomes() {
     queryFn: async () => {
       if (!user) return [];
 
-      const { data, error } = await supabase
-        .from('homes')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('start_date', { ascending: false });
+      try {
+        const { data, error } = await supabase
+          .from('homes')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('start_date', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching homes:', error);
-        return [];
+        if (error) {
+          console.error('Error fetching homes:', error);
+          if (USE_MOCK_DATA) {
+            console.warn('[useHomes] Falling back to mock data');
+            return mockHomes;
+          }
+          return [];
+        }
+
+        return (
+          data?.map(home => ({
+            id: home.id,
+            city: home.city,
+            country: home.country,
+            adminDivision: home.admin_division || undefined,
+            adminDivisionCode: home.admin_division_code || undefined,
+            countryCode: home.country_code || undefined,
+            latitude: home.latitude || undefined,
+            longitude: home.longitude || undefined,
+            startDate: home.start_date,
+            endDate: home.end_date || undefined,
+            status: home.status as 'current' | 'past',
+            userId: home.user_id,
+            createdAt: home.created_at,
+            updatedAt: home.updated_at,
+            tips: home.tips || undefined,
+            favorites: home.favorites || undefined,
+          })) || []
+        );
+      } catch (error) {
+        console.error('[useHomes] Exception fetching homes:', error);
+        if (USE_MOCK_DATA) {
+          console.warn('[useHomes] Falling back to mock data');
+          return mockHomes;
+        }
+        throw error;
       }
-
-      return data?.map(home => ({
-        id: home.id,
-        city: home.city,
-        country: home.country,
-        adminDivision: home.admin_division || undefined,
-        adminDivisionCode: home.admin_division_code || undefined,
-        countryCode: home.country_code || undefined,
-        latitude: home.latitude || undefined,
-        longitude: home.longitude || undefined,
-        startDate: home.start_date,
-        endDate: home.end_date || undefined,
-        status: home.status as 'current' | 'past',
-        userId: home.user_id,
-        createdAt: home.created_at,
-        updatedAt: home.updated_at,
-        tips: home.tips || undefined,
-        favorites: home.favorites || undefined,
-      })) || [];
     },
     enabled: !!user,
   });
@@ -539,81 +646,90 @@ export function useTimeline() {
     queryFn: async () => {
       if (!user) return [];
 
-      // Get all trips and homes
-      const [tripsData, homesData] = await Promise.all([
-        supabase
-          .from('trips')
-          .select('*')
-          .eq('created_by', user.id)
-          .order('start_date', { ascending: true }),
-        supabase
-          .from('homes')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('start_date', { ascending: false }),
-      ]);
+      try {
+        // Get all trips and homes
+        const [tripsData, homesData] = await Promise.all([
+          supabase
+            .from('trips')
+            .select('*')
+            .eq('created_by', user.id)
+            .order('start_date', { ascending: true }),
+          supabase
+            .from('homes')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('start_date', { ascending: false }),
+        ]);
 
-      const trips = tripsData.data || [];
-      const homes = homesData.data || [];
+        const trips = tripsData.data || [];
+        const homes = homesData.data || [];
 
-      const timelineItems: TimelineItem[] = [];
+        const timelineItems: TimelineItem[] = [];
 
-      // Process trips
-      for (const trip of trips) {
-        const now = new Date();
-        const endDate = new Date(trip.end_date);
-        const isPast = endDate < now;
+        // Process trips
+        for (const trip of trips) {
+          const now = new Date();
+          const endDate = new Date(trip.end_date);
+          const isPast = endDate < now;
 
-        timelineItems.push({
-          type: 'trip',
-          id: trip.id,
-          name: trip.name,
-          location: `${trip.city}, ${trip.country}`,
-          city: trip.city || '',
-          country: trip.country || '',
-          startDate: trip.start_date,
-          endDate: trip.end_date,
-          isCurrent: false,
-          isPast,
-          placeCounts: {
-            visited: 0,
-            endorsed: 0,
-            toVisit: 0,
-          },
-          completionPercentage: 0,
+          timelineItems.push({
+            type: 'trip',
+            id: trip.id,
+            name: trip.name,
+            location: `${trip.city}, ${trip.country}`,
+            city: trip.city || '',
+            country: trip.country || '',
+            startDate: trip.start_date,
+            endDate: trip.end_date,
+            isCurrent: false,
+            isPast,
+            placeCounts: {
+              visited: 0,
+              endorsed: 0,
+              toVisit: 0,
+            },
+            completionPercentage: 0,
+          });
+        }
+
+        // Process homes
+        for (const home of homes) {
+          const isCurrent = home.status === 'current';
+
+          timelineItems.push({
+            type: 'home',
+            id: home.id,
+            name: `${home.city}, ${home.country}`,
+            location: `${home.city}, ${home.country}`,
+            city: home.city,
+            country: home.country,
+            startDate: home.start_date,
+            endDate: home.end_date || undefined,
+            isCurrent,
+            isPast: home.status === 'past',
+            placeCounts: {
+              localFavorites: 0,
+            },
+            completionPercentage: 0,
+          });
+        }
+
+        // Sort by start date (most recent first)
+        timelineItems.sort((a, b) => {
+          const dateA = new Date(a.startDate);
+          const dateB = new Date(b.startDate);
+          return dateB.getTime() - dateA.getTime();
         });
+
+        return timelineItems;
+      } catch (error) {
+        console.error('[useTimeline] Exception fetching timeline:', error);
+        if (USE_MOCK_DATA) {
+          console.warn('[useTimeline] Falling back to mock data');
+          return mockTimelineItems;
+        }
+        throw error;
       }
-
-      // Process homes
-      for (const home of homes) {
-        const isCurrent = home.status === 'current';
-
-        timelineItems.push({
-          type: 'home',
-          id: home.id,
-          name: `${home.city}, ${home.country}`,
-          location: `${home.city}, ${home.country}`,
-          city: home.city,
-          country: home.country,
-          startDate: home.start_date,
-          endDate: home.end_date || undefined,
-          isCurrent,
-          isPast: home.status === 'past',
-          placeCounts: {
-            localFavorites: 0,
-          },
-          completionPercentage: 0,
-        });
-      }
-
-      // Sort by start date (most recent first)
-      timelineItems.sort((a, b) => {
-        const dateA = new Date(a.startDate);
-        const dateB = new Date(b.startDate);
-        return dateB.getTime() - dateA.getTime();
-      });
-
-      return timelineItems;
     },
     enabled: !!user,
   });

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Pressable, Text, ActivityIndicator, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { Pressable, Text, ActivityIndicator, StyleSheet, ViewStyle, TextStyle, StyleProp } from 'react-native';
 // Temporarily disabled animations for Expo Go compatibility
 // import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { theme, combineStyles } from '@/theme';
@@ -47,6 +47,9 @@ export interface ButtonProps {
 
   /** Test ID */
   testID?: string;
+
+  /** Additional container style */
+  style?: StyleProp<ViewStyle>;
 }
 
 // ============================================================================
@@ -63,6 +66,7 @@ export const Button: React.FC<ButtonProps> = ({
   onPress,
   accessibilityLabel,
   testID,
+  style,
 }) => {
   // Combine styles
   const containerStyle = combineStyles(
@@ -83,7 +87,11 @@ export const Button: React.FC<ButtonProps> = ({
 
   return (
     <Pressable
-      style={[containerStyle as ViewStyle, fullWidth && { width: '100%' }]}
+      style={[
+        containerStyle as ViewStyle,
+        fullWidth && { width: '100%' },
+        style,
+      ]}
       onPress={onPress}
       disabled={disabled || isLoading}
       accessibilityRole="button"
@@ -130,7 +138,7 @@ const styles = StyleSheet.create({
   },
 
   text: {
-    fontFamily: typography.fontFamily.primary,
+    fontFamily: typography.fontFamily.body.medium,
     fontWeight: typography.fontWeight.medium,
     textAlign: 'center',
   },

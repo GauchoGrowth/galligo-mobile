@@ -34,7 +34,7 @@ const { colors, spacing } = theme;
 
 type TabIndex = 0 | 1 | 2 | 3;
 
-const TABS = ['Requests', 'For You', 'Your Picks', 'Want to Go'] as const;
+const TABS: string[] = ['Requests', 'For You', 'Your Picks', 'Want to Go'];
 
 export function RecommendationsScreen() {
   const [selectedTab, setSelectedTab] = useState<TabIndex>(0);

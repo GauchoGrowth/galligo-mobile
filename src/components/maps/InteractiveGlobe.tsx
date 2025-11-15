@@ -18,7 +18,6 @@ import {
   useSharedValue,
   withTiming,
   withSpring,
-  withDecay,
   Easing,
   runOnJS,
 } from 'react-native-reanimated';
@@ -78,6 +77,7 @@ export const InteractiveGlobe = forwardRef<InteractiveGlobeHandle, WorldMapProps
     const scaleValue = useSharedValue(1);
     const savedScale = useSharedValue(1);
     const isAnimating = useSharedValue(false);
+    const lastPanTranslation = useSharedValue({ x: 0, y: 0 });
 
     // Globe dimensions - make it 87% of screen width for prominence
     // Calculate dynamic size based on available screen space
@@ -227,18 +227,26 @@ export const InteractiveGlobe = forwardRef<InteractiveGlobeHandle, WorldMapProps
 
     // Pan gesture - use changeX/changeY for smooth continuous rotation
     const panGesture = Gesture.Pan()
+      .onStart(() => {
+        'worklet';
+        lastPanTranslation.value = { x: 0, y: 0 };
+      })
       .onUpdate((event) => {
         'worklet';
         if (!isAnimating.value) {
-          // Use changeX/changeY (delta values) for smooth, continuous rotation
-          rotationX.value += event.changeX * 0.5;
-          rotationY.value += event.changeY * 0.5;
-          // Clamp latitude to prevent upside-down globe
+          const deltaX = event.translationX - lastPanTranslation.value.x;
+          const deltaY = event.translationY - lastPanTranslation.value.y;
+
+          rotationX.value += deltaX * 0.5;
+          rotationY.value += deltaY * 0.5;
           rotationY.value = Math.max(-90, Math.min(90, rotationY.value));
+
+          lastPanTranslation.value = { x: event.translationX, y: event.translationY };
         }
       })
       .onEnd((event) => {
         'worklet';
+        lastPanTranslation.value = { x: 0, y: 0 };
         // Update paths when gesture ends (not during dragging)
         runOnJS(updatePaths)();
 
@@ -296,13 +304,13 @@ export const InteractiveGlobe = forwardRef<InteractiveGlobeHandle, WorldMapProps
     // Expose methods
     useImperativeHandle(ref, () => ({
       zoomToCountry: (countryCode: string) => {
-        const country = findCountryByCode(countryCode.toUpperCase(), mapData);
+        const country = findCountryByCode(countryCode.toUpperCase());
         if (country) {
           focusOnCountry(country);
         }
       },
       resetView,
-    }), [mapData, focusOnCountry, resetView]);
+    }), [focusOnCountry, resetView]);
 
     return (
       <GestureDetector gesture={composedGesture}>

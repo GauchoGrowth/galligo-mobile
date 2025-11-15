@@ -91,8 +91,7 @@ export function RequestCard({ request, onSendRec, onPress }: RequestCardProps) {
           <Button
             variant="primary"
             size="sm"
-            onPress={(e) => {
-              e?.stopPropagation?.();
+            onPress={() => {
               onSendRec();
             }}
           >
@@ -115,7 +114,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary.white,
     borderRadius: borderRadius.lg,
     marginBottom: spacing[3],
-    ...shadows.sm,
+    ...shadows[1],
   },
   pressed: {
     opacity: 0.8,
@@ -135,7 +134,7 @@ const styles = StyleSheet.create({
   metadata: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: spacing[0.5],
+    marginTop: spacing[1],
   },
   resolvedBadge: {
     marginLeft: spacing[2],

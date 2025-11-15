@@ -13,12 +13,18 @@ export interface Trip {
   country: string;
   flag: string;
   imageUrl: string;
+  heroImage?: string;
   startDate: Date;
   endDate: Date;
   collaborators: Collaborator[];
   isPast: boolean;
   tips?: string;
   photos?: Photo[];
+  description?: string;
+  places?: Array<{
+    id?: string;
+    name: string;
+  }>;
 }
 
 // Recommendation types for Recs page
@@ -175,6 +181,7 @@ export interface Place {
   tripName?: string; // Trip name if context is 'trip'
   homeYears?: string; // Years lived there if context is 'home'
   lists: string[]; // Array of list IDs this place belongs to
+  imageUrl?: string;
 }
 
 export interface CuratedList {

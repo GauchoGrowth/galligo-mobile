@@ -25,6 +25,23 @@ export const colors = {
     purple: '#93229E',
   },
 
+  // Brand Accents
+  brand: {
+    sunset: '#FF6347',
+    goldenHour: '#FFD700',
+    warmBeige: '#F5F5DC',
+    charcoal: '#2C2C2C',
+    offWhite: '#FAFAFA',
+  },
+
+  // Text system
+  text: {
+    primary: '#2C2C2C',
+    secondary: '#666666',
+    muted: '#8C8C8C',
+    inverted: '#F2F2F2',
+  },
+
   // Neutral Scale
   neutral: {
     50: '#FAFAFA',
@@ -119,7 +136,18 @@ export const spacing = {
 export const typography = {
   // Font families - React Native uses system fonts
   fontFamily: {
-    primary: 'System',  // iOS: SF Pro, Android: Roboto
+    heading: {
+      regular: 'Outfit-Regular',
+      medium: 'Outfit-Medium',
+      semibold: 'Outfit-SemiBold',
+      bold: 'Outfit-Bold',
+    },
+    body: {
+      regular: 'Roboto-Regular',
+      medium: 'Roboto-Medium',
+      semibold: 'Roboto-Medium',
+      bold: 'Roboto-Bold',
+    },
     mono: 'Menlo',
   },
 
