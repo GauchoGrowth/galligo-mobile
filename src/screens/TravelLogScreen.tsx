@@ -51,6 +51,24 @@ export function TravelLogScreen() {
   const isLoading = (placesLoading || tripsLoading || homesLoading || profileLoading) &&
                     !placesError && !tripsError && !homesError && !profileError;
 
+  // Log loading state for debugging
+  React.useEffect(() => {
+    console.log('[TravelLogScreen] Loading state:', {
+      placesLoading,
+      tripsLoading,
+      homesLoading,
+      profileLoading,
+      placesError: !!placesError,
+      tripsError: !!tripsError,
+      homesError: !!homesError,
+      profileError: !!profileError,
+      isLoading,
+      placesCount: places.length,
+      tripsCount: trips.length,
+      homesCount: homes.length,
+    });
+  }, [placesLoading, tripsLoading, homesLoading, profileLoading, placesError, tripsError, homesError, profileError, isLoading, places.length, trips.length, homes.length]);
+
   // Filter places by selected country
   const filteredPlaces = useMemo(() => {
     if (!selectedCountry) return places;
