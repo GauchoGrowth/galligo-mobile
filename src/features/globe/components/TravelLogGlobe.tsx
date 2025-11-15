@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useCallback } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 import { theme } from '@/theme';
@@ -7,6 +7,7 @@ import { useTravelLogGlobeData } from '../hooks/useTravelLogGlobeData';
 import { GlobeCanvas } from './GlobeCanvas';
 import { GlobeCountryDetailSheet } from './GlobeCountryDetailSheet';
 import type { CountryGlobeData } from '../types';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 
 interface TravelLogGlobeProps {
   onCountryChange?: (iso2: string | null) => void;
@@ -15,6 +16,15 @@ interface TravelLogGlobeProps {
 export function TravelLogGlobe({ onCountryChange }: TravelLogGlobeProps) {
   const { countriesByIso3, isLoading, error } = useTravelLogGlobeData();
   const [selectedCountry, setSelectedCountry] = useState<CountryGlobeData | null>(null);
+
+  const hasError = !!error;
+  const isReady = !isLoading && !hasError;
+
+  console.log('[TravelLogGlobe] render', {
+    isLoading,
+    hasError,
+    countriesCount: Object.keys(countriesByIso3).length,
+  });
 
   const handleSelection = useCallback(
     (country: CountryGlobeData | null) => {
@@ -34,9 +44,43 @@ export function TravelLogGlobe({ onCountryChange }: TravelLogGlobeProps) {
     []
   );
 
-  // Always render globe even if loading or error - show empty globe if no data
-  // This allows testing the 3D globe even when network requests fail
-  const shouldRenderGlobe = !isLoading || error;
+  let globeContent: React.ReactNode;
+
+  if (isLoading) {
+    globeContent = (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={theme.colors.primary.blue} />
+        <Text variant="bodySm" style={styles.stateMessage}>
+          Loading globe...
+        </Text>
+      </View>
+    );
+  } else if (hasError) {
+    globeContent = (
+      <View style={styles.errorContainer}>
+        <Text variant="bodyMd" style={styles.errorTitle}>
+          Failed to load travel data.
+        </Text>
+        <Text variant="bodySm" style={styles.errorSubtitle}>
+          Please check your connection and try again.
+        </Text>
+      </View>
+    );
+  } else {
+    globeContent = (
+      <ErrorBoundary
+        fallback={
+          <View style={styles.errorContainer}>
+            <Text variant="bodyMd" style={styles.errorTitle}>
+              Globe failed to load.
+            </Text>
+          </View>
+        }
+      >
+        <GlobeCanvas countriesByIso3={countriesByIso3} onCountrySelect={handleSelection} />
+      </ErrorBoundary>
+    );
+  }
 
   return (
     <>
@@ -45,13 +89,7 @@ export function TravelLogGlobe({ onCountryChange }: TravelLogGlobeProps) {
           Your world at a glance
         </Text>
         <View style={styles.globeContainer}>
-          {shouldRenderGlobe ? (
-            <GlobeCanvas countriesByIso3={countriesByIso3} onCountrySelect={handleSelection} />
-          ) : (
-            <View style={styles.loadingContainer}>
-              <Text variant="bodySm" style={styles.loadingText}>Loading globe...</Text>
-            </View>
-          )}
+          {globeContent}
         </View>
         <View style={styles.legendRow}>
           {legend.map(item => (
@@ -64,7 +102,7 @@ export function TravelLogGlobe({ onCountryChange }: TravelLogGlobeProps) {
       </Card>
       <GlobeCountryDetailSheet
         country={selectedCountry}
-        visible={!!selectedCountry}
+        visible={isReady && !!selectedCountry}
         onClose={() => handleSelection(null)}
       />
     </>
@@ -91,9 +129,27 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: theme.spacing[6],
   },
-  loadingText: {
+  stateMessage: {
     color: theme.colors.text.secondary,
+    marginTop: theme.spacing[3],
+    textAlign: 'center',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: theme.spacing[6],
+    gap: theme.spacing[2],
+  },
+  errorTitle: {
+    color: theme.colors.text.primary,
+    textAlign: 'center',
+  },
+  errorSubtitle: {
+    color: theme.colors.text.secondary,
+    textAlign: 'center',
   },
   legendRow: {
     flexDirection: 'row',

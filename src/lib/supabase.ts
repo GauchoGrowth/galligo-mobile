@@ -7,13 +7,10 @@ import { createClient } from '@supabase/supabase-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import 'react-native-url-polyfill/auto';
 
-console.log('[Supabase] Initializing client...');
-
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
-console.log('[Supabase] URL:', supabaseUrl);
-console.log('[Supabase] Anon key (first 20 chars):', supabaseAnonKey?.substring(0, 20));
+console.log('[Supabase] Initializing client with URL:', supabaseUrl);
 console.log('[Supabase] AsyncStorage available:', !!AsyncStorage);
 
 if (!supabaseUrl || !supabaseAnonKey) {
