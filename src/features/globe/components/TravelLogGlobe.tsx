@@ -1,7 +1,8 @@
 import React, { useMemo, useState, useCallback } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { theme } from '@/theme';
 import { useTravelLogGlobeData } from '../hooks/useTravelLogGlobeData';
 import { GlobeCanvas } from './GlobeCanvas';
@@ -34,9 +35,54 @@ export function TravelLogGlobe({ onCountryChange }: TravelLogGlobeProps) {
     []
   );
 
-  // Always render globe even if loading or error - show empty globe if no data
-  // This allows testing the 3D globe even when network requests fail
-  const shouldRenderGlobe = !isLoading || error;
+  // Log render state for debugging
+  React.useEffect(() => {
+    console.log('[TravelLogGlobe] Render state:', {
+      isLoading,
+      hasError: !!error,
+      countriesCount: Object.keys(countriesByIso3 ?? {}).length,
+    });
+  }, [isLoading, error, countriesByIso3]);
+
+  const hasError = !!error;
+  const isReady = !isLoading && !hasError;
+
+  const renderContent = () => {
+    if (isLoading) {
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.colors.primary.blue} />
+          <Text variant="bodySm" style={styles.loadingText}>Loading globe...</Text>
+        </View>
+      );
+    }
+
+    if (hasError) {
+      return (
+        <View style={styles.errorContainer}>
+          <Text variant="bodyMd" style={styles.errorTitle}>Failed to load travel data</Text>
+          <Text variant="bodySm" style={styles.errorSubtitle}>
+            Please check your connection and try again
+          </Text>
+        </View>
+      );
+    }
+
+    return (
+      <ErrorBoundary
+        fallback={
+          <View style={styles.errorContainer}>
+            <Text variant="bodyMd" style={styles.errorTitle}>Globe failed to load</Text>
+            <Text variant="bodySm" style={styles.errorSubtitle}>
+              Try restarting the app
+            </Text>
+          </View>
+        }
+      >
+        <GlobeCanvas countriesByIso3={countriesByIso3} onCountrySelect={handleSelection} />
+      </ErrorBoundary>
+    );
+  };
 
   return (
     <>
@@ -45,13 +91,7 @@ export function TravelLogGlobe({ onCountryChange }: TravelLogGlobeProps) {
           Your world at a glance
         </Text>
         <View style={styles.globeContainer}>
-          {shouldRenderGlobe ? (
-            <GlobeCanvas countriesByIso3={countriesByIso3} onCountrySelect={handleSelection} />
-          ) : (
-            <View style={styles.loadingContainer}>
-              <Text variant="bodySm" style={styles.loadingText}>Loading globe...</Text>
-            </View>
-          )}
+          {renderContent()}
         </View>
         <View style={styles.legendRow}>
           {legend.map(item => (
@@ -91,9 +131,26 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    gap: theme.spacing[3],
   },
   loadingText: {
     color: theme.colors.text.secondary,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: theme.spacing[2],
+    padding: theme.spacing[4],
+  },
+  errorTitle: {
+    color: theme.colors.text.primary,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  errorSubtitle: {
+    color: theme.colors.text.secondary,
+    textAlign: 'center',
   },
   legendRow: {
     flexDirection: 'row',
