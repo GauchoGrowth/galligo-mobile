@@ -93,7 +93,7 @@ export function GlobeCanvas({ countriesByIso3, onCountrySelect }: GlobeCanvasPro
 
   const updateSelectionMaterials = useCallback(() => {
     countryMeshesRef.current.forEach(info => {
-      const data = countriesByIso3[info.iso3];
+      const data = countriesByIso3?.[info.iso3];
       const baseColor = (() => {
         switch (data?.status) {
           case 'home':
@@ -110,9 +110,11 @@ export function GlobeCanvas({ countriesByIso3, onCountrySelect }: GlobeCanvasPro
         }
       })();
       const material = info.mesh.material as THREE.MeshStandardMaterial;
-      material.color.set(baseColor);
-      material.transparent = true;
-      material.opacity = data ? 0.95 : 0.6;
+      if (material) {
+        material.color.set(baseColor);
+        material.transparent = true;
+        material.opacity = data ? 0.95 : 0.6;
+      }
     });
   }, [countriesByIso3]);
 
@@ -122,93 +124,149 @@ export function GlobeCanvas({ countriesByIso3, onCountrySelect }: GlobeCanvasPro
 
   const onContextCreate = useCallback(
     async (gl: ExpoWebGLRenderingContext) => {
-      gl.enable(gl.DEPTH_TEST);
-      gl.enable(gl.CULL_FACE);
-      const scene = new THREE.Scene();
-      sceneRef.current = scene;
+      try {
+        console.log('[GlobeCanvas] Initializing WebGL context...');
 
-      const camera = new THREE.PerspectiveCamera(45, gl.drawingBufferWidth / gl.drawingBufferHeight, 0.1, 1000);
-      camera.position.z = zoomRef.current;
-      cameraRef.current = camera;
+        if (!gl) {
+          throw new Error('WebGL context is null (possible simulator limitation)');
+        }
 
-      const renderer = new Renderer({ gl });
-      renderer.setSize(gl.drawingBufferWidth, gl.drawingBufferHeight);
-      rendererRef.current = renderer;
+        gl.enable(gl.DEPTH_TEST);
+        gl.enable(gl.CULL_FACE);
 
-      const worldGroup = new THREE.Group();
-      worldGroupRef.current = worldGroup;
-      scene.add(worldGroup);
+        const scene = new THREE.Scene();
+        sceneRef.current = scene;
 
-      const ambient = new THREE.AmbientLight('#ffffff', 0.8);
-      scene.add(ambient);
-      const directional = new THREE.DirectionalLight('#ffffff', 0.8);
-      directional.position.set(5, 3, 5);
-      scene.add(directional);
+        const camera = new THREE.PerspectiveCamera(45, gl.drawingBufferWidth / gl.drawingBufferHeight, 0.1, 1000);
+        camera.position.z = zoomRef.current;
+        cameraRef.current = camera;
 
-      const asset = Asset.fromModule(require('../../../../assets/globe/galligo-political-globe.glb'));
-      await asset.downloadAsync();
+        const renderer = new Renderer({ gl });
+        renderer.setSize(gl.drawingBufferWidth, gl.drawingBufferHeight);
+        rendererRef.current = renderer;
 
-      const loader = new GLTFLoader();
-      loader.load(
-        asset.localUri || asset.uri,
-        (gltf: GLTF) => {
-          gltf.scene.traverse((child: THREE.Object3D) => {
-            if ((child as THREE.Mesh).isMesh) {
-              const mesh = child as THREE.Mesh;
-              mesh.material = new THREE.MeshStandardMaterial({
-                color: themeColors.brand.warmBeige,
-                metalness: 0.1,
-                roughness: 0.9,
-                transparent: true,
-                opacity: 0.95,
-              });
-            }
-          });
+        const worldGroup = new THREE.Group();
+        worldGroupRef.current = worldGroup;
+        scene.add(worldGroup);
 
-          countryMeshesRef.current = [];
-          gltf.scene.children.forEach(child => {
-            const group = child as THREE.Group;
-            group.traverse((node: THREE.Object3D) => {
-              if ((node as THREE.Mesh).isMesh) {
-                const mesh = node as THREE.Mesh;
-                const iso3 = mapNameToIso3(mesh.name);
-                if (iso3) {
-                  countryMeshesRef.current.push({ mesh, iso3 });
-                }
+        const ambient = new THREE.AmbientLight('#ffffff', 0.8);
+        scene.add(ambient);
+        const directional = new THREE.DirectionalLight('#ffffff', 0.8);
+        directional.position.set(5, 3, 5);
+        scene.add(directional);
+
+        console.log('[GlobeCanvas] Scene & camera initialized');
+
+        // Load GLB asset with timeout
+        console.log('[GlobeCanvas] Loading GLB asset...');
+        const asset = Asset.fromModule(require('../../../../assets/globe/galligo-political-globe.glb'));
+
+        if (!asset.downloaded) {
+          console.log('[GlobeCanvas] Downloading asset...');
+          await Promise.race([
+            asset.downloadAsync(),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error('Asset download timeout (10s)')), 10000)
+            ),
+          ]);
+        }
+
+        console.log('[GlobeCanvas] Asset ready:', asset.localUri || asset.uri);
+
+        // Load GLB with error handling
+        await new Promise<void>((resolve, reject) => {
+          const loader = new GLTFLoader();
+          loader.load(
+            asset.localUri || asset.uri,
+            (gltf: GLTF) => {
+              try {
+                console.log('[GlobeCanvas] GLB loaded successfully');
+
+                // Apply base materials to all meshes
+                gltf.scene.traverse((child: THREE.Object3D) => {
+                  if ((child as THREE.Mesh).isMesh) {
+                    const mesh = child as THREE.Mesh;
+                    mesh.material = new THREE.MeshStandardMaterial({
+                      color: themeColors.brand.warmBeige,
+                      metalness: 0.1,
+                      roughness: 0.9,
+                      transparent: true,
+                      opacity: 0.95,
+                    });
+                  }
+                });
+
+                // Extract country meshes
+                countryMeshesRef.current = [];
+                gltf.scene.children.forEach(child => {
+                  const group = child as THREE.Group;
+                  group.traverse((node: THREE.Object3D) => {
+                    if ((node as THREE.Mesh).isMesh) {
+                      const mesh = node as THREE.Mesh;
+                      const iso3 = mapNameToIso3(mesh.name);
+                      if (iso3) {
+                        countryMeshesRef.current.push({ mesh, iso3 });
+                      }
+                    }
+                  });
+                });
+
+                console.log('[GlobeCanvas] Country meshes initialized, count:', countryMeshesRef.current.length);
+
+                worldGroup.add(gltf.scene);
+                updateSelectionMaterials();
+                resolve();
+              } catch (error) {
+                console.error('[GlobeCanvas] Error processing GLB:', error);
+                reject(error);
               }
-            });
-          });
+            },
+            (progress) => {
+              if (progress.total) {
+                const pct = Math.round((progress.loaded / progress.total) * 100);
+                console.log('[GlobeCanvas] Loading progress:', pct, '%');
+              }
+            },
+            (error) => {
+              console.error('[GlobeCanvas] Failed to load GLB:', error);
+              reject(error);
+            }
+          );
+        });
 
-          worldGroup.add(gltf.scene);
-          updateSelectionMaterials();
-        },
-        undefined,
-        error => console.error('[GlobeCanvas] Failed to load GLB', error)
-      );
+        // Start render loop with error protection
+        const renderLoop = () => {
+          try {
+            const world = worldGroupRef.current;
+            const cameraInstance = cameraRef.current;
+            const rendererInstance = rendererRef.current;
+            if (world && cameraInstance && rendererInstance) {
+              world.rotation.x = rotationRef.current.x;
+              world.rotation.y = rotationRef.current.y;
+              cameraInstance.position.z = zoomRef.current;
+              rendererInstance.render(scene, cameraInstance);
+              gl.endFrameEXP();
+            }
+          } catch (error) {
+            console.error('[GlobeCanvas] Render loop error:', error);
+          }
+          frameRef.current = requestAnimationFrame(renderLoop);
+        };
 
-      const renderLoop = () => {
-        const world = worldGroupRef.current;
-        const cameraInstance = cameraRef.current;
-        const rendererInstance = rendererRef.current;
-        if (world && cameraInstance && rendererInstance) {
-          world.rotation.x = rotationRef.current.x;
-          world.rotation.y = rotationRef.current.y;
-          cameraInstance.position.z = zoomRef.current;
-          rendererInstance.render(scene, cameraInstance);
-          gl.endFrameEXP();
-        }
-        frameRef.current = requestAnimationFrame(renderLoop);
-      };
+        renderLoop();
+        console.log('[GlobeCanvas] Render loop started');
 
-      renderLoop();
-
-      return () => {
-        if (frameRef.current) {
-          cancelAnimationFrame(frameRef.current);
-        }
-        renderer.dispose();
-        worldGroup.clear();
-      };
+        return () => {
+          if (frameRef.current) {
+            cancelAnimationFrame(frameRef.current);
+          }
+          renderer.dispose();
+          worldGroup.clear();
+        };
+      } catch (error) {
+        console.error('[GlobeCanvas] WebGL initialization failed:', error);
+        throw error;
+      }
     },
     [updateSelectionMaterials]
   );
@@ -253,13 +311,15 @@ export function GlobeCanvas({ countriesByIso3, onCountrySelect }: GlobeCanvasPro
         const mesh = intersections[0].object as THREE.Mesh;
         const entry = countryMeshesRef.current.find(info => info.mesh === mesh);
         if (entry) {
-          const countryData = countriesByIso3[entry.iso3];
+          const countryData = countriesByIso3?.[entry.iso3];
           if (countryData) {
+            console.log('[GlobeCanvas] Country tapped:', entry.iso3, countryData.iso2);
             onCountrySelect?.(countryData);
             return;
           }
         }
       }
+      console.log('[GlobeCanvas] Tap on empty space');
       onCountrySelect?.(null);
     },
     [countriesByIso3, onCountrySelect, raycaster]
