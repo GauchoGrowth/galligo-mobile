@@ -117,6 +117,8 @@ export function usePlaces() {
       }
     },
     enabled: !!user,
+    retry: 3,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 }
 
@@ -181,6 +183,8 @@ export function useTrips() {
       if (!user) return [];
 
       try {
+        console.log('[useTrips] Fetching trips for user:', user.id);
+
         const { data, error } = await supabase
           .from('trips')
           .select('*')
@@ -188,13 +192,16 @@ export function useTrips() {
           .order('start_date', { ascending: true });
 
         if (error) {
-          console.error('Error fetching trips:', error);
+          console.error('[useTrips] Error fetching trips:', error);
+          console.error('[useTrips] Error details:', JSON.stringify(error, null, 2));
           if (USE_MOCK_DATA) {
             console.warn('[useTrips] Falling back to mock data');
             return mockTrips;
           }
-          return [];
+          throw error;
         }
+
+        console.log('[useTrips] Fetched trips successfully, count:', data?.length || 0);
 
         return (
           data?.map(trip => {
@@ -227,6 +234,8 @@ export function useTrips() {
       }
     },
     enabled: !!user,
+    retry: 3,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 }
 
@@ -535,6 +544,8 @@ export function useHomes() {
       if (!user) return [];
 
       try {
+        console.log('[useHomes] Fetching homes for user:', user.id);
+
         const { data, error } = await supabase
           .from('homes')
           .select('*')
@@ -542,13 +553,16 @@ export function useHomes() {
           .order('start_date', { ascending: false });
 
         if (error) {
-          console.error('Error fetching homes:', error);
+          console.error('[useHomes] Error fetching homes:', error);
+          console.error('[useHomes] Error details:', JSON.stringify(error, null, 2));
           if (USE_MOCK_DATA) {
             console.warn('[useHomes] Falling back to mock data');
             return mockHomes;
           }
-          return [];
+          throw error;
         }
+
+        console.log('[useHomes] Fetched homes successfully, count:', data?.length || 0);
 
         return (
           data?.map(home => ({
@@ -580,6 +594,8 @@ export function useHomes() {
       }
     },
     enabled: !!user,
+    retry: 3,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 }
 
