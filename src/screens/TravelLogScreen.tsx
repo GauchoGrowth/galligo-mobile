@@ -47,9 +47,20 @@ export function TravelLogScreen() {
   const { data: homes = [], isLoading: homesLoading, error: homesError, refetch: refetchHomes } = useHomes();
   const { data: profile, isLoading: profileLoading, error: profileError } = useUserProfile();
 
-  // Show loading ONLY if actually loading AND no errors occurred
-  const isLoading = (placesLoading || tripsLoading || homesLoading || profileLoading) &&
-                    !placesError && !tripsError && !homesError && !profileError;
+  const hasError = Boolean(placesError || tripsError || homesError || profileError);
+  const isLoading = !hasError && (placesLoading || tripsLoading || homesLoading || profileLoading);
+
+  console.log('[TravelLogScreen] loading state', {
+    placesLoading,
+    tripsLoading,
+    homesLoading,
+    profileLoading,
+    placesError: !!placesError,
+    tripsError: !!tripsError,
+    homesError: !!homesError,
+    profileError: !!profileError,
+    isLoading,
+  });
 
   // Filter places by selected country
   const filteredPlaces = useMemo(() => {
