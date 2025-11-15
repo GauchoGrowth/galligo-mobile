@@ -28,3 +28,5 @@ export type { EmptyStateProps } from './EmptyState';
 
 export { PlaceCard } from './PlaceCard';
 export type { PlaceCardProps } from './PlaceCard';
+
+export { ErrorBoundary } from './ErrorBoundary';
