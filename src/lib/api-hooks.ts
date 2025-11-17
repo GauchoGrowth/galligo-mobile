@@ -15,6 +15,7 @@ import { useAuth } from './auth';
 
 // Use environment variable or fallback to localhost
 // In production, this would be your deployed backend URL
+// Mock mode remains disabled by default so we always favor live Supabase data.
 const USE_MOCK_DATA = process.env.EXPO_PUBLIC_USE_MOCK_DATA === 'true';
 
 const resolveHostFromExpo = () => {
@@ -72,10 +73,10 @@ export function usePlaces() {
           .order('created_at', { ascending: false });
 
         if (error) {
-          console.error('Error fetching places:', error);
-          console.error('Error details:', JSON.stringify(error, null, 2));
-          console.error('Error message:', error.message);
-          console.error('Error code:', error.code);
+          console.error('[usePlaces] Error fetching places:', error);
+          console.error('[usePlaces] Error details:', JSON.stringify(error, null, 2));
+          console.error('[usePlaces] Error message:', error.message);
+          console.error('[usePlaces] Error code:', error.code);
           throw error;
         }
 
@@ -117,6 +118,8 @@ export function usePlaces() {
       }
     },
     enabled: !!user,
+    retry: 3,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 }
 
@@ -181,6 +184,7 @@ export function useTrips() {
       if (!user) return [];
 
       try {
+        console.log('[useTrips] Fetching trips for user:', user.id);
         const { data, error } = await supabase
           .from('trips')
           .select('*')
@@ -188,15 +192,15 @@ export function useTrips() {
           .order('start_date', { ascending: true });
 
         if (error) {
-          console.error('Error fetching trips:', error);
+          console.error('[useTrips] Error fetching trips:', error);
           if (USE_MOCK_DATA) {
             console.warn('[useTrips] Falling back to mock data');
             return mockTrips;
           }
-          return [];
+          throw error;
         }
 
-        return (
+        const mappedTrips =
           data?.map(trip => {
             const now = new Date();
             const endDate = new Date(trip.end_date);
@@ -215,8 +219,11 @@ export function useTrips() {
               isPast,
               tips: trip.tips,
             } as Trip;
-          }) || []
-        );
+          }) || [];
+
+        console.log('[useTrips] Fetched trips successfully, count:', mappedTrips.length);
+
+        return mappedTrips;
       } catch (error) {
         console.error('[useTrips] Exception fetching trips:', error);
         if (USE_MOCK_DATA) {
@@ -227,6 +234,8 @@ export function useTrips() {
       }
     },
     enabled: !!user,
+    retry: 3,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 }
 
@@ -535,6 +544,7 @@ export function useHomes() {
       if (!user) return [];
 
       try {
+        console.log('[useHomes] Fetching homes for user:', user.id);
         const { data, error } = await supabase
           .from('homes')
           .select('*')
@@ -542,15 +552,15 @@ export function useHomes() {
           .order('start_date', { ascending: false });
 
         if (error) {
-          console.error('Error fetching homes:', error);
+          console.error('[useHomes] Error fetching homes:', error);
           if (USE_MOCK_DATA) {
             console.warn('[useHomes] Falling back to mock data');
             return mockHomes;
           }
-          return [];
+          throw error;
         }
 
-        return (
+        const mappedHomes =
           data?.map(home => ({
             id: home.id,
             city: home.city,
@@ -568,8 +578,11 @@ export function useHomes() {
             updatedAt: home.updated_at,
             tips: home.tips || undefined,
             favorites: home.favorites || undefined,
-          })) || []
-        );
+          })) || [];
+
+        console.log('[useHomes] Fetched homes successfully, count:', mappedHomes.length);
+
+        return mappedHomes;
       } catch (error) {
         console.error('[useHomes] Exception fetching homes:', error);
         if (USE_MOCK_DATA) {
@@ -580,6 +593,8 @@ export function useHomes() {
       }
     },
     enabled: !!user,
+    retry: 3,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 }
 
