@@ -18,41 +18,88 @@ The React Native migration foundation is **100% complete** and validated. A work
 
 ## 🚀 Quick Start
 
-### Run the App
+### First-Time Setup
 
 ```bash
-cd /Users/joe/Desktop/GalliGo/galligo-mobile
+# 1. Ensure you're using Node 20
+nvm use 20
+node -v  # Should show v20.x.x
 
-# Start Metro bundler
-npx expo start --dev-client
+# 2. Install dependencies
+npm install
 
-# The app will open in iOS Simulator (iPhone 16 Pro)
-# Or press 'i' in terminal to open iOS Simulator
+# 3. Configure environment variables
+cp .env.example .env
+# Edit .env with your Supabase credentials and API URL
+
+# 4. Build and run on iOS Simulator
+npm run ios
+
+# 5. Start Metro bundler (if not auto-started)
+npm start
 ```
 
-### Rebuild Native Code (After Adding Dependencies)
+### Daily Development Workflow
 
 ```bash
-npx expo run:ios --device "C020E08A-22B7-4772-B18D-3D0B6593F25F"
+# Start Metro bundler and open simulator
+npm start
+# Press 'i' to launch iOS simulator
+
+# The app will hot-reload as you make changes
+# Keep Metro running while developing
 ```
+
+### Common Commands
+
+| Command | Description | When to Use |
+|---------|-------------|-------------|
+| `npm start` | Start Metro bundler | Daily development |
+| `npm run ios` | Build & run on simulator | First time, or after adding native deps |
+| `npm run ios:device` | Build & run on physical iPhone | Device testing |
+| `npm run typecheck` | Run TypeScript validation | Before committing |
+| `npm run clean` | Clear Metro cache | Metro errors, branch switches |
+| `npm run clean:deep` | Nuclear clean (cache + node_modules) | Persistent issues |
+| `npm run prebuild` | Regenerate iOS project | After app.json changes |
+
+### Switching Branches
+
+```bash
+# Automated (recommended)
+./scripts/switch-branch.sh feature/branch-name
+
+# Manual
+git checkout feature/branch-name
+npm install
+# If package.json or app.json changed:
+npm run ios
+# Otherwise just:
+npm start
+```
+
+**See [Branch Workflow Guide](docs/BRANCH_WORKFLOW.md) for details**
 
 ---
 
 ## 📚 Documentation
 
-### For Continuing Development
+### Build & Deployment Guides (Start Here)
 
-**Primary Guide:**
+- **[Branch Workflow Guide](docs/BRANCH_WORKFLOW.md)** - How to switch branches without breaking builds
+- **[Build Errors & Troubleshooting](docs/BUILD_ERRORS.md)** - Solutions to common Metro, network, and native build errors
+- **[CLAUDE.md](CLAUDE.md)** - Complete development guide for Claude Code (tech stack, MCP servers, workflows)
+
+### Migration & Architecture
+
 - **`FULL-APP-MIGRATION-PLAN.md`** - Practical 8-phase implementation plan with code examples
-
-**Continuation Prompt:**
-- **`CONTINUE-MIGRATION-PROMPT.md`** - Copy this entire file to start a fresh Claude Code session with full context
-
-**Session Summary:**
-- **`SESSION-SUMMARY.md`** - Quick reference of what's done and what's next
-
-**Architectural Reference:**
 - **`REACT-NATIVE-MIGRATION-PLAN.md`** - Comprehensive 12-phase plan with architecture details
+- **`CONTINUE-MIGRATION-PROMPT.md`** - Session continuation prompt with full context
+
+### Design & Patterns
+
+- **[Design System](docs/design-system-mobile.md)** - React Native design tokens and component patterns
+- **[Brand Guidelines](docs/brand-guidelines.md)** - Voice, tone, visual identity, and motion standards
+- **[Mobile Architecture](docs/mobile-architecture.md)** - Detailed architecture overview
 
 ---
 
@@ -102,15 +149,19 @@ galligo-mobile/
 
 ## 🛠️ Tech Stack
 
-- **Framework:** React Native (Expo managed workflow)
-- **Language:** TypeScript
-- **UI:** NativeWind + StyleSheet
-- **Navigation:** React Navigation v7
-- **Animation:** React Native Reanimated v4
-- **Maps:** react-native-maps (Apple Maps)
-- **State:** TanStack Query + Zustand
-- **Backend:** Supabase + Express (same as web)
-- **Testing:** iOS Simulator MCP
+- **Framework:** React Native 0.81.5 + Expo SDK ~54
+- **Workflow:** Expo Development Build (custom native modules)
+- **Language:** TypeScript 5.9
+- **Package Manager:** npm (Node 20 LTS)
+- **UI:** NativeWind 4.2 + React Native StyleSheet
+- **Navigation:** React Navigation v7 (Bottom Tabs + Native Stack)
+- **Animation:** React Native Reanimated v4 (New Architecture enabled)
+- **Maps:** react-native-maps 1.20 (Apple Maps integration)
+- **3D Graphics:** @shopify/react-native-skia 2.2 + expo-three
+- **State:** TanStack Query 5.90 (server state) + Zustand 5.0 (client state)
+- **Backend:** Supabase (auth, database, real-time) + Express API
+- **Testing:** iOS Simulator + Physical Device (iPhone 16 Pro primary)
+- **CI/CD:** GitHub Actions (type checking, prebuild validation)
 
 ---
 
@@ -174,18 +225,39 @@ import { H1, H2, Body, Caption } from '@/components/ui';
 
 ---
 
+## 🔧 Troubleshooting
+
+### Quick Fixes for Common Issues
+
+| Problem | Quick Fix |
+|---------|-----------|
+| Metro can't find entry file | `npm run clean && npm start` |
+| "Incompatible with Expo Go" | Don't use Expo Go app - run `npm run ios` to build custom dev client |
+| App has no network | **Simulator:** Restart simulator<br>**Device:** Use `npm start -- --tunnel` |
+| Changes not reflecting | Press `r` in Metro terminal, or `Cmd+R` in simulator |
+| Port 8081 in use | `lsof -ti :8081 \| xargs kill -9` then `npm start` |
+| Branch switch broke app | `./scripts/switch-branch.sh <branch>` or `npm run clean:deep` |
+| Everything is broken | `./scripts/deep-clean.sh` (nuclear option, 5-10 min) |
+
+**See [Build Errors Guide](docs/BUILD_ERRORS.md) for comprehensive troubleshooting**
+
+---
+
 ## 📞 Getting Help
 
-### Continue in New Claude Code Session
+### Build & Deployment Issues
+- **[Build Errors Guide](docs/BUILD_ERRORS.md)** - Comprehensive error solutions
+- **[Branch Workflow](docs/BRANCH_WORKFLOW.md)** - Branch switching best practices
+- Run diagnostics: `expo doctor`
 
-Open `CONTINUE-MIGRATION-PROMPT.md` and copy the entire contents to Claude Code.
-
-### Quick Questions
-
-Reference the migration plan docs:
+### Development Questions
+- **[CLAUDE.md](CLAUDE.md)** - Development workflow and tools
 - Implementation questions → `FULL-APP-MIGRATION-PLAN.md`
 - Architecture questions → `REACT-NATIVE-MIGRATION-PLAN.md`
 - Maps questions → `.claude/skills/react-native-maps.md`
+
+### Continue in New Claude Code Session
+Open `CONTINUE-MIGRATION-PROMPT.md` and copy the entire contents to Claude Code
 
 ---
 

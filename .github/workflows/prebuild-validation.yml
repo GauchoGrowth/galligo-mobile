@@ -1,0 +1,137 @@
+name: Expo Prebuild Validation
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'app.json'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/prebuild-validation.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'app.json'
+      - 'package.json'
+
+jobs:
+  validate-ios-prebuild:
+    name: Validate iOS Native Generation
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate app.json schema
+        run: |
+          echo "Checking app.json for required fields..."
+
+          # Check if critical fields exist
+          if ! grep -q "react-native-maps" app.json; then
+            echo "⚠️  WARNING: react-native-maps plugin not found in app.json"
+            echo "This is required for maps functionality"
+          fi
+
+          if ! grep -q "expo-location" app.json; then
+            echo "⚠️  WARNING: expo-location plugin not found in app.json"
+          fi
+
+          echo "✅ app.json validation complete"
+
+      - name: Run Expo Prebuild (dry run)
+        run: |
+          echo "Testing iOS project generation from app.json..."
+          npx expo prebuild --platform ios --clean
+
+          # Check if ios/ directory was generated
+          if [ ! -d "ios" ]; then
+            echo "❌ ERROR: ios/ directory was not generated"
+            exit 1
+          fi
+
+          echo "✅ iOS project generated successfully"
+
+      - name: Validate CocoaPods
+        run: |
+          cd ios
+
+          # Check if Podfile exists
+          if [ ! -f "Podfile" ]; then
+            echo "❌ ERROR: Podfile not generated"
+            exit 1
+          fi
+
+          # Validate Podfile.properties.json for New Architecture
+          if [ -f "Podfile.properties.json" ]; then
+            NEW_ARCH=$(cat Podfile.properties.json | grep "newArchEnabled" | grep "true" || echo "")
+            if [ -n "$NEW_ARCH" ]; then
+              echo "✅ New Architecture enabled"
+            else
+              echo "ℹ️  New Architecture disabled"
+            fi
+          fi
+
+          echo "✅ CocoaPods configuration valid"
+
+      - name: Check for native module conflicts
+        run: |
+          echo "Checking for potential native module conflicts..."
+
+          # Check if package.json has react-native-maps but app.json is missing the plugin
+          if grep -q "react-native-maps" package.json && ! grep -q "react-native-maps" app.json; then
+            echo "❌ ERROR: react-native-maps in dependencies but not in app.json plugins"
+            exit 1
+          fi
+
+          echo "✅ No native module conflicts detected"
+
+      - name: Report configuration summary
+        run: |
+          echo "📋 Configuration Summary:"
+          echo "  - Expo SDK: $(grep '"expo":' package.json | sed 's/.*: "\(.*\)".*/\1/')"
+          echo "  - React Native: $(grep '"react-native":' package.json | sed 's/.*: "\(.*\)".*/\1/')"
+          echo "  - iOS Bundle ID: $(grep 'bundleIdentifier' app.json | sed 's/.*: "\(.*\)".*/\1/')"
+          echo ""
+          echo "  Native Dependencies:"
+          grep -E "react-native-|expo-|@shopify" package.json | grep -v "devDependencies" | head -10
+
+  env-template-check:
+    name: Validate Environment Template
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check .env.example exists
+        run: |
+          if [ ! -f ".env.example" ]; then
+            echo "❌ ERROR: .env.example not found"
+            echo "This file is required for team onboarding"
+            exit 1
+          fi
+
+          echo "✅ .env.example exists"
+
+      - name: Validate .env.example has required keys
+        run: |
+          REQUIRED_KEYS=("EXPO_PUBLIC_API_URL" "EXPO_PUBLIC_SUPABASE_URL" "EXPO_PUBLIC_SUPABASE_ANON_KEY")
+
+          for KEY in "${REQUIRED_KEYS[@]}"; do
+            if ! grep -q "$KEY" .env.example; then
+              echo "❌ ERROR: Missing required key in .env.example: $KEY"
+              exit 1
+            fi
+          done
+
+          echo "✅ All required environment variables documented"

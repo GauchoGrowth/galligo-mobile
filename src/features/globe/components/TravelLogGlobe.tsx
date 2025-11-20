@@ -50,7 +50,7 @@ export function TravelLogGlobe({ onCountryChange }: TravelLogGlobeProps) {
     globeContent = (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={theme.colors.primary.blue} />
-        <Text variant="bodySm" style={styles.stateMessage}>
+        <Text variant="bodySmall" style={styles.stateMessage}>
           Loading globe...
         </Text>
       </View>
@@ -58,10 +58,10 @@ export function TravelLogGlobe({ onCountryChange }: TravelLogGlobeProps) {
   } else if (hasError) {
     globeContent = (
       <View style={styles.errorContainer}>
-        <Text variant="bodyMd" style={styles.errorTitle}>
+        <Text variant="body" style={styles.errorTitle}>
           Failed to load travel data.
         </Text>
-        <Text variant="bodySm" style={styles.errorSubtitle}>
+        <Text variant="bodySmall" style={styles.errorSubtitle}>
           Please check your connection and try again.
         </Text>
       </View>
@@ -71,7 +71,7 @@ export function TravelLogGlobe({ onCountryChange }: TravelLogGlobeProps) {
       <ErrorBoundary
         fallback={
           <View style={styles.errorContainer}>
-            <Text variant="bodyMd" style={styles.errorTitle}>
+            <Text variant="body" style={styles.errorTitle}>
               Globe failed to load.
             </Text>
           </View>
