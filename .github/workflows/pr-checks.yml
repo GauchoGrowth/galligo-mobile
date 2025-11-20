@@ -1,0 +1,90 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main]
+
+jobs:
+  typecheck:
+    name: TypeScript Type Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run TypeScript type check
+        run: npm run typecheck
+
+  dependency-audit:
+    name: Dependency Security Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Run npm audit
+        run: npm audit --audit-level=high
+        continue-on-error: true
+
+  lockfile-validation:
+    name: Validate package-lock.json
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate lockfile
+        run: |
+          if [ -f yarn.lock ]; then
+            echo "❌ ERROR: yarn.lock found but project uses npm"
+            echo "Please remove yarn.lock - this project standardizes on npm"
+            exit 1
+          fi
+
+          # Verify package-lock.json is in sync with package.json
+          npm ci
+
+          # Check if lockfile changed (shouldn't if properly synced)
+          git diff --exit-code package-lock.json || {
+            echo "❌ ERROR: package-lock.json is out of sync with package.json"
+            echo "Please run 'npm install' locally and commit the updated lockfile"
+            exit 1
+          }
+
+      - name: Verify Node version
+        run: |
+          if [ -f .nvmrc ]; then
+            REQUIRED_VERSION=$(cat .nvmrc)
+            CURRENT_VERSION=$(node -v | sed 's/v//' | cut -d. -f1)
+
+            if [ "$CURRENT_VERSION" != "$REQUIRED_VERSION" ]; then
+              echo "⚠️  WARNING: .nvmrc specifies Node $REQUIRED_VERSION, CI uses Node $CURRENT_VERSION"
+            else
+              echo "✅ Node version matches .nvmrc: $REQUIRED_VERSION"
+            fi
+          fi

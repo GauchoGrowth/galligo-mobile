@@ -238,7 +238,7 @@ export function GlobeCanvas({ countriesByIso3, onCountrySelect }: GlobeCanvasPro
       scene: THREE.Scene,
       camera: THREE.PerspectiveCamera,
       renderer: Renderer,
-      worldRef: React.RefObject<THREE.Object3D>,
+      worldRef: React.RefObject<THREE.Object3D | null>,
       rotationState: React.MutableRefObject<{ x: number; y: number }>,
       zoomState: React.MutableRefObject<number>
     ) => {

@@ -42,7 +42,13 @@
           "locationAlwaysAndWhenInUsePermission": "Allow GalliGo to access your location to show your position on maps."
         }
       ],
-      "expo-asset"
+      "expo-asset",
+      [
+        "react-native-maps",
+        {
+          "locationPermission": "Allow GalliGo to access your location to show your position on maps."
+        }
+      ]
     ]
   }
 }
