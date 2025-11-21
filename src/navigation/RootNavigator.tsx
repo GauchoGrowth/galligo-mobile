@@ -71,14 +71,21 @@ function LoadingScreen() {
  * Main Tabs Navigator
  * Bottom tab navigation for 4 main screens
  */
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 function MainTabs() {
+  const insets = useSafeAreaInsets();
+  // Standard tab bar height on iOS is ~49. Android is similar.
+  // We add bottom inset for home indicator area.
+  const tabBarHeight = 60 + insets.bottom;
+
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          height: 49 + 34, // 49px iOS standard + safe area bottom (approx)
-          paddingBottom: 34, // Safe area bottom
+          height: tabBarHeight,
+          paddingBottom: insets.bottom > 0 ? insets.bottom : 8, // Add padding for home indicator or small padding on old devices
           paddingTop: 8,
           borderTopWidth: 1,
           borderTopColor: colors.neutral[200],
@@ -90,6 +97,7 @@ function MainTabs() {
           fontSize: 10,
           fontWeight: '500',
           marginTop: -4,
+          marginBottom: insets.bottom > 0 ? 0 : 4, // Adjust label spacing if no home indicator
         },
       }}
     >

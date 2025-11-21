@@ -3,6 +3,7 @@
  *
  * iOS-style segmented control for Travel Log page
  * Switches between Travel Footprint, Journal, and Milestones
+ * Revamped for a modern, pill-shaped aesthetic
  */
 
 import React from 'react';
@@ -21,7 +22,7 @@ interface TravelLogTabsProps {
 }
 
 const tabs: Array<{ key: TravelLogTab; label: string; icon: keyof typeof Ionicons.glyphMap }> = [
-  { key: 'footprint', label: 'Travel Footprint', icon: 'globe-outline' },
+  { key: 'footprint', label: 'Footprint', icon: 'globe-outline' }, // Shortened label
   { key: 'journal', label: 'Journal', icon: 'book-outline' },
   { key: 'milestones', label: 'Milestones', icon: 'trophy-outline' },
 ];
@@ -53,12 +54,13 @@ export function TravelLogTabs({ activeTab, onTabChange }: TravelLogTabsProps) {
               <Ionicons
                 name={tab.icon}
                 size={16}
-                color={isActive ? colors.primary.blue : colors.neutral[600]}
+                color={isActive ? colors.primary.blue : colors.neutral[500]}
                 style={styles.tabIcon}
               />
               <Body
-                weight={isActive ? 'semibold' : 'normal'}
-                color={isActive ? colors.primary.blue : colors.neutral[600]}
+                size="sm"
+                weight={isActive ? 'bold' : 'medium'}
+                color={isActive ? colors.primary.blue : colors.neutral[500]}
               >
                 {tab.label}
               </Body>
@@ -74,13 +76,15 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: spacing.pagePaddingMobile,
     paddingVertical: spacing[3],
-    backgroundColor: colors.primary.white,
+    backgroundColor: 'transparent', // Removed white background
   },
   tabBar: {
     flexDirection: 'row',
     backgroundColor: colors.neutral[100],
     borderRadius: borderRadius.full,
-    padding: spacing[1],
+    padding: 4, // Slightly more padding for the "track"
+    borderWidth: 1,
+    borderColor: colors.neutral[200],
   },
   tab: {
     flex: 1,
@@ -88,19 +92,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: spacing[2],
-    paddingHorizontal: spacing[2],
     borderRadius: borderRadius.full,
-    gap: spacing[1],
+    gap: 4,
   },
   tabActive: {
     backgroundColor: colors.primary.white,
     shadowColor: colors.neutral[900],
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowRadius: 3,
+    elevation: 3,
   },
   tabIcon: {
-    marginRight: spacing[1],
+    // No specific style needed
   },
 });

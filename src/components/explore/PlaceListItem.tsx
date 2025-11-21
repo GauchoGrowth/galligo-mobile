@@ -2,10 +2,11 @@
  * PlaceListItem Component - GalliGo React Native
  * Port of web app "row" variant with marker stats
  * Matches NetworkCityPlacesPage structure
+ * Modernized with softer corners and cleaner shadows
  */
 
 import React from 'react';
-import { View, Image, Pressable, Text, StyleSheet } from 'react-native';
+import { View, Image, Pressable, Text, StyleSheet, Platform } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { MarkerStats, type MarkerStatsType } from '@/components/markers';
@@ -74,7 +75,10 @@ export function PlaceListItem({
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         onPress();
       }}
-      style={styles.container}
+      style={({ pressed }) => [
+        styles.container,
+        pressed && styles.pressed
+      ]}
       accessible={true}
       accessibilityLabel={`${placeName}, ${categoryLabel}. ${friends.length} ${friends.length === 1 ? 'friend' : 'friends'}`}
       accessibilityRole="button"
@@ -127,13 +131,26 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    padding: spacing[3],
+    padding: spacing[4], // Increased padding
     backgroundColor: colors.primary.white,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    borderColor: colors.neutral[200],
-    marginBottom: spacing[2],
-    ...shadows[1],
+    borderRadius: borderRadius.xl, // Softer corners
+    marginBottom: spacing[3],
+    // Clean shadow instead of border
+    ...Platform.select({
+      ios: {
+        shadowColor: colors.neutral[900],
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
+  },
+  pressed: {
+    transform: [{ scale: 0.98 }],
+    opacity: 0.9,
   },
   content: {
     flex: 1,
@@ -146,46 +163,49 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   placeName: {
-    fontSize: 15,
-    fontWeight: '600',
+    fontSize: 16, // Slightly larger
+    fontWeight: '700',
     color: colors.neutral[900],
     flex: 1,
   },
   categoryBadge: {
     paddingHorizontal: spacing[2],
-    paddingVertical: 2,
+    paddingVertical: 4,
     backgroundColor: colors.neutral[100],
-    borderRadius: borderRadius.full,
-    borderWidth: 1,
-    borderColor: colors.neutral[200],
+    borderRadius: borderRadius.md, // Softer badge
+    // No border for badge
   },
   categoryBadgeText: {
     fontSize: 11,
-    fontWeight: '500',
-    color: colors.neutral[700],
+    fontWeight: '600',
+    color: colors.neutral[600],
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   friendsRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[2],
+    marginTop: 2,
   },
   avatarsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   friendAvatar: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     borderWidth: 2,
     borderColor: colors.primary.white,
     backgroundColor: colors.neutral[100],
   },
   friendCount: {
-    fontSize: 12,
-    color: colors.neutral[600],
+    fontSize: 13,
+    color: colors.neutral[500],
+    fontWeight: '500',
   },
   markerStatsContainer: {
-    marginTop: 2,
+    marginTop: spacing[2],
   },
 });

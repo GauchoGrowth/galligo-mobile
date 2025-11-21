@@ -2,17 +2,17 @@
  * StatCard Component - GalliGo React Native
  *
  * Displays a statistic with icon and label
- * Enhanced with warm brand aesthetic and spring animations
+ * Revamped to match the modern, clean Travel Log aesthetic
  */
 
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Platform } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-import { H2, Caption } from '@/components/ui';
+import { BodySmall } from '@/components/ui';
 import { theme } from '@/theme';
 
-const { colors, spacing, borderRadius, shadows } = theme;
+const { colors, spacing, borderRadius } = theme;
 
 export interface StatCardProps {
   /**
@@ -56,11 +56,21 @@ export function StatCard({
       accessibilityLabel={`${value.toLocaleString()} ${label}`}
       accessibilityRole="summary"
     >
-      <View style={[styles.iconContainer, { backgroundColor: color + '15' }]} accessible={false}>
-        <Ionicons name={icon} size={24} color={color} />
+      <View style={[styles.iconContainer, { backgroundColor: color + '15' }]}>
+        <Ionicons name={icon} size={20} color={color} />
       </View>
-      <H2 style={styles.value} accessibilityElementsHidden={true}>{value.toLocaleString()}</H2>
-      <Caption color={colors.text.secondary} accessibilityElementsHidden={true}>{label}</Caption>
+      
+      <Animated.Text style={[styles.value, { color }]}>
+        {value.toLocaleString()}
+      </Animated.Text>
+      
+      <BodySmall 
+        weight="medium" 
+        color={colors.neutral[500]} 
+        style={styles.label}
+      >
+        {label.toUpperCase()}
+      </BodySmall>
     </Animated.View>
   );
 }
@@ -68,23 +78,41 @@ export function StatCard({
 const styles = StyleSheet.create({
   card: {
     flex: 1,
-    backgroundColor: colors.brand.offWhite,
+    backgroundColor: colors.primary.white,
     borderRadius: borderRadius.xl,
-    padding: spacing[4],
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.neutral[200],
-    ...shadows[1],
-  },
-  iconContainer: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    paddingVertical: spacing[4],
+    paddingHorizontal: spacing[2],
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: spacing[3],
+    // Soft Shadow
+    ...Platform.select({
+      ios: {
+        shadowColor: colors.neutral[900],
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.05,
+        shadowRadius: 12,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
+  },
+  iconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing[2],
   },
   value: {
-    marginBottom: spacing[1],
+    fontSize: 28,
+    fontWeight: '800',
+    marginBottom: 2,
+    lineHeight: 34,
+  },
+  label: {
+    fontSize: 11,
+    letterSpacing: 0.5,
   },
 });

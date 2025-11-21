@@ -5,10 +5,11 @@
  * - Includes: AnimatedMapHeader, AnimatedCountryFlags, ProfileHeader, TravelLogTabs
  * - Handles entrance animations on mount
  * - Passes all necessary data down from TravelLogScreen
+ * - Revamped layout for a seamless, modern feel
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView, StyleSheet, RefreshControl, TouchableOpacity, Text } from 'react-native';
+import { View, ScrollView, StyleSheet, RefreshControl, TouchableOpacity, Text, Platform } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -16,6 +17,7 @@ import Animated, {
   Easing,
   type SharedValue,
 } from 'react-native-reanimated';
+import { Ionicons } from '@expo/vector-icons';
 import { AnimatedCountryFlags } from '@/components/travel/AnimatedCountryFlags';
 import { ProfileHeader } from '@/components/travel/ProfileHeader';
 import { TravelLogTabs } from '@/components/travel/TravelLogTabs';
@@ -30,7 +32,7 @@ import { theme } from '@/theme';
 import { TravelLogGlobe } from '@/features/globe/components/TravelLogGlobe';
 import { LAYOUT } from '@/lib/animations/constants';
 
-const { colors, spacing } = theme;
+const { colors, spacing, borderRadius } = theme;
 
 export interface WorldViewProps {
   // Data
@@ -196,25 +198,26 @@ export function WorldView({
             {/* Back Button - appears when in country view */}
             <Animated.View style={[styles.backButtonContainer, backButtonAnimatedStyle]}>
               <TouchableOpacity onPress={handleBackToGlobal} style={styles.backButton}>
-                <Text style={styles.backButtonText}>← Back to World</Text>
+                <Ionicons name="arrow-back" size={16} color={colors.primary.white} />
+                <Text style={styles.backButtonText}>World View</Text>
               </TouchableOpacity>
             </Animated.View>
 
             {/* Map/Globe - always visible, handles zoom internally */}
-            <View style={{ height: LAYOUT.MAP_HEADER_HEIGHT }}>
+            <View style={styles.mapContainer}>
               <TravelLogGlobe onCountryChange={handleCountrySelect} />
             </View>
 
             {/* Country Flags - fade out when country selected - MOVED BELOW MAP */}
             {visitedCountries.length > 0 && (
-              <Animated.View style={flagAnimatedStyle}>
-              <AnimatedCountryFlags
-                countryCodes={visitedCountries}
-                selectedCountryCode={selectedCountry}
-                onFlagPress={code => handleCountrySelect(code)}
-                size="md"
-                animateEntrance={true}
-              />
+              <Animated.View style={[flagAnimatedStyle, styles.flagsContainer]}>
+                <AnimatedCountryFlags
+                  countryCodes={visitedCountries}
+                  selectedCountryCode={selectedCountry}
+                  onFlagPress={code => handleCountrySelect(code)}
+                  size="md"
+                  animateEntrance={true}
+                />
               </Animated.View>
             )}
 
@@ -242,26 +245,51 @@ export function WorldView({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.neutral[50],
+    backgroundColor: colors.neutral[50], // Consistent background
   },
   content: {
     flex: 1,
   },
   contentContainer: {
-    paddingBottom: spacing[8],
+    paddingBottom: spacing[16],
+  },
+  mapContainer: {
+    height: LAYOUT.MAP_HEADER_HEIGHT,
+    marginTop: spacing[2],
+    marginBottom: spacing[2],
   },
   backButtonContainer: {
-    paddingHorizontal: spacing.pagePaddingMobile,
-    paddingVertical: spacing[3],
+    position: 'absolute',
+    top: spacing[4],
+    left: spacing.pagePaddingMobile,
+    zIndex: 10,
   },
   backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.primary.blue,
     paddingVertical: spacing[2],
     paddingHorizontal: spacing[4],
-    alignSelf: 'flex-start',
+    borderRadius: borderRadius.full,
+    gap: spacing[2],
+    ...Platform.select({
+      ios: {
+        shadowColor: colors.neutral[900],
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.15,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
   backButtonText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
-    color: colors.primary.blue,
+    color: colors.primary.white,
+  },
+  flagsContainer: {
+    marginVertical: spacing[2],
   },
 });

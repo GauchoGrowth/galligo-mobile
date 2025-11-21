@@ -5,9 +5,10 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { StyleSheet, View, Text, Image } from 'react-native';
+import { StyleSheet, View, Text, Image, Pressable, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedScrollHandler, FadeIn } from 'react-native-reanimated';
+import { Ionicons } from '@expo/vector-icons';
 import { HeroSection } from '@/components/travel/HeroSection';
 import { CountryDetailPanel } from '@/components/travel/CountryDetailPanel';
 import { useTravelLogGlobeData } from '@/features/globe/hooks/useTravelLogGlobeData';
@@ -25,8 +26,49 @@ interface CountryData {
   placeCount?: number;
 }
 
+// ----------------------------------------------------------------------------
+// Accessible List View Component
+// ----------------------------------------------------------------------------
+function VisitedCountriesList({ 
+  countries, 
+  onSelect 
+}: { 
+  countries: CountryData[], 
+  onSelect: (c: CountryData) => void 
+}) {
+  return (
+    <View style={styles.listContainer}>
+      <Text style={styles.listHeader}>Visited Countries ({countries.length})</Text>
+      {countries.length === 0 ? (
+        <Text style={styles.emptyText}>No visited countries recorded yet.</Text>
+      ) : (
+        <FlatList
+          data={countries.sort((a, b) => a.name.localeCompare(b.name))}
+          keyExtractor={(item) => item.iso3}
+          scrollEnabled={false} // Parent handles scrolling
+          renderItem={({ item }) => (
+            <Pressable
+              style={styles.listItem}
+              onPress={() => onSelect(item)}
+              accessibilityRole="button"
+              accessibilityLabel={`View details for ${item.name}`}
+            >
+              <View style={styles.flagPlaceholder}>
+                 <Text style={styles.flagText}>{item.iso2.toUpperCase()}</Text>
+              </View>
+              <Text style={styles.countryName}>{item.name}</Text>
+              <Ionicons name="chevron-forward" size={20} color={theme.colors.neutral[400]} />
+            </Pressable>
+          )}
+        />
+      )}
+    </View>
+  );
+}
+
 export function TravelLogScreen() {
   const scrollY = useSharedValue(0);
+  const [viewMode, setViewMode] = useState<'globe' | 'list'>('globe');
   const [selectedCountry, setSelectedCountry] = useState<CountryData | null>(null);
   const [panelVisible, setPanelVisible] = useState(false);
   const [orbitReset, setOrbitReset] = useState(0);
@@ -42,6 +84,11 @@ export function TravelLogScreen() {
       Object.values(countriesByIso3 || {})
         .filter(c => c.status !== 'unseen')
         .map(c => c.iso2),
+    [countriesByIso3]
+  );
+
+  const visitedCountriesData = useMemo(
+    () => Object.values(countriesByIso3 || {}).filter(c => c.status !== 'unseen'),
     [countriesByIso3]
   );
 
@@ -119,14 +166,33 @@ export function TravelLogScreen() {
           <Text style={styles.title}>Your Travel Log</Text>
           <Text style={styles.subtitle}>Live from your Supabase data</Text>
         </View>
-        <View style={styles.avatarWrapper}>
-          <Image
-            source={{
-              uri: profile?.avatar_url || 'https://api.dicebear.com/7.x/adventurer/png?seed=travel',
-            }}
-            style={styles.avatar}
-          />
-          <View style={styles.statusDot} />
+        
+        <View style={styles.headerActions}>
+          {/* View Mode Toggle */}
+          <Pressable
+            onPress={() => setViewMode(m => m === 'globe' ? 'list' : 'globe')}
+            style={({pressed}) => [styles.iconButton, pressed && styles.iconPressed]}
+            accessibilityRole="button"
+            accessibilityLabel={viewMode === 'globe' ? "Switch to list view" : "Switch to globe view"}
+            hitSlop={8}
+          >
+            <Ionicons 
+              name={viewMode === 'globe' ? "list" : "globe-outline"} 
+              size={24} 
+              color={theme.colors.primary.blue} 
+            />
+          </Pressable>
+
+          <View style={styles.avatarWrapper}>
+            <Image
+              source={{
+                uri: profile?.avatar_url || 'https://api.dicebear.com/7.x/adventurer/png?seed=travel',
+              }}
+              style={styles.avatar}
+              accessibilityLabel="User profile"
+            />
+            <View style={styles.statusDot} />
+          </View>
         </View>
       </View>
 
@@ -138,20 +204,31 @@ export function TravelLogScreen() {
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
       >
-        {/* Hero Section with Globe */}
-        <HeroSection
-          scrollY={scrollY}
-          onCountrySelect={handleCountrySelect}
-          countriesByIso3={countriesByIso3}
-          countriesCount={countriesCount}
-          citiesCount={citiesCount}
-          newThisMonth={newThisMonth}
-          visitedCountriesIso2={visitedCountriesIso2}
-          externalReset={orbitReset}
-        />
+        {viewMode === 'globe' ? (
+          <HeroSection
+            scrollY={scrollY}
+            onCountrySelect={handleCountrySelect}
+            countriesByIso3={countriesByIso3}
+            countriesCount={countriesCount}
+            citiesCount={citiesCount}
+            newThisMonth={newThisMonth}
+            visitedCountriesIso2={visitedCountriesIso2}
+            externalReset={orbitReset}
+          />
+        ) : (
+          <Animated.View entering={FadeIn}>
+            <VisitedCountriesList 
+              countries={visitedCountriesData} 
+              onSelect={handleCountrySelect}
+            />
+             {/* Spacer to match HeroSection height somewhat or just padding */}
+             <View style={{ height: 20 }} />
+          </Animated.View>
+        )}
 
         {/* Stats + Social cards */}
-        <View style={styles.cardsRow}>
+        {/* Only show stats overlapping if in globe mode, otherwise normal margin */}
+        <View style={[styles.cardsRow, viewMode === 'list' && styles.cardsRowListMode]}>
           <View style={styles.card}>
             <View style={styles.cardBadge}>
               <Text style={styles.cardBadgeText}>Travel Score</Text>
@@ -175,7 +252,14 @@ export function TravelLogScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Recent highlights</Text>
-            <Text style={styles.sectionLink}>View all</Text>
+            <Pressable 
+              onPress={() => { /* Navigate to full list */ }}
+              hitSlop={12}
+              accessibilityRole="button"
+              accessibilityLabel="View all highlights"
+            >
+              <Text style={styles.sectionLink}>View all</Text>
+            </Pressable>
           </View>
           <View style={styles.highlightsRow}>
             {trips.slice(0, 3).map(trip => (
@@ -224,6 +308,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  iconButton: {
+    padding: 4,
+  },
+  iconPressed: {
+    opacity: 0.7,
   },
   kicker: {
     fontFamily: 'OutfitMedium',
@@ -293,6 +388,10 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingHorizontal: 20,
     marginTop: -24,
+    zIndex: 10, // Ensure it sits above globe reset button area
+  },
+  cardsRowListMode: {
+    marginTop: 12,
   },
   card: {
     flex: 1,
@@ -402,5 +501,44 @@ const styles = StyleSheet.create({
   },
   bottomSpacer: {
     height: 60,
+  },
+  // List View Styles
+  listContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 8,
+  },
+  listHeader: {
+    fontFamily: 'OutfitSemiBold',
+    fontSize: 18,
+    color: theme.colors.text.primary,
+    marginBottom: 16,
+  },
+  listItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.neutral[100],
+  },
+  flagPlaceholder: {
+    width: 40,
+    height: 28,
+    backgroundColor: theme.colors.neutral[200],
+    borderRadius: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  flagText: {
+    fontSize: 10,
+    fontFamily: 'RobotoBold',
+    color: theme.colors.neutral[600],
+  },
+  countryName: {
+    flex: 1,
+    fontFamily: 'RobotoMedium',
+    fontSize: 16,
+    color: theme.colors.text.primary,
   },
 });

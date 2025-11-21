@@ -2,11 +2,12 @@
  * TravelStatistics Component
  *
  * Displays statistics cards for cities, places, and favorites
+ * Revamped for a cleaner, modern look with shadows and brand colors
  */
 
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { BodySmall, H2 } from '@/components/ui';
+import { View, StyleSheet, Platform } from 'react-native';
+import { BodySmall } from '@/components/ui';
 import { AnimatedStatsCounter } from './AnimatedStatsCounter';
 import { theme } from '@/theme';
 
@@ -21,9 +22,9 @@ interface TravelStatisticsProps {
 export function TravelStatistics({ citiesCount, placesCount, favoritesCount }: TravelStatisticsProps) {
   return (
     <View style={styles.container}>
-      <StatCard value={citiesCount} label="Cities" />
-      <StatCard value={placesCount} label="Places" />
-      <StatCard value={favoritesCount} label="Favorites" />
+      <StatCard value={citiesCount} label="CITIES" />
+      <StatCard value={placesCount} label="PLACES" />
+      <StatCard value={favoritesCount} label="FAVORITES" />
     </View>
   );
 }
@@ -38,10 +39,15 @@ function StatCard({ value, label }: StatCardProps) {
     <View style={styles.card}>
       <AnimatedStatsCounter
         value={value}
-        duration={300}
+        duration={600}
         style={styles.statNumber}
       />
-      <BodySmall color={colors.neutral[600]} align="center" style={styles.label}>
+      <BodySmall 
+        weight="medium" 
+        color={colors.neutral[500]} 
+        align="center" 
+        style={styles.label}
+      >
         {label}
       </BodySmall>
     </View>
@@ -58,21 +64,34 @@ const styles = StyleSheet.create({
   card: {
     flex: 1,
     backgroundColor: colors.primary.white,
-    borderRadius: borderRadius.lg,
-    paddingVertical: spacing[4],
-    paddingHorizontal: spacing[3],
+    borderRadius: borderRadius.xl, // More rounded
+    paddingVertical: spacing[5], // More breathing room
+    paddingHorizontal: spacing[2],
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.neutral[200],
+    justifyContent: 'center',
+    // Shadow
+    ...Platform.select({
+      ios: {
+        shadowColor: colors.neutral[900],
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.05,
+        shadowRadius: 12,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
   },
   statNumber: {
-    fontSize: theme.typography.fontSize.h2,
-    fontWeight: theme.typography.fontWeight.bold,
-    lineHeight: 40,
-    color: colors.neutral[900],
+    fontSize: 32, // Larger
+    fontWeight: '800',
+    lineHeight: 36,
+    color: colors.primary.blue, // Brand color
     textAlign: 'center',
+    marginBottom: spacing[1],
   },
   label: {
-    marginTop: spacing[1],
+    fontSize: 11,
+    letterSpacing: 0.5,
   },
 });

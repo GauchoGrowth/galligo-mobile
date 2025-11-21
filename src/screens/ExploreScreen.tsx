@@ -2,15 +2,16 @@
  * Explore Screen - GalliGo React Native
  *
  * Discover places from your friends network
+ * Revamped for a modern, clean, and airy aesthetic
  */
 
-import React, { useState, useMemo } from 'react';
-import { View, ScrollView, RefreshControl, StyleSheet } from 'react-native';
+import React, { useState, useMemo, useEffect } from 'react';
+import { View, StyleSheet, AccessibilityInfo, LayoutAnimation, Platform, UIManager } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
+import Animated, { FadeInDown, Layout } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { FullPageSpinner, SearchBar, EmptyState, H1, Body } from '@/components/ui';
+import { SearchBar, EmptyState, H1, Body } from '@/components/ui';
 import { CityCard } from '@/components/travel/CityCard';
 import { StatCard } from '@/components/explore/StatCard';
 import type { FriendInCity } from '@/components/travel/CityCard';
@@ -19,27 +20,48 @@ import { getCountryCode } from '@/utils/countryUtils';
 import { theme } from '@/theme';
 import type { RootStackParamList } from '@/navigation/RootNavigator';
 
-const { colors, spacing } = theme;
+// Enable LayoutAnimation on Android
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+const { colors, spacing, borderRadius } = theme;
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-export function ExploreScreen() {
-  console.log('[ExploreScreen] Component mounting...');
+// ----------------------------------------------------------------------------
+// Skeleton Loader Component
+// ----------------------------------------------------------------------------
+function ExploreSkeleton() {
+  return (
+    <View style={styles.skeletonContainer}>
+      {/* Stats Skeleton */}
+      <View style={styles.statsRow}>
+        {[1, 2, 3].map((i) => (
+          <View key={i} style={styles.skeletonStat} />
+        ))}
+      </View>
+      {/* Search Skeleton */}
+      <View style={styles.skeletonSearch} />
+      {/* Cards Skeleton */}
+      {[1, 2].map((i) => (
+        <View key={i} style={styles.skeletonCard} />
+      ))}
+    </View>
+  );
+}
 
+// ----------------------------------------------------------------------------
+// Main Screen Component
+// ----------------------------------------------------------------------------
+export function ExploreScreen() {
   const navigation = useNavigation<NavigationProp>();
   const insets = useSafeAreaInsets();
   const [searchQuery, setSearchQuery] = useState('');
-  const [refreshing, setRefreshing] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Fetch friends network data
   const { data: networkData, isLoading, error, refetch } = useFriendsNetwork();
-
-  console.log('[ExploreScreen] Hook state:', {
-    hasData: !!networkData,
-    isLoading,
-    hasError: !!error,
-    errorMessage: error?.message
-  });
 
   // Transform data for display
   const citiesData = useMemo(() => {
@@ -71,24 +93,81 @@ export function ExploreScreen() {
     );
   }, [citiesData, searchQuery]);
 
-  // Pull to refresh
+  // Accessibility announcement for search results
+  useEffect(() => {
+    if (searchQuery) {
+      const message = filteredCities.length === 0 
+        ? 'No cities found' 
+        : `Found ${filteredCities.length} ${filteredCities.length === 1 ? 'city' : 'cities'}`;
+      AccessibilityInfo.announceForAccessibility(message);
+    }
+  }, [filteredCities.length, searchQuery]);
+
+  // Pull to refresh handler
   const handleRefresh = async () => {
-    setRefreshing(true);
+    setIsRefreshing(true);
     await refetch();
-    setRefreshing(false);
+    setIsRefreshing(false);
   };
 
-  // Loading state
-  if (isLoading) {
-    console.log('[ExploreScreen] Rendering loading state');
-    return <FullPageSpinner label="Loading your network..." />;
-  }
+  // Render Header (Clean + Stats + Search)
+  const renderHeader = () => (
+    <View style={styles.headerContainer}>
+      <View style={[styles.headerContent, { paddingTop: insets.top }]}>
+        <Animated.View entering={FadeInDown.duration(600).springify()}>
+          <H1 style={styles.pageTitle}>Explore</H1>
+          <Body style={styles.subtitle}>See where your friends are traveling</Body>
+        </Animated.View>
+      </View>
 
-  // Error state
+      <View style={styles.contentContainer}>
+        {/* Stats Row */}
+        {networkData && (
+          <View style={styles.statsRow}>
+            <StatCard
+              icon="people-outline"
+              value={networkData.friends.length}
+              label="Friends"
+              color={colors.primary.blue}
+              index={0}
+            />
+            <StatCard
+              icon="map-outline"
+              value={networkData.totalCities}
+              label="Cities"
+              color={colors.secondary.green}
+              index={1}
+            />
+            <StatCard
+              icon="location-outline"
+              value={networkData.totalPlaces}
+              label="Places"
+              color={colors.brand.sunset}
+              index={2}
+            />
+          </View>
+        )}
+
+        {/* Search Bar */}
+        <View style={styles.searchContainer}>
+          <SearchBar
+            value={searchQuery}
+            onChangeText={(text) => {
+              LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+              setSearchQuery(text);
+            }}
+            placeholder="Search cities, friends..."
+          />
+        </View>
+      </View>
+    </View>
+  );
+
+  // Error State
   if (error) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={styles.content}>
+        <View style={styles.centerContent}>
           <EmptyState
             icon="alert-circle-outline"
             description="Failed to load friends network. Please try again."
@@ -100,109 +179,55 @@ export function ExploreScreen() {
     );
   }
 
-  // Empty state
-  if (!networkData || networkData.friends.length === 0) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.content}>
-          <EmptyState
-            icon="people-outline"
-            title="Travel is better with friends"
-            description="Connect to see where they've been and share your favorite discoveries."
-          />
-        </View>
-      </SafeAreaView>
-    );
-  }
-
   return (
-    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            tintColor={colors.primary.blue}
-          />
-        }
-      >
-        {/* Header with Warm Gradient - Extends into Safe Area */}
-        <LinearGradient
-          colors={['rgba(255, 99, 71, 0.08)', 'rgba(245, 208, 25, 0.05)', 'transparent']}
-          locations={[0, 0.5, 0.85]}
-          style={styles.headerGradient}
-        >
-          <View style={[styles.header, { paddingTop: insets.top + spacing[2] }]}>
-            <H1>Explore</H1>
-            <Body style={styles.subtitle}>Your friends have been busy!</Body>
+    <View style={styles.container}>
+      {isLoading ? (
+        <>
+          <View style={[styles.headerContent, { paddingTop: insets.top, paddingBottom: spacing[4] }]}>
+            <H1 style={styles.pageTitle}>Explore</H1>
+            <Body style={styles.subtitle}>See where your friends are traveling</Body>
           </View>
-        </LinearGradient>
-
-        {/* Network Stats with Brand Colors */}
-        <View style={styles.statsRow}>
-          <StatCard
-            icon="people"
-            value={networkData.friends.length}
-            label="Friends"
-            color={colors.primary.blue}
-            index={0}
-          />
-          <StatCard
-            icon="location"
-            value={networkData.totalCities}
-            label="Cities"
-            color={colors.secondary.green}
-            index={1}
-          />
-          <StatCard
-            icon="restaurant"
-            value={networkData.totalPlaces}
-            label="Places"
-            color={colors.brand.sunset}
-            index={2}
-          />
-        </View>
-
-        {/* Search */}
-        <SearchBar
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          placeholder="Search cities or friends..."
-        />
-
-        {/* Cities List */}
-        {filteredCities.length === 0 ? (
-          <EmptyState
-            icon="search-outline"
-            title="No matches"
-            description={searchQuery ? `No cities or friends match "${searchQuery}". Try a different search.` : 'No cities to explore yet'}
-          />
-        ) : (
-          <View style={styles.citiesList}>
-            {filteredCities.map((city, index) => (
-              <CityCard
-                key={city.city}
-                city={city.city}
-                country={city.country}
-                countryCode={city.countryCode}
-                friends={city.friends}
-                totalPlaces={city.totalPlaces}
-                index={index}
-                onViewAll={() => {
-                  navigation.navigate('CityDetail', { cityName: city.city });
-                }}
-                onFriendClick={(friendName) => {
-                  console.log('Friend clicked:', friendName);
-                  // TODO: Navigate to friend profile (future feature)
-                }}
+          <ExploreSkeleton />
+        </>
+      ) : (
+        <Animated.FlatList
+          data={filteredCities}
+          keyExtractor={(item) => item.city}
+          contentContainerStyle={{ paddingBottom: spacing[8] }}
+          showsVerticalScrollIndicator={false}
+          onRefresh={handleRefresh}
+          refreshing={isRefreshing}
+          ListHeaderComponent={renderHeader}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <EmptyState
+                icon={searchQuery ? "search-outline" : "people-outline"}
+                title={searchQuery ? "No matches found" : "No cities yet"}
+                description={
+                  searchQuery 
+                    ? `We couldn't find any cities or friends matching "${searchQuery}".` 
+                    : "Connect with friends to see their travel discoveries!"
+                }
               />
-            ))}
-          </View>
-        )}
-      </ScrollView>
-    </SafeAreaView>
+            </View>
+          }
+          renderItem={({ item, index }) => (
+            <View style={styles.cardWrapper}>
+              <CityCard
+                city={item.city}
+                country={item.country}
+                countryCode={item.countryCode}
+                friends={item.friends}
+                totalPlaces={item.totalPlaces}
+                index={index}
+                onViewAll={() => navigation.navigate('CityDetail', { cityName: item.city })}
+              />
+            </View>
+          )}
+          itemLayoutAnimation={Layout.springify()}
+        />
+      )}
+    </View>
   );
 }
 
@@ -211,32 +236,68 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.neutral[50],
   },
-  content: {
+  centerContent: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
   },
-  scrollContent: {
-    paddingBottom: spacing[6],
+  headerContainer: {
+    marginBottom: spacing[2],
   },
-  headerGradient: {
-    paddingBottom: spacing[3],
-  },
-  header: {
+  headerContent: {
     paddingHorizontal: spacing.pagePaddingMobile,
-    paddingBottom: spacing[2],
+    paddingBottom: spacing[4],
+    backgroundColor: colors.neutral[50],
+  },
+  pageTitle: {
+    fontSize: 34,
+    marginBottom: spacing[1],
   },
   subtitle: {
-    color: colors.text.secondary,
-    marginTop: spacing[1],
+    color: colors.neutral[500],
+    fontSize: 16,
+  },
+  contentContainer: {
+    paddingHorizontal: spacing.pagePaddingMobile,
   },
   statsRow: {
     flexDirection: 'row',
     gap: spacing[3],
+    marginBottom: spacing[6],
+  },
+  searchContainer: {
+    marginBottom: spacing[6],
+  },
+  cardWrapper: {
     paddingHorizontal: spacing.pagePaddingMobile,
+  },
+  emptyContainer: {
+    marginTop: spacing[8],
+    paddingHorizontal: spacing.pagePaddingMobile,
+  },
+  // Skeleton Styles
+  skeletonContainer: {
+    paddingHorizontal: spacing.pagePaddingMobile,
+    marginTop: spacing[2],
+  },
+  skeletonStat: {
+    flex: 1,
+    height: 100,
+    backgroundColor: colors.neutral[200],
+    borderRadius: borderRadius.xl,
+    marginRight: spacing[2],
+  },
+  skeletonSearch: {
+    height: 48,
+    backgroundColor: colors.neutral[200],
+    borderRadius: borderRadius.lg,
+    marginTop: spacing[4],
     marginBottom: spacing[4],
   },
-  citiesList: {
-    paddingHorizontal: spacing.pagePaddingMobile,
-    marginTop: spacing[4],
+  skeletonCard: {
+    height: 280,
+    backgroundColor: colors.neutral[200],
+    borderRadius: borderRadius.xl,
+    marginBottom: spacing[4],
   },
 });
