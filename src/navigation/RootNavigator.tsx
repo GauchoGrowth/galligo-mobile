@@ -16,7 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 // Screens
 import { LoginScreen } from '@/screens/LoginScreen';
-import { TravelLogScreen } from '@/screens/TravelLogScreen';
+import { TravelLogScreen as TravelLogScreenNew } from '@/screens/TravelLogScreenNew';
 import { ExploreScreen } from '@/screens/ExploreScreen';
 import { MyTripsScreen } from '@/screens/MyTripsScreen';
 import { RecommendationsScreen } from '@/screens/RecommendationsScreen';
@@ -122,7 +122,7 @@ function MainTabs() {
       />
       <Tab.Screen
         name="Log"
-        component={TravelLogScreen}
+        component={TravelLogScreenNew}
         options={{
           tabBarLabel: 'Travel Log',
           tabBarIcon: ({ color, size }) => (
