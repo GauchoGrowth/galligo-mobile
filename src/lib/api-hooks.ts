@@ -52,6 +52,40 @@ export interface UserProfile {
   bio?: string;
 }
 
+export function useProfile() {
+  const { user } = useAuth();
+
+  return useQuery<UserProfile | null>({
+    queryKey: ['profile', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (error) {
+        console.error('[useProfile] Error fetching profile:', error);
+        if (USE_MOCK_DATA) {
+          return {
+            id: 'mock-user',
+            email: 'mock@galligo.com',
+            display_name: mockUserProfile.display_name,
+            avatar_url: mockUserProfile.avatar_url,
+            bio: mockUserProfile.bio,
+          } as UserProfile;
+        }
+        throw error;
+      }
+
+      return data as UserProfile;
+    },
+    enabled: !!user,
+  });
+}
+
 // Places hooks
 export function usePlaces() {
   const { user } = useAuth();
