@@ -54,8 +54,16 @@ export function TravelLogScreen() {
     );
 
     const recentWindow = subDays(new Date(), 30);
-    const recentTrips = trips.filter(trip => trip.start_date && new Date(trip.start_date) >= recentWindow).length;
-    const recentPlaces = places.filter(place => place.created_at && new Date(place.created_at) >= recentWindow).length;
+    const recentTrips = trips.filter(trip => {
+      const start = (trip as any).start_date ?? trip.startDate;
+      if (!start) return false;
+      return new Date(start) >= recentWindow;
+    }).length;
+    const recentPlaces = places.filter(place => {
+      const created = (place as any).created_at ?? (place as any).createdAt;
+      if (!created) return false;
+      return new Date(created) >= recentWindow;
+    }).length;
 
     return {
       countriesCount: visitedCountries.length,
