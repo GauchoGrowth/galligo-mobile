@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
   },
   backdropOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(255, 255, 255, 0.98)',
+    backgroundColor: 'transparent',
   },
   panel: {
     position: 'absolute',
