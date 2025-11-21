@@ -36,6 +36,14 @@ export function TravelLogScreen() {
   // Fetch travel data
   const { countriesByIso3, isLoading, error } = useTravelLogGlobeData();
 
+  const visitedCountriesIso2 = useMemo(
+    () =>
+      Object.values(countriesByIso3 || {})
+        .filter(c => c.status !== 'unseen')
+        .map(c => c.iso2),
+    [countriesByIso3]
+  );
+
   // Calculate stats from live data
   const { countriesCount, citiesCount, newThisMonth } = useMemo(() => {
     const visitedCountries = Object.values(countriesByIso3).filter(c => c.status !== 'unseen');
@@ -127,6 +135,7 @@ export function TravelLogScreen() {
           countriesCount={countriesCount}
           citiesCount={citiesCount}
           newThisMonth={newThisMonth}
+          visitedCountriesIso2={visitedCountriesIso2}
         />
 
         {/* Stats + Social cards */}

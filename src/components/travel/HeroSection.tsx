@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import Animated, { useAnimatedStyle, SharedValue } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
-import { PoliticalGlobe } from '@/components/globe/PoliticalGlobe';
-import { GlobeTooltip } from '@/components/globe/GlobeTooltip';
+import { AmChartsGlobe } from '@/components/globe/AmChartsGlobe';
 import { StatsBar } from './StatsBar';
 
 interface CountryData {
@@ -20,6 +19,7 @@ interface HeroSectionProps {
   countriesCount?: number;
   citiesCount?: number;
   newThisMonth?: number;
+  visitedCountriesIso2?: string[];
 }
 
 export function HeroSection({
@@ -29,10 +29,8 @@ export function HeroSection({
   countriesCount,
   citiesCount,
   newThisMonth,
+  visitedCountriesIso2,
 }: HeroSectionProps) {
-  const [tooltipVisible, setTooltipVisible] = useState(false);
-  const [hoveredCountry, setHoveredCountry] = useState<CountryData | null>(null);
-
   const globeAnimStyle = useAnimatedStyle(() => {
     const y = scrollY.value;
     const scale = Math.max(0.6, 1 - 0.0015 * y);
@@ -44,18 +42,6 @@ export function HeroSection({
     };
   });
 
-  const handleCountrySelect = (country: CountryData | null) => {
-    if (country) {
-      setHoveredCountry(country);
-      setTooltipVisible(true);
-      // Auto-hide after 3 seconds
-      setTimeout(() => setTooltipVisible(false), 3000);
-    } else {
-      setTooltipVisible(false);
-    }
-    onCountrySelect?.(country);
-  };
-
   return (
     <View style={styles.heroContainer}>
       <LinearGradient
@@ -65,19 +51,24 @@ export function HeroSection({
 
       <Animated.View style={[styles.globeWrapper, globeAnimStyle]}>
         <View style={styles.globeContainer}>
-          <PoliticalGlobe
-            onCountrySelect={handleCountrySelect}
-            countriesByIso3={countriesByIso3}
+          <AmChartsGlobe
+            visitedCountries={visitedCountriesIso2 || []}
+            onCountrySelect={(country) => {
+              const match = Object.values(countriesByIso3 || {}).find(
+                c => c.iso2.toUpperCase() === country.id?.toUpperCase()
+              );
+              if (match) {
+                onCountrySelect?.(match);
+              } else {
+                onCountrySelect?.({
+                  iso2: country.id,
+                  iso3: country.id,
+                  name: country.name,
+                  status: 'unseen',
+                });
+              }
+            }}
           />
-
-          {/* Tooltip */}
-          {tooltipVisible && hoveredCountry && (
-            <GlobeTooltip
-              countryName={hoveredCountry.name}
-              countryStats={`Status: ${hoveredCountry.status || 'unseen'}`}
-              visible={tooltipVisible}
-            />
-          )}
         </View>
 
         {/* Stats Bar */}
@@ -106,6 +97,19 @@ const styles = StyleSheet.create({
   globeContainer: {
     marginTop: 64,
     position: 'relative',
+    width: 320,
+    height: 320,
+    borderRadius: 160,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#EAF7FF',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(0,0,0,0.05)',
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
   },
   statsBarWrapper: {
     position: 'absolute',
