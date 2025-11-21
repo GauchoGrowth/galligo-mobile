@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View, Pressable, Text } from 'react-native';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
 import { getAmChartsHTML } from './amChartsHtml';
 
@@ -10,6 +10,8 @@ interface AmChartsGlobeProps {
   selectedContinentGeoIds?: string[];
   resetTrigger?: number;
   onCountrySelect?: (country: CountrySelection) => void;
+  showReset?: boolean;
+  onReset?: () => void;
 }
 
 export function AmChartsGlobe({
@@ -17,9 +19,12 @@ export function AmChartsGlobe({
   selectedContinentGeoIds,
   resetTrigger = 0,
   onCountrySelect,
+  showReset = false,
+  onReset,
 }: AmChartsGlobeProps) {
   const webviewRef = useRef<WebView>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [focused, setFocused] = useState(false);
 
   const html = useMemo(() => getAmChartsHTML(visitedCountries), [visitedCountries]);
   const reloadKey = useMemo(
@@ -55,6 +60,7 @@ export function AmChartsGlobe({
     try {
       const data = JSON.parse(event.nativeEvent.data);
       if (data?.type === 'COUNTRY_SELECTED') {
+        setFocused(true);
         onCountrySelect?.({ id: data.id, name: data.name });
       }
     } catch {
@@ -67,6 +73,23 @@ export function AmChartsGlobe({
       {!isLoaded && (
         <View style={styles.loader}>
           <ActivityIndicator size="large" color="#00DDFF" />
+        </View>
+      )}
+      {showReset && focused && (
+        <View style={styles.resetContainer}>
+          <Pressable
+            onPress={() => {
+              setFocused(false);
+              if (onReset) onReset();
+            }}
+            style={({ pressed }) => [
+              styles.resetButton,
+              pressed && { opacity: 0.8 },
+            ]}
+            accessibilityLabel="Return to globe"
+          >
+            <Text style={styles.resetText}>Return to globe</Text>
+          </Pressable>
         </View>
       )}
       <WebView
@@ -104,5 +127,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 10,
+  },
+  resetContainer: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    zIndex: 20,
+  },
+  resetButton: {
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(0,0,0,0.08)',
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+  },
+  resetText: {
+    fontSize: 13,
+    color: '#0F172A',
+    fontFamily: 'OutfitMedium',
   },
 });

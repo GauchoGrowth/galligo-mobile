@@ -31,11 +31,14 @@ export function HeroSection({
   newThisMonth,
   visitedCountriesIso2,
 }: HeroSectionProps) {
+  const [isFocused, setIsFocused] = React.useState(false);
+  const [resetTrigger, setResetTrigger] = React.useState(0);
+
   const globeAnimStyle = useAnimatedStyle(() => {
     const y = scrollY.value;
-    const scale = Math.max(0.6, 1 - 0.0015 * y);
-    const translateY = 0.5 * y;
-    const opacity = Math.max(0, 1 - 0.003 * y);
+    const scale = Math.max(0.9, 1 - 0.001 * y);
+    const translateY = 0.3 * y;
+    const opacity = Math.max(0, 1 - 0.002 * y);
     return {
       transform: [{ translateY }, { scale }],
       opacity,
@@ -50,10 +53,18 @@ export function HeroSection({
       />
 
       <Animated.View style={[styles.globeWrapper, globeAnimStyle]}>
-        <View style={styles.globeContainer}>
+        <View style={[styles.globeContainer, isFocused && styles.globeContainerFocused]}>
           <AmChartsGlobe
             visitedCountries={visitedCountriesIso2 || []}
+            showReset={isFocused}
+            resetTrigger={resetTrigger}
+            onReset={() => {
+              setResetTrigger(t => t + 1);
+              setIsFocused(false);
+              onCountrySelect?.(null);
+            }}
             onCountrySelect={(country) => {
+              setIsFocused(true);
               const match = Object.values(countriesByIso3 || {}).find(
                 c => c.iso2.toUpperCase() === country.id?.toUpperCase()
               );
@@ -95,11 +106,11 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   globeContainer: {
-    marginTop: 64,
+    marginTop: 24,
     position: 'relative',
-    width: 320,
-    height: 320,
-    borderRadius: 160,
+    width: '100%',
+    height: 360,
+    borderRadius: 24,
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
@@ -110,6 +121,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.06,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 6 },
+  },
+  globeContainerFocused: {
+    height: 520,
+    borderRadius: 32,
   },
   statsBarWrapper: {
     position: 'absolute',
