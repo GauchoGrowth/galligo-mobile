@@ -53,7 +53,12 @@ export function HeroSection({
       />
 
       <Animated.View style={[styles.globeWrapper, globeAnimStyle]}>
-        <View style={[styles.globeContainer, isFocused && styles.globeContainerFocused]}>
+        <View
+          style={[
+            styles.globeContainer,
+            isFocused && styles.globeContainerFocused,
+          ]}
+        >
           <AmChartsGlobe
             visitedCountries={visitedCountriesIso2 || []}
             showReset={isFocused}
@@ -125,6 +130,7 @@ const styles = StyleSheet.create({
   globeContainerFocused: {
     height: 520,
     borderRadius: 32,
+    transform: [{ translateY: -80 }],
   },
   statsBarWrapper: {
     position: 'absolute',
