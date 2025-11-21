@@ -29,6 +29,7 @@ export function TravelLogScreen() {
   const scrollY = useSharedValue(0);
   const [selectedCountry, setSelectedCountry] = useState<CountryData | null>(null);
   const [panelVisible, setPanelVisible] = useState(false);
+  const [orbitReset, setOrbitReset] = useState(0);
   const { data: trips = [] } = useTrips();
   const { data: places = [] } = usePlaces();
   const { data: profile } = useProfile();
@@ -88,6 +89,8 @@ export function TravelLogScreen() {
   const handleClosePanel = useCallback(() => {
     setPanelVisible(false);
     setTimeout(() => setSelectedCountry(null), 300);
+    // Reset globe view when closing the panel
+    setOrbitReset(prev => prev + 1);
   }, []);
 
   if (isLoading) {
@@ -144,6 +147,7 @@ export function TravelLogScreen() {
           citiesCount={citiesCount}
           newThisMonth={newThisMonth}
           visitedCountriesIso2={visitedCountriesIso2}
+          externalReset={orbitReset}
         />
 
         {/* Stats + Social cards */}

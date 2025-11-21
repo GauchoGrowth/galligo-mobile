@@ -20,6 +20,7 @@ interface HeroSectionProps {
   citiesCount?: number;
   newThisMonth?: number;
   visitedCountriesIso2?: string[];
+  externalReset?: number;
 }
 
 export function HeroSection({
@@ -30,9 +31,18 @@ export function HeroSection({
   citiesCount,
   newThisMonth,
   visitedCountriesIso2,
+  externalReset = 0,
 }: HeroSectionProps) {
   const [isFocused, setIsFocused] = React.useState(false);
   const [resetTrigger, setResetTrigger] = React.useState(0);
+
+  React.useEffect(() => {
+    if (externalReset > 0) {
+      setIsFocused(false);
+      setResetTrigger(t => t + 1);
+      onCountrySelect?.(null);
+    }
+  }, [externalReset, onCountrySelect]);
 
   const globeAnimStyle = useAnimatedStyle(() => {
     const y = scrollY.value;
