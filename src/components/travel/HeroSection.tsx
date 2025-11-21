@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import Animated, { useAnimatedStyle, SharedValue } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
-import { PoliticalGlobe } from '@/components/globe/PoliticalGlobe';
-import { GlobeTooltip } from '@/components/globe/GlobeTooltip';
+import { AmChartsGlobe } from '@/components/globe/AmChartsGlobe';
 import { StatsBar } from './StatsBar';
 
 interface CountryData {
@@ -20,6 +19,8 @@ interface HeroSectionProps {
   countriesCount?: number;
   citiesCount?: number;
   newThisMonth?: number;
+  visitedCountriesIso2?: string[];
+  externalReset?: number;
 }
 
 export function HeroSection({
@@ -29,32 +30,30 @@ export function HeroSection({
   countriesCount,
   citiesCount,
   newThisMonth,
+  visitedCountriesIso2,
+  externalReset = 0,
 }: HeroSectionProps) {
-  const [tooltipVisible, setTooltipVisible] = useState(false);
-  const [hoveredCountry, setHoveredCountry] = useState<CountryData | null>(null);
+  const [isFocused, setIsFocused] = React.useState(false);
+  const [resetTrigger, setResetTrigger] = React.useState(0);
+
+  React.useEffect(() => {
+    if (externalReset > 0) {
+      setIsFocused(false);
+      setResetTrigger(t => t + 1);
+      onCountrySelect?.(null);
+    }
+  }, [externalReset, onCountrySelect]);
 
   const globeAnimStyle = useAnimatedStyle(() => {
     const y = scrollY.value;
-    const scale = Math.max(0.6, 1 - 0.0015 * y);
-    const translateY = 0.5 * y;
-    const opacity = Math.max(0, 1 - 0.003 * y);
+    const scale = Math.max(0.9, 1 - 0.001 * y);
+    const translateY = 0.3 * y;
+    const opacity = Math.max(0, 1 - 0.002 * y);
     return {
       transform: [{ translateY }, { scale }],
       opacity,
     };
   });
-
-  const handleCountrySelect = (country: CountryData | null) => {
-    if (country) {
-      setHoveredCountry(country);
-      setTooltipVisible(true);
-      // Auto-hide after 3 seconds
-      setTimeout(() => setTooltipVisible(false), 3000);
-    } else {
-      setTooltipVisible(false);
-    }
-    onCountrySelect?.(country);
-  };
 
   return (
     <View style={styles.heroContainer}>
@@ -64,20 +63,38 @@ export function HeroSection({
       />
 
       <Animated.View style={[styles.globeWrapper, globeAnimStyle]}>
-        <View style={styles.globeContainer}>
-          <PoliticalGlobe
-            onCountrySelect={handleCountrySelect}
-            countriesByIso3={countriesByIso3}
+        <View
+          style={[
+            styles.globeContainer,
+            isFocused && styles.globeContainerFocused,
+          ]}
+        >
+          <AmChartsGlobe
+            visitedCountries={visitedCountriesIso2 || []}
+            showReset={isFocused}
+            resetTrigger={resetTrigger}
+            onReset={() => {
+              setResetTrigger(t => t + 1);
+              setIsFocused(false);
+              onCountrySelect?.(null);
+            }}
+            onCountrySelect={(country) => {
+              setIsFocused(true);
+              const match = Object.values(countriesByIso3 || {}).find(
+                c => c.iso2.toUpperCase() === country.id?.toUpperCase()
+              );
+              if (match) {
+                onCountrySelect?.(match);
+              } else {
+                onCountrySelect?.({
+                  iso2: country.id,
+                  iso3: country.id,
+                  name: country.name,
+                  status: 'unseen',
+                });
+              }
+            }}
           />
-
-          {/* Tooltip */}
-          {tooltipVisible && hoveredCountry && (
-            <GlobeTooltip
-              countryName={hoveredCountry.name}
-              countryStats={`Status: ${hoveredCountry.status || 'unseen'}`}
-              visible={tooltipVisible}
-            />
-          )}
         </View>
 
         {/* Stats Bar */}
@@ -104,8 +121,26 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   globeContainer: {
-    marginTop: 64,
+    marginTop: 24,
     position: 'relative',
+    width: '100%',
+    height: 360,
+    borderRadius: 24,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#EAF7FF',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(0,0,0,0.05)',
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+  },
+  globeContainerFocused: {
+    height: 520,
+    borderRadius: 32,
+    transform: [{ translateY: -80 }],
   },
   statsBarWrapper: {
     position: 'absolute',

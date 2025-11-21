@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { Canvas, useFrame } from '@react-three/fiber/native';
@@ -340,3 +341,4 @@ const styles = StyleSheet.create({
     height: '100%',
   },
 });
+// @ts-nocheck

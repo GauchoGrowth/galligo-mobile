@@ -29,12 +29,21 @@ export function TravelLogScreen() {
   const scrollY = useSharedValue(0);
   const [selectedCountry, setSelectedCountry] = useState<CountryData | null>(null);
   const [panelVisible, setPanelVisible] = useState(false);
+  const [orbitReset, setOrbitReset] = useState(0);
   const { data: trips = [] } = useTrips();
   const { data: places = [] } = usePlaces();
   const { data: profile } = useProfile();
 
   // Fetch travel data
   const { countriesByIso3, isLoading, error } = useTravelLogGlobeData();
+
+  const visitedCountriesIso2 = useMemo(
+    () =>
+      Object.values(countriesByIso3 || {})
+        .filter(c => c.status !== 'unseen')
+        .map(c => c.iso2),
+    [countriesByIso3]
+  );
 
   // Calculate stats from live data
   const { countriesCount, citiesCount, newThisMonth } = useMemo(() => {
@@ -46,8 +55,16 @@ export function TravelLogScreen() {
     );
 
     const recentWindow = subDays(new Date(), 30);
-    const recentTrips = trips.filter(trip => trip.start_date && new Date(trip.start_date) >= recentWindow).length;
-    const recentPlaces = places.filter(place => place.created_at && new Date(place.created_at) >= recentWindow).length;
+    const recentTrips = trips.filter(trip => {
+      const start = (trip as any).start_date ?? trip.startDate;
+      if (!start) return false;
+      return new Date(start) >= recentWindow;
+    }).length;
+    const recentPlaces = places.filter(place => {
+      const created = (place as any).created_at ?? (place as any).createdAt;
+      if (!created) return false;
+      return new Date(created) >= recentWindow;
+    }).length;
 
     return {
       countriesCount: visitedCountries.length,
@@ -72,6 +89,8 @@ export function TravelLogScreen() {
   const handleClosePanel = useCallback(() => {
     setPanelVisible(false);
     setTimeout(() => setSelectedCountry(null), 300);
+    // Reset globe view when closing the panel
+    setOrbitReset(prev => prev + 1);
   }, []);
 
   if (isLoading) {
@@ -127,6 +146,8 @@ export function TravelLogScreen() {
           countriesCount={countriesCount}
           citiesCount={citiesCount}
           newThisMonth={newThisMonth}
+          visitedCountriesIso2={visitedCountriesIso2}
+          externalReset={orbitReset}
         />
 
         {/* Stats + Social cards */}
