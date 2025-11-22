@@ -4,12 +4,15 @@
  * Card displaying a trip with image, dates, and collaborators
  */
 
-import React from 'react';
-import { View, Image, Pressable, StyleSheet, ImageBackground } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Pressable, StyleSheet, Text, ActivityIndicator } from 'react-native';
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import type { Trip } from '@/types/shared';
 import { H2, Body, Caption } from '@/components/ui';
 import { getCountryCode } from '@/utils/countryUtils';
+import { resolveCityImage } from '@/utils/cityImageCache';
+import { DEFAULT_CITY_PLACEHOLDER } from '@/utils/unsplashImageUtils';
 import { theme } from '@/theme';
 
 const { colors, spacing, borderRadius } = theme;
@@ -20,6 +23,10 @@ export interface TripCardProps {
 }
 
 export function TripCard({ trip, onPress }: TripCardProps) {
+  // Image loading states
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageLoading, setImageLoading] = useState(true);
+
   // Convert dates to Date objects if needed
   const startDate = trip.startDate instanceof Date ? trip.startDate : new Date(trip.startDate);
   const endDate = trip.endDate instanceof Date ? trip.endDate : new Date(trip.endDate);
@@ -31,12 +38,50 @@ export function TripCard({ trip, onPress }: TripCardProps) {
   // Format date range
   const dateRange = `${startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
 
-  // Get country flag
-  const countryCode = getCountryCode(trip.country);
-  const flagUrl = `https://flagcdn.com/w80/${countryCode}.png`;
+  // Get country code for circular flag
+  const countryCode = getCountryCode(trip.country).toLowerCase();
+  const flagUrl = `https://flagcdn.com/w40/${countryCode}.png`;
 
-  // Fallback image
-  const imageUrl = trip.heroImage || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828';
+  // Load city image from Unsplash using existing utility
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadImage = async () => {
+      try {
+        setImageLoading(true);
+
+        // Use existing heroImage or fetch from Unsplash
+        let url: string;
+        if (trip.heroImage && trip.heroImage.trim()) {
+          url = trip.heroImage;
+        } else if (trip.imageUrl && trip.imageUrl.trim()) {
+          url = trip.imageUrl;
+        } else {
+          // Fetch from Unsplash using existing utility
+          url = await resolveCityImage(trip.city, trip.country);
+        }
+
+        if (isMounted) {
+          setImageUrl(url);
+          setImageLoading(false);
+          console.log('[TripCard] Image loaded:', trip.name);
+        }
+      } catch (error) {
+        console.error('[TripCard] Error loading image:', trip.name, error);
+
+        if (isMounted) {
+          setImageUrl(DEFAULT_CITY_PLACEHOLDER);
+          setImageLoading(false);
+        }
+      }
+    };
+
+    loadImage();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [trip.city, trip.country, trip.heroImage, trip.imageUrl, trip.name]);
 
   return (
     <Pressable
@@ -46,18 +91,36 @@ export function TripCard({ trip, onPress }: TripCardProps) {
         pressed && styles.cardPressed,
       ]}
     >
-      <ImageBackground
-        source={{ uri: imageUrl }}
-        style={styles.image}
-        imageStyle={styles.imageStyle}
-      >
-        {/* Gradient overlay */}
+      {/* Image Container */}
+      <View style={styles.imageContainer}>
+        {/* Loading Spinner */}
+        {imageLoading && (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={colors.primary.blue} />
+          </View>
+        )}
+
+        {/* Background Image with expo-image */}
+        {imageUrl && (
+          <Image
+            source={{ uri: imageUrl }}
+            style={styles.image}
+            contentFit="cover"
+            transition={300}
+            placeholder={DEFAULT_CITY_PLACEHOLDER}
+            placeholderContentFit="cover"
+            cachePolicy="memory-disk"
+          />
+        )}
+
+        {/* Gradient Overlay */}
         <LinearGradient
-          colors={['transparent', 'rgba(0,0,0,0.2)', 'rgba(0,0,0,0.8)']}
+          colors={['transparent', 'rgba(0,0,0,0.3)', 'rgba(0,0,0,0.85)']}
+          locations={[0, 0.5, 1]}
           style={styles.gradient}
         />
 
-        {/* Days away badge (only for upcoming trips) */}
+        {/* Days Away Badge (only for upcoming trips) */}
         {!isPast && daysAway > 0 && (
           <View style={styles.badge}>
             <Caption style={styles.badgeText}>
@@ -66,68 +129,82 @@ export function TripCard({ trip, onPress }: TripCardProps) {
           </View>
         )}
 
-        {/* Content */}
+        {/* Content Overlay */}
         <View style={styles.content}>
           <H2 style={styles.title} numberOfLines={2}>
             {trip.name}
           </H2>
 
-          {/* Location */}
+          {/* Location with Circular Flag (matching CityCard) */}
           <View style={styles.locationRow}>
             <Image
               source={{ uri: flagUrl }}
               style={styles.flag}
-              resizeMode="cover"
+              contentFit="cover"
+              cachePolicy="memory-disk"
             />
             <Body style={styles.location} numberOfLines={1}>
               {trip.city}, {trip.country}
             </Body>
           </View>
 
-          {/* Date range */}
+          {/* Date Range */}
           <Body style={styles.dateRange}>{dateRange}</Body>
 
           {/* Collaborators */}
           {trip.collaborators && trip.collaborators.length > 0 && (
             <View style={styles.collaborators}>
               {trip.collaborators.slice(0, 5).map((collab, idx) => (
-                <Image
+                <View
                   key={idx}
-                  source={{ uri: collab.avatarUrl }}
                   style={[
                     styles.avatar,
                     { marginLeft: idx > 0 ? -8 : 0, zIndex: 5 - idx },
                   ]}
-                  resizeMode="cover"
-                />
+                >
+                  <Text style={styles.avatarText}>{collab.initials}</Text>
+                </View>
               ))}
             </View>
           )}
         </View>
-      </ImageBackground>
+      </View>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    height: 256,
+    height: 200,
     borderRadius: borderRadius.xl,
     overflow: 'hidden',
-    marginBottom: spacing[4],
+    width: '100%',
+    backgroundColor: colors.neutral[900],
   },
   cardPressed: {
     opacity: 0.9,
   },
-  image: {
-    flex: 1,
+  imageContainer: {
     width: '100%',
+    height: 200,
+    position: 'relative',
   },
-  imageStyle: {
+  image: {
+    width: '100%',
+    height: 200,
+    position: 'absolute',
     borderRadius: borderRadius.xl,
+  },
+  loadingContainer: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: colors.neutral[900],
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1,
   },
   gradient: {
     ...StyleSheet.absoluteFillObject,
+    zIndex: 2,
   },
   badge: {
     position: 'absolute',
@@ -137,6 +214,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.full,
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[1] + 4,
+    zIndex: 3,
   },
   badgeText: {
     fontSize: 11,
@@ -163,15 +241,16 @@ const styles = StyleSheet.create({
     marginBottom: spacing[1],
   },
   flag: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     borderWidth: 2,
     borderColor: colors.primary.white,
   },
   location: {
     color: 'rgba(255, 255, 255, 0.9)',
     fontSize: 14,
+    flex: 1,
   },
   dateRange: {
     color: 'rgba(255, 255, 255, 0.8)',
@@ -188,5 +267,13 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 2,
     borderColor: colors.primary.white,
+    backgroundColor: colors.primary.blue,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: {
+    color: colors.primary.white,
+    fontSize: 12,
+    fontWeight: '600',
   },
 });

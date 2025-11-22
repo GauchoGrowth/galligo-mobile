@@ -4,8 +4,8 @@
  * View and manage your travel trips
  */
 
-import React, { useState, useMemo } from 'react';
-import { View, ScrollView, RefreshControl, Pressable, StyleSheet } from 'react-native';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import { View, Pressable, StyleSheet, FlatList, ListRenderItem } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -25,6 +25,7 @@ export function MyTripsScreen() {
   const navigation = useNavigation<NavigationProp>();
   const [selectedTab, setSelectedTab] = useState<TabValue>('upcoming');
   const [refreshing, setRefreshing] = useState(false);
+  const listRef = useRef<FlatList>(null);
 
   // Fetch trips data
   const { data: trips = [], isLoading, refetch } = useTrips();
@@ -61,6 +62,16 @@ export function MyTripsScreen() {
   // Get active trips list
   const activeTrips = selectedTab === 'upcoming' ? upcomingTrips : pastTrips;
 
+  useEffect(() => {
+    // Debug lengths; keep for troubleshooting
+    console.log('[MyTripsScreen] tabs lengths', {
+      selectedTab,
+      upcoming: upcomingTrips.length,
+      past: pastTrips.length,
+      active: activeTrips.length,
+    });
+  }, [selectedTab, upcomingTrips.length, pastTrips.length, activeTrips.length]);
+
   // Pull to refresh
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -68,107 +79,125 @@ export function MyTripsScreen() {
     setRefreshing(false);
   };
 
-  // Loading state
-  if (isLoading) {
-    return <FullPageSpinner label="Loading your trips..." />;
-  }
+  // Scroll to top when switching tabs so content is visible
+  useEffect(() => {
+    listRef.current?.scrollToOffset({ offset: 0, animated: true });
+  }, [selectedTab]);
+
+  const renderTabs = useCallback(() => (
+    <View style={styles.tabs}>
+      <Pressable
+        onPress={() => setSelectedTab('upcoming')}
+        style={[
+          styles.tab,
+          selectedTab === 'upcoming' && styles.tabActive,
+        ]}
+      >
+        <Ionicons
+          name="airplane"
+          size={16}
+          color={selectedTab === 'upcoming' ? colors.primary.blue : colors.neutral[600]}
+        />
+        <Caption
+          style={
+            selectedTab === 'upcoming'
+              ? [styles.tabText, styles.tabTextActive]
+              : styles.tabText
+          }
+        >
+          Upcoming ({upcomingTrips.length})
+        </Caption>
+      </Pressable>
+
+      <Pressable
+        onPress={() => setSelectedTab('past')}
+        style={[
+          styles.tab,
+          selectedTab === 'past' && styles.tabActive,
+        ]}
+      >
+        <Ionicons
+          name="time"
+          size={16}
+          color={selectedTab === 'past' ? colors.primary.blue : colors.neutral[600]}
+        />
+        <Caption
+          style={
+            selectedTab === 'past'
+              ? [styles.tabText, styles.tabTextActive]
+              : styles.tabText
+          }
+        >
+          Past ({pastTrips.length})
+        </Caption>
+      </Pressable>
+    </View>
+  ), [selectedTab, upcomingTrips.length, pastTrips.length]);
+
+  const renderTrip: ListRenderItem<typeof activeTrips[number]> = ({ item, index }) => {
+    // Debug log to confirm render
+    console.log('[MyTripsScreen] renderTrip', selectedTab, index, item.name);
+    return (
+      <View style={styles.cardWrapper}>
+        <TripCard
+          key={item.id}
+          trip={item}
+          onPress={() => {
+            navigation.navigate('TripDetail', { tripId: item.id });
+          }}
+        />
+      </View>
+    );
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            tintColor={colors.primary.blue}
-          />
-        }
-      >
-        {/* Header */}
-        <View style={styles.header}>
-          <H1>My Trips</H1>
-        </View>
-
-        {/* Tabs */}
-        <View style={styles.tabs}>
-          <Pressable
-            onPress={() => setSelectedTab('upcoming')}
-            style={[
-              styles.tab,
-              selectedTab === 'upcoming' && styles.tabActive,
-            ]}
-          >
-            <Ionicons
-              name="airplane"
-              size={16}
-              color={selectedTab === 'upcoming' ? colors.primary.blue : colors.neutral[600]}
-            />
-            <Caption
-              style={
-                selectedTab === 'upcoming'
-                  ? [styles.tabText, styles.tabTextActive]
-                  : styles.tabText
-              }
-            >
-              Upcoming ({upcomingTrips.length})
-            </Caption>
-          </Pressable>
-
-          <Pressable
-            onPress={() => setSelectedTab('past')}
-            style={[
-              styles.tab,
-              selectedTab === 'past' && styles.tabActive,
-            ]}
-          >
-            <Ionicons
-              name="time"
-              size={16}
-              color={selectedTab === 'past' ? colors.primary.blue : colors.neutral[600]}
-            />
-            <Caption
-              style={
-                selectedTab === 'past'
-                  ? [styles.tabText, styles.tabTextActive]
-                  : styles.tabText
-              }
-            >
-              Past ({pastTrips.length})
-            </Caption>
-          </Pressable>
-        </View>
-
-        {/* Trips List */}
-        {activeTrips.length === 0 ? (
-          <EmptyState
-            icon={selectedTab === 'upcoming' ? 'airplane-outline' : 'time-outline'}
-            title={selectedTab === 'upcoming' ? 'No Upcoming Trips' : 'No Past Trips'}
-            description={
-              selectedTab === 'upcoming'
-                ? 'Start planning your next adventure!'
-                : 'Your completed trips will appear here.'
-            }
-            actionLabel={selectedTab === 'upcoming' ? 'Plan a Trip' : undefined}
-            onAction={selectedTab === 'upcoming' ? () => {
-              navigation.navigate('CreateTrip');
-            } : undefined}
-          />
-        ) : (
-          <View style={styles.tripsList}>
-            {activeTrips.map((trip, index) => (
-              <TripCard
-                key={trip.id}
-                trip={trip}
-                onPress={() => {
-                  navigation.navigate('TripDetail', { tripId: trip.id });
-                }}
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right', 'bottom']}>
+      <View style={styles.listSpacer} />
+      {isLoading ? (
+        <FullPageSpinner label="Loading your trips..." />
+      ) : (
+        <FlatList
+          style={styles.list}
+          ref={listRef}
+          data={activeTrips}
+          renderItem={renderTrip}
+          keyExtractor={(item) => item.id}
+          extraData={selectedTab}
+          contentContainerStyle={styles.listContent}
+          ListHeaderComponent={
+            <View>
+              <View style={styles.header}>
+                <H1>My Trips</H1>
+              </View>
+              {renderTabs()}
+            </View>
+          }
+          initialNumToRender={10}
+          removeClippedSubviews={false}
+          ListFooterComponent={<View style={styles.listFooter} />}
+          ListEmptyComponent={
+            <View style={styles.emptyWrapper}>
+              <EmptyState
+                icon={selectedTab === 'upcoming' ? 'airplane-outline' : 'time-outline'}
+                title={selectedTab === 'upcoming' ? 'No Upcoming Trips' : 'No Past Trips'}
+                description={
+                  selectedTab === 'upcoming'
+                    ? 'Start planning your next adventure!'
+                    : 'Your completed trips will appear here.'
+                }
+                actionLabel={selectedTab === 'upcoming' ? 'Plan a Trip' : undefined}
+                onAction={selectedTab === 'upcoming' ? () => {
+                  navigation.navigate('CreateTrip');
+                } : undefined}
               />
-            ))}
-          </View>
-        )}
-      </ScrollView>
+            </View>
+          }
+          showsVerticalScrollIndicator={false}
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
+          contentInsetAdjustmentBehavior="automatic"
+        />
+      )}
 
       {/* Floating Add Button */}
       <Pressable
@@ -188,19 +217,42 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.neutral[50],
   },
-  scrollContent: {
-    paddingBottom: spacing[20], // Extra space for FAB
+  list: {
+    flex: 1,
+  },
+  listContent: {
+    paddingHorizontal: spacing.pagePaddingMobile,
+    paddingBottom: spacing[20],
+    paddingTop: spacing[2],
+    flexGrow: 1,
+  },
+  listSpacer: {
+    height: spacing[2],
+  },
+  listFooter: {
+    height: spacing[10],
+  },
+  cardWrapper: {
+    marginBottom: spacing[4],
   },
   header: {
     paddingHorizontal: spacing.pagePaddingMobile,
-    paddingTop: spacing[4],
-    paddingBottom: spacing[3],
+    paddingTop: spacing[5],
+    paddingBottom: spacing[2],
   },
   tabs: {
     flexDirection: 'row',
     gap: spacing[2],
     paddingHorizontal: spacing.pagePaddingMobile,
     marginBottom: spacing[4],
+  },
+  emptyWrapper: {
+    paddingHorizontal: spacing.pagePaddingMobile,
+    paddingTop: spacing[6],
+  },
+  debugCount: {
+    color: colors.neutral[500],
+    marginTop: spacing[1],
   },
   tab: {
     flex: 1,
@@ -227,9 +279,6 @@ const styles = StyleSheet.create({
   tabTextActive: {
     color: colors.primary.blue,
     fontWeight: '600',
-  },
-  tripsList: {
-    paddingHorizontal: spacing.pagePaddingMobile,
   },
   fab: {
     position: 'absolute',
